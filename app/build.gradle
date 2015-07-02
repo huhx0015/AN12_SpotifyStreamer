@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+
     compileSdkVersion 22
     buildToolsVersion "23.0.0 rc2"
 
@@ -11,6 +12,7 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -19,11 +21,21 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+    flatDir{
+        dirs 'libs'
+    }
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile(name:'spotify-web-api-android-0.1.0', ext:'aar')
     compile 'com.android.support:design:22.+'
     compile 'com.android.support:recyclerview-v7:22.+'
     compile 'com.squareup.picasso:picasso:+'
     compile 'com.squareup.retrofit:retrofit:+'
+    compile 'com.squareup.okhttp:okhttp:+'
     compile 'com.jakewharton:butterknife:+'
+
 }
