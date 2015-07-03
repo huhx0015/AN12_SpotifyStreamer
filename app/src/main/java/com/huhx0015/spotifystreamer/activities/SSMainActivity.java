@@ -1,25 +1,43 @@
 package com.huhx0015.spotifystreamer.activities;
 
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import com.huhx0015.spotifystreamer.R;
+import java.lang.ref.WeakReference;
+import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class SSMainActivity extends AppCompatActivity {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
+    // ACTIVITY VARIABLES
+    private static WeakReference<SSMainActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
+
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSMainActivity.class.getSimpleName();
+
+    // VIEW INJECTION VARIABLES
+    @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
 
     /** ACTIVITY LIFECYCLE METHODS _____________________________________________________________ **/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Creates a weak reference of this activity.
+        weakRefActivity = new WeakReference<SSMainActivity>(this);
 
         // LAYOUT SETUP:
         setupLayout();
@@ -68,5 +86,121 @@ public class SSMainActivity extends AppCompatActivity {
         //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         //actionBar.setDisplayShowHomeEnabled(false);
         //actionBar.setDisplayShowTitleEnabled(false);
+    }
+
+    /** FRAGMENT METHODS _______________________________________________________________________ **/
+
+    // setUpFragment(): Sets up the fragment view and the fragment view animation.
+    private void setUpFragment(Fragment fragment, final String fragType, Boolean isAnimated) {
+
+        if ((weakRefActivity.get() != null) && (!weakRefActivity.get().isFinishing())) {
+
+            // Initializes the manager and transaction objects for the fragments.
+            android.support.v4.app.FragmentManager fragMan = weakRefActivity.get().getSupportFragmentManager();
+            android.support.v4.app.FragmentTransaction fragTrans = fragMan.beginTransaction();
+            fragTrans.replace(R.id.ss_main_activity_fragment_container, fragment);
+
+            // Makes the changes to the fragment manager and transaction objects.
+            fragTrans.addToBackStack(null);
+            fragTrans.commitAllowingStateLoss();
+
+            // Sets up the transition animation.
+            if (isAnimated) {
+
+                int animationResource; // References the animation XML resource file.
+
+                // Sets the animation XML resource file, based on the fragment type.
+                // RESULTS:
+                if (fragType.equals("RESULTS")) {
+                    animationResource = R.anim.bottom_up;
+                }
+
+                // MISCELLANEOUS:
+                else {
+                    animationResource = R.anim.slide_down;
+                }
+
+                Animation fragmentAnimation = AnimationUtils.loadAnimation(this, animationResource);
+
+                // Sets the AnimationListener for the animation.
+                fragmentAnimation.setAnimationListener(new Animation.AnimationListener() {
+
+                    // onAnimationStart(): Runs when the animation is started.
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        fragmentContainer.setVisibility(View.VISIBLE); // Displays the fragment.
+                    }
+
+                    // onAnimationEnd(): The fragment is removed after the animation ends.
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+
+                        Log.d(LOG_TAG, "setUpFragment(): Fragment animation has ended.");
+                    }
+
+                    // onAnimationRepeat(): Runs when the animation is repeated.
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+
+                fragmentContainer.startAnimation(fragmentAnimation); // Starts the animation.
+            }
+
+            // Displays the fragment view without any transition animations.
+            else {
+                fragmentContainer.setVisibility(View.VISIBLE); // Displays the fragment.
+            }
+        }
+    }
+
+    // removeFragment(): This method is responsible for displaying the remove fragment animation, as
+    // well as removing the fragment view.
+    private void removeFragment(final String fragType) {
+
+        if ((weakRefActivity.get() != null) && (!weakRefActivity.get().isFinishing())) {
+
+            int animationResource; // References the animation XML resource file.
+
+            // RESULTS:
+            if (fragType.equals("RESULTS")) {
+                animationResource = R.anim.bottom_down; // Sets the animation XML resource file.
+            }
+
+            // MISCELLANEOUS
+            else {
+                animationResource = R.anim.slide_up;
+            }
+
+            Animation fragmentAnimation = AnimationUtils.loadAnimation(this, animationResource);
+
+            // Sets the AnimationListener for the animation.
+            fragmentAnimation.setAnimationListener(new Animation.AnimationListener() {
+
+                // onAnimationStart(): Runs when the animation is started.
+                @Override
+                public void onAnimationStart(Animation animation) {  }
+
+                // onAnimationEnd(): The fragment is removed after the animation ends.
+                @Override
+                public void onAnimationEnd(Animation animation) {
+
+                    Log.d(LOG_TAG, "removeFragment(): Fragment animation has ended. Attempting to remove fragment.");
+
+                    // Initializes the manager and transaction objects for the fragments.
+                    FragmentManager fragMan = getSupportFragmentManager();
+                    fragMan.popBackStack(); // Pops the fragment from the stack.
+                    fragmentContainer.removeAllViews(); // Removes all views in the layout.
+                    fragmentContainer.setVisibility(View.INVISIBLE); // Hides the fragment.
+
+                    Log.d(LOG_TAG, "removeFragment(): Fragment has been removed.");
+                }
+
+                // onAnimationRepeat(): Runs when the animation is repeated.
+                @Override
+                public void onAnimationRepeat(Animation animation) { }
+            });
+
+            fragmentContainer.startAnimation(fragmentAnimation); // Starts the animation.
+        }
     }
 }
