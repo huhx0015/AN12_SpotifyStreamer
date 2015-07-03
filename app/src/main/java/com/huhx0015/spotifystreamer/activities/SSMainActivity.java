@@ -1,16 +1,12 @@
-package com.huhx0015.spotifystreamer;
+package com.huhx0015.spotifystreamer.activities;
 
-import android.os.AsyncTask;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import java.util.List;
-import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.ArtistsPager;
+import com.huhx0015.spotifystreamer.R;
+import butterknife.ButterKnife;
 
 public class SSMainActivity extends AppCompatActivity {
 
@@ -24,11 +20,9 @@ public class SSMainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.ss_main_activity);
 
-        // SPOTIFY ASYNCTASK INITIALIZATION:
-        SearchSpotifyTask task = new SearchSpotifyTask();
-        task.execute(); // Executes the AsyncTask.
+        // LAYOUT SETUP:
+        setupLayout();
     }
 
     /** ACTIVITY EXTENSION METHODS _____________________________________________________________ **/
@@ -58,31 +52,21 @@ public class SSMainActivity extends AppCompatActivity {
 
     /** LAYOUT METHODS _________________________________________________________________________ **/
 
-    /** ASYNCTASK METHODS ______________________________________________________________________ **/
+    // setupLayout(): Sets up the layout for the activity.
+    private void setupLayout() {
 
-    public class SearchSpotifyTask extends AsyncTask<Void, Void, Void>
-    {
+        setContentView(R.layout.ss_main_activity); // Sets the XML layout file for the activity.
+        ButterKnife.bind(this); // ButterKnife view injection initialization.
 
-        // doInBackground(): AsyncTask method which runs in the background.
-        @Override
-        protected Void doInBackground(Void... strings) {
+        setupActionBar(); // Sets up the action bar attributes.
+    }
 
-            // Initializes the Spotify API and background service.
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService service = api.getService();
+    // setupActionBar(): Sets up the action bar attributes for the activity.
+    private void setupActionBar() {
 
-            // Accesses the background service to search for a specific artist.
-            ArtistsPager results = service.searchArtists("Paul");
-
-            List<Artist> artists = results.artists.items;
-
-            // Retrieves the list of Artists found and sets it in the list.
-            for (int i = 0; i < artists.size(); i++) {
-                Artist artist = artists.get(i);
-                Log.i(LOG_TAG, i + " " + artist.name);
-            }
-
-            return null;
-        }
+        ActionBar actionBar = getSupportActionBar();
+        //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        //actionBar.setDisplayShowHomeEnabled(false);
+        //actionBar.setDisplayShowTitleEnabled(false);
     }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ss_toolbar_dark_color">#d32f2f</color>
+    <color name="ss_toolbar_light_color">#f44336</color>
+    <color name="ss_toolbar_accent_color">#b71c1c</color>
+</resources>

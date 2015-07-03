@@ -17,7 +17,7 @@
         android:alwaysRetainTaskState="true">
 
         <activity
-            android:name="com.huhx0015.spotifystreamer.SSMainActivity"
+            android:name=".activities.SSMainActivity"
             android:label="@string/app_name" >
 
             <intent-filter>

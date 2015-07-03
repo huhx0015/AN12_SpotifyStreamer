@@ -2,7 +2,10 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/ss_toolbar_light_color</item>
+        <item name="colorPrimaryDark">@color/ss_toolbar_dark_color</item>
+        <item name="colorAccent">@color/ss_toolbar_accent_color</item>
     </style>
+
 
 </resources>
