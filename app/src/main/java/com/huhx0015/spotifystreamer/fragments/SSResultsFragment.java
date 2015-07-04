@@ -13,10 +13,8 @@ import android.view.ViewGroup;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.model.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.ui.SSResultsAdapter;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -108,7 +106,7 @@ public class SSResultsFragment extends Fragment {
     }
 
     private void setListAdapter(){
-        SSResultsAdapter adapter = new SSResultsAdapter(songListResult);
+        SSResultsAdapter adapter = new SSResultsAdapter(songListResult, currentActivity);
         resultsList.setAdapter(adapter);
     }
 

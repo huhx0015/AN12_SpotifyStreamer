@@ -1,5 +1,6 @@
 package com.huhx0015.spotifystreamer.ui;
 
+import android.app.Activity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,6 +21,20 @@ import java.util.List;
  */
 public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSongResultViewHolder> {
 
+    /** CLASS VARIABLES ________________________________________________________________________ **/
+
+    // ACTIVITY VARIABLES
+    public Activity currentActivity;
+
+    // LIST VARIABLES
+    private List<SSSpotifyModel> songListResult;
+
+    /** INITIALIZATION METHODS _________________________________________________________________ **/
+
+    public SSResultsAdapter(List<SSSpotifyModel> songListResult, Activity act){
+        this.currentActivity = act;
+        this.songListResult = songListResult;
+    }
 
     public static class SSSongResultViewHolder extends RecyclerView.ViewHolder {
 
@@ -40,11 +55,7 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
         }
     }
 
-    private List<SSSpotifyModel> songListResult;
-
-    public SSResultsAdapter(List<SSSpotifyModel> songListResult){
-        this.songListResult = songListResult;
-    }
+    /** EXTENSION METHODS ______________________________________________________________________ **/
 
     // As its name suggests, this method is called when the custom ViewHolder needs to be initialized.
     // We specify the layout that each item of the RecyclerView should use. This is done by inflating
@@ -62,14 +73,16 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
     @Override
     public void onBindViewHolder(SSSongResultViewHolder holder, int position) {
 
+        // Sets the song, album, and artist name into the TextView objects.
         holder.songName.setText(songListResult.get(position).getSong());
         holder.albumName.setText(songListResult.get(position).getAlbum());
         holder.artistName.setText(songListResult.get(position).getArtist());
 
-        // TODO Replace with Picasso later.
-        holder.albumImage.setImageResource(songListResult.get(position).getAlbumImage());
+        // Loads the image into the ImageView object.
+        Picasso.with(currentActivity)
+                .load(songListResult.get(position).getAlbumImage())
+                .into(holder.albumImage);
     }
-
 
     // This should return the number of items present in the data. As our data is in the form of a
     // List, we only need to call the size method on the List object:
@@ -84,5 +97,4 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
     }
-
 }

@@ -5,8 +5,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,13 +14,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.fragments.SSResultsFragment;
-import com.huhx0015.spotifystreamer.model.SSSpotifyModel;
-import com.huhx0015.spotifystreamer.ui.SSResultsAdapter;
-
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
