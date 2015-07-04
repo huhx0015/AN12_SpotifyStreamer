@@ -6,10 +6,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.model.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.ui.SSResultsAdapter;
@@ -19,6 +22,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.AlbumsPager;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 
@@ -32,13 +36,18 @@ public class SSResultsFragment extends Fragment {
     // ACTIVITY VARIABLES
     private Activity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
+    // LAYOUT VARIABLES
+    private String currentSearchInput = "";
+
+    // LIST VARIABLES
+    private List<SSSpotifyModel> songListResult;
+
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSResultsFragment.class.getSimpleName();
 
     // VIEW INJECTION VARIABLES
+    @Bind(R.id.ss_results_search_input) EditText searchInput;
     @Bind(R.id.ss_results_recycler_view) RecyclerView resultsList;
-
-    private List<SSSpotifyModel> songListResult;
 
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
 
@@ -60,10 +69,6 @@ public class SSResultsFragment extends Fragment {
 
         setUpLayout(); // Sets up the layout for the fragment.
 
-        // SPOTIFY ASYNCTASK INITIALIZATION:
-        SSSearchSpotifyTask task = new SSSearchSpotifyTask();
-        task.execute(); // Executes the AsyncTask.
-
         return tg_fragment_view;
     }
 
@@ -80,7 +85,29 @@ public class SSResultsFragment extends Fragment {
     // setUpLayout(): Sets up the layout for the fragment.
     private void setUpLayout() {
 
+        setUpTextListener();
         setUpList();
+    }
+
+    // setUpTextListener(): Sets up the EditText listener for the fragment.
+    private void setUpTextListener() {
+
+        searchInput.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {}
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                // Retrieves the current string from the EditText object.
+                currentSearchInput = s.toString();
+
+                // SPOTIFY ASYNCTASK INITIALIZATION:
+                SSSearchSpotifyTask task = new SSSearchSpotifyTask();
+                task.execute(); // Executes the AsyncTask.
+            }
+        });
     }
 
     /** RECYCLERVIEW METHODS ___________________________________________________________________ **/
@@ -122,7 +149,8 @@ public class SSResultsFragment extends Fragment {
 
     public class SSSearchSpotifyTask extends AsyncTask<Void, Void, Void> {
 
-        // doInBackground(): AsyncTask method which runs in the background.
+        // doInBackground(): This method constantly runs in the background while AsyncTask is
+        // running.
         @Override
         protected Void doInBackground(Void... strings) {
 
@@ -131,7 +159,7 @@ public class SSResultsFragment extends Fragment {
             SpotifyService service = api.getService();
 
             // Accesses the background service to search for a specific artist.
-            ArtistsPager results = service.searchArtists("Paul");
+            ArtistsPager results = service.searchArtists(currentSearchInput);
 
             List<Artist> artists = results.artists.items;
 
@@ -139,6 +167,8 @@ public class SSResultsFragment extends Fragment {
             for (int i = 0; i < artists.size(); i++) {
                 Artist artist = artists.get(i);
                 Log.i(LOG_TAG, i + " " + artist.name);
+                Log.i(LOG_TAG, i + " " + artist.href);
+                Log.i(LOG_TAG, i + " " + artist.type);
             }
 
             return null;

@@ -12,15 +12,6 @@
         android:orientation="vertical"
         android:id="@+id/ss_main_activity_main_content">
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:ems="10"
-            android:id="@+id/ss_main_activity_search_input"
-            android:hint="Type in an artist"
-            android:layout_margin="8dp" />
-
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"

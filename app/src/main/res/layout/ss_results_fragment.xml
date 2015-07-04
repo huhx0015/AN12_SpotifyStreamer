@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     android:id="@+id/ss_results_fragment_layout">
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:id="@+id/ss_results_search_input"
+        android:hint="Type in an artist"
+        android:layout_margin="8dp" />
+
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
