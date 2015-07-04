@@ -15,6 +15,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import com.huhx0015.spotifystreamer.R;
+import com.huhx0015.spotifystreamer.fragments.SSResultsFragment;
 import com.huhx0015.spotifystreamer.model.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.ui.SSResultsAdapter;
 
@@ -37,9 +38,6 @@ public class SSMainActivity extends AppCompatActivity {
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
-    @Bind(R.id.ss_results_recycler_view) RecyclerView resultsList;
-
-    private List<SSSpotifyModel> songListResult;
 
     /** ACTIVITY LIFECYCLE METHODS _____________________________________________________________ **/
 
@@ -79,6 +77,15 @@ public class SSMainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /** PHYSICAL BUTTON METHODS ________________________________________________________________ **/
+
+    // BACK KEY:
+    // onBackPressed(): Defines the action to take when the physical back button key is pressed.
+    @Override
+    public void onBackPressed() {
+        finish(); // Finishes the activity.
+    }
+
     /** LAYOUT METHODS _________________________________________________________________________ **/
 
     // setupLayout(): Sets up the layout for the activity.
@@ -89,28 +96,8 @@ public class SSMainActivity extends AppCompatActivity {
 
         setupActionBar(); // Sets up the action bar attributes.
 
-        // TODO Move to SSResulsFragment
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        resultsList.setLayoutManager(layoutManager);
-
-        initializeData();
-        initializeAdapter();
-    }
-
-    // This method creates an ArrayList that has three SSSpotifyModel objects
-    // Checkout the project associated with this tutorial on Github if
-    // you want to use the same images.
-    private void initializeData(){
-
-        songListResult = new ArrayList<>();
-        songListResult.add(new SSSpotifyModel("Coldplay", "X & Y", "Fix You", R.drawable.sample_cover_1));
-        songListResult.add(new SSSpotifyModel("Coldplay", "Ghost Stories", "Oceans", R.drawable.sample_cover_2));
-        songListResult.add(new SSSpotifyModel("Coldplay", "Parachutes", "Yellow", R.drawable.sample_cover_3));
-    }
-
-    private void initializeAdapter(){
-        SSResultsAdapter adapter = new SSResultsAdapter(songListResult);
-        resultsList.setAdapter(adapter);
+        // Sets up sample fragment for the view.
+        setUpFragment(new SSResultsFragment(), "RESULTS", false);
     }
 
     // setupActionBar(): Sets up the action bar attributes for the activity.

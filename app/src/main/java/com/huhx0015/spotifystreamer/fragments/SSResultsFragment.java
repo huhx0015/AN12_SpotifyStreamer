@@ -4,12 +4,17 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.huhx0015.spotifystreamer.R;
+import com.huhx0015.spotifystreamer.model.SSSpotifyModel;
+import com.huhx0015.spotifystreamer.ui.SSResultsAdapter;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -35,7 +40,9 @@ public class SSResultsFragment extends Fragment {
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_results_recycler_view) RecyclerView resultsList;
 
-    /** FRAGMENT FUNCTIONALITY _________________________________________________________________ **/
+    private List<SSSpotifyModel> songListResult;
+
+    /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
 
     // onAttach(): The initial function that is called when the Fragment is run. The activity is
     // attached to the fragment.
@@ -70,14 +77,42 @@ public class SSResultsFragment extends Fragment {
         ButterKnife.unbind(this); // Sets all injected views to null.
     }
 
-    /** LAYOUT FUNCTIONALITY ___________________________________________________________________ **/
+    /** LAYOUT METHODS _________________________________________________________________________ **/
 
     // setUpLayout(): Sets up the layout for the fragment.
     private void setUpLayout() {
 
+        setUpList();
     }
 
-    /** ASYNCTASK FUNCTIONALITY ________________________________________________________________ **/
+    /** RECYCLERVIEW METHODS ___________________________________________________________________ **/
+
+    private void setUpList() {
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(currentActivity);
+        resultsList.setLayoutManager(layoutManager);
+
+        initializeData();
+        setListAdapter();
+    }
+
+    // This method creates an ArrayList that has three SSSpotifyModel objects
+    // Checkout the project associated with this tutorial on Github if
+    // you want to use the same images.
+    private void initializeData(){
+
+        songListResult = new ArrayList<>();
+        songListResult.add(new SSSpotifyModel("Coldplay", "X & Y", "Fix You", R.drawable.sample_cover_1));
+        songListResult.add(new SSSpotifyModel("Coldplay", "Ghost Stories", "Oceans", R.drawable.sample_cover_2));
+        songListResult.add(new SSSpotifyModel("Coldplay", "Parachutes", "Yellow", R.drawable.sample_cover_3));
+    }
+
+    private void setListAdapter(){
+        SSResultsAdapter adapter = new SSResultsAdapter(songListResult);
+        resultsList.setAdapter(adapter);
+    }
+
+    /** ASYNCTASK METHODS ______________________________________________________________________ **/
 
     /**
      * --------------------------------------------------------------------------------------------
