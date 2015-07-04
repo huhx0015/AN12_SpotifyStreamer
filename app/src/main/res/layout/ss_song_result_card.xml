@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/ss_song_result_card_layout"
+    android:paddingRight="8dp"
+    android:paddingLeft="8dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ss_song_result_cardview_container"
+        >
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:gravity="center_vertical"
+            android:id="@+id/ss_song_row_container">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:id="@+id/ss_album_image"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="16dp"
+                android:layout_gravity="center" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/ss_album_image"
+                android:id="@+id/ss_song_info_text_container">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ss_song_name_text"
+
+                    android:layout_alignParentTop="true"
+                    android:textSize="24sp"
+                    android:typeface="sans" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ss_artist_name_text"
+                    android:textSize="18sp"
+                    android:typeface="sans" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ss_album_name_text"
+                    android:textSize="14sp"
+                    android:typeface="sans" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

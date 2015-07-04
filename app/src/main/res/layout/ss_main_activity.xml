@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp"
         android:id="@+id/ss_main_activity_main_content">
 
         <EditText
@@ -19,12 +18,22 @@
             android:inputType="textPersonName"
             android:ems="10"
             android:id="@+id/ss_main_activity_search_input"
-            android:hint="Type in an artist" />
+            android:hint="Type in an artist"
+            android:layout_margin="8dp" />
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/ss_results_recycler_view"
+            android:padding="8dp" />
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/ss_main_activity_fragment_container"></FrameLayout>
+            android:id="@+id/ss_main_activity_fragment_container"
+            android:visibility="gone">
+
+        </FrameLayout>
     </LinearLayout>
 
 

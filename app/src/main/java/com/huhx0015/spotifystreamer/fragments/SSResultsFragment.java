@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.huhx0015.spotifystreamer.R;
 import java.util.List;
+
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -28,6 +31,9 @@ public class SSResultsFragment extends Fragment {
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSResultsFragment.class.getSimpleName();
+
+    // VIEW INJECTION VARIABLES
+    @Bind(R.id.ss_results_recycler_view) RecyclerView resultsList;
 
     /** FRAGMENT FUNCTIONALITY _________________________________________________________________ **/
 
