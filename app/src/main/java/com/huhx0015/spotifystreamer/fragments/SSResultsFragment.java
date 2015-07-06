@@ -22,7 +22,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.AlbumsPager;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 
@@ -64,12 +63,12 @@ public class SSResultsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View tg_fragment_view = (ViewGroup) inflater.inflate(R.layout.ss_results_fragment, container, false);
-        ButterKnife.bind(this, tg_fragment_view); // ButterKnife view injection initialization.
+        View ss_fragment_view = (ViewGroup) inflater.inflate(R.layout.ss_results_fragment, container, false);
+        ButterKnife.bind(this, ss_fragment_view); // ButterKnife view injection initialization.
 
         setUpLayout(); // Sets up the layout for the fragment.
 
-        return tg_fragment_view;
+        return ss_fragment_view;
     }
 
     // onDestroyView(): This function runs when the screen is no longer visible and the view is
@@ -117,6 +116,7 @@ public class SSResultsFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(currentActivity);
         resultsList.setLayoutManager(layoutManager);
 
+        // TODO: Experimental
         initializeData();
         setListAdapter();
     }

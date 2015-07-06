@@ -38,5 +38,4 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:+'
     compile 'com.squareup.okhttp:okhttp:+'
     compile 'com.jakewharton:butterknife:+'
-
 }
