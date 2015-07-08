@@ -46,6 +46,9 @@ public class SSMainActivity extends AppCompatActivity {
 
     /** ACTIVITY EXTENSION METHODS _____________________________________________________________ **/
 
+    /* TODO: Action bar buttons disabled for P1.
+    // onCreateOptionsMenu(): Inflates the menu when the menu key is pressed. This adds items to
+    // the action bar if it is present.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -54,6 +57,8 @@ public class SSMainActivity extends AppCompatActivity {
         return true;
     }
 
+    // onOptionsItemSelected(): Defines the action to take when the menu options are selected. The
+    // GTN_Preferences preference activity is launched when "Settings" is selected.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -68,6 +73,7 @@ public class SSMainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+    */
 
     /** PHYSICAL BUTTON METHODS ________________________________________________________________ **/
 
@@ -86,12 +92,13 @@ public class SSMainActivity extends AppCompatActivity {
         setContentView(R.layout.ss_main_activity); // Sets the XML layout file for the activity.
         ButterKnife.bind(this); // ButterKnife view injection initialization.
 
-        setupActionBar(); // Sets up the action bar attributes.
+        //setupActionBar(); // Sets up the action bar attributes.
 
         // Sets up sample fragment for the view.
         setUpFragment(new SSResultsFragment(), "RESULTS", false);
     }
 
+    /* TODO: Disabled for P1.
     // setupActionBar(): Sets up the action bar attributes for the activity.
     private void setupActionBar() {
 
@@ -100,6 +107,7 @@ public class SSMainActivity extends AppCompatActivity {
         //actionBar.setDisplayShowHomeEnabled(false);
         //actionBar.setDisplayShowTitleEnabled(false);
     }
+    */
 
     /** FRAGMENT METHODS _______________________________________________________________________ **/
 

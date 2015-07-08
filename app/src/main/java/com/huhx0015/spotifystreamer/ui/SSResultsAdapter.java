@@ -89,7 +89,7 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
     }
 
     // Finally, you need to override the onAttachedToRecyclerView method. For now, we can simply use
-    // the superclass's implementation of this method as shown below.
+    // the superclass' implementation of this method as shown below.
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
