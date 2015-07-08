@@ -16,6 +16,14 @@ import java.lang.ref.WeakReference;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+/** -----------------------------------------------------------------------------------------------
+ *  [SSMainActivity] CLASS
+ *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
+ *  DESCRIPTION: SSMainActivity class is the primary Activity class that is loaded when the
+ *  application is launched and is responsible for managing the fragment views for the application.
+ *  -----------------------------------------------------------------------------------------------
+ */
+
 public class SSMainActivity extends AppCompatActivity {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
@@ -215,6 +223,7 @@ public class SSMainActivity extends AppCompatActivity {
             @Override
             public void onAnimationStart(Animation animation) {
 
+                // FRAGMENT APPEARANCE ANIMATION:
                 if (isAppearing) {
                     fragmentContainer.setVisibility(View.VISIBLE); // Displays the fragment.
                 }
@@ -226,6 +235,7 @@ public class SSMainActivity extends AppCompatActivity {
 
                 Log.d(LOG_TAG, "setUpFragment(): Fragment animation has ended.");
 
+                // FRAGMENT REMOVAL ANIMATION:
                 if (!isAppearing) {
 
                     // Initializes the manager and transaction objects for the fragments.

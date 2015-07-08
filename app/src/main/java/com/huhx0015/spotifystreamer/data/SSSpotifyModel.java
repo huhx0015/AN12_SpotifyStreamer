@@ -1,8 +1,12 @@
 package com.huhx0015.spotifystreamer.data;
 
-/**
- * Created by Michael Yoon Huh on 7/2/2015.
+/** -----------------------------------------------------------------------------------------------
+ *  [SSSpotifyModel] CLASS
+ *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
+ *  DESCRIPTION: SSSpotifyModel is an object class that stores the artist song track data.
+ *  -----------------------------------------------------------------------------------------------
  */
+
 public class SSSpotifyModel {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/

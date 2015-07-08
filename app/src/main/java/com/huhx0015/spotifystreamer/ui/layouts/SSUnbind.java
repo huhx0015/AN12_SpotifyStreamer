@@ -7,7 +7,8 @@ import android.widget.AdapterView;
 /** -----------------------------------------------------------------------------------------------
  *  [SSUnbind] CLASS
  *  DESCRIPTION: GTNUnbind class is a class that contains methods which unbind View groups that are
- *  no longer needed by activities. This code is adapted from Roman Guy at
+ *  no longer needed by activities. This is done to avoid possible memory leaks produced by
+ *  Activity classes. This code is adapted from Roman Guy at:
  *  http://www.curious-creature.com/2008/12/18/avoid-memory-leaks-on-android/.
  *  -----------------------------------------------------------------------------------------------
  */

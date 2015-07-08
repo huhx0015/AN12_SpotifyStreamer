@@ -13,9 +13,15 @@ import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-/**
- * Created by Michael Yoon Huh on 7/5/2015.
+/** -----------------------------------------------------------------------------------------------
+ *  [SSPlayerFragment] CLASS
+ *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
+ *  DESCRIPTION: SSPlayerFragment is a fragment class that is responsible for displaying the music
+ *  player in which a user can interact with to listen to streaming Spotify songs.
+ *  TODO: Reserved for use in P2.
+ *  -----------------------------------------------------------------------------------------------
  */
+
 public class SSPlayerFragment extends Fragment {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/

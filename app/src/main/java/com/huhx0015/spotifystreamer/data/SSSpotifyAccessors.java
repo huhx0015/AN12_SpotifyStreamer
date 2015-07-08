@@ -10,8 +10,11 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
-/**
- * Created by Michael Yoon Huh on 7/7/2015.
+/** -----------------------------------------------------------------------------------------------
+ *  [SSSpotifyAccessors] CLASS
+ *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
+ *  DESCRIPTION: SSSpotifyAccessors class contains methods for accessing the Spotify service.
+ *  -----------------------------------------------------------------------------------------------
  */
 
 public class SSSpotifyAccessors {

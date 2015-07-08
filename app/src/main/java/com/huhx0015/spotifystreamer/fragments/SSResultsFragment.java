@@ -27,9 +27,15 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Tracks;
 
-/**
- * Created by Michael Yoon Huh on 7/2/2015.
+/** -----------------------------------------------------------------------------------------------
+ *  [SSResultsFragment] CLASS
+ *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
+ *  DESCRIPTION: SSResultsFragment is a fragment class that is responsible for displaying the input
+ *  field in which a user can search for an artist's top tracks via Spotify. The results are then
+ *  loaded into the RecyclerView object that is handled by this fragment.
+ *  -----------------------------------------------------------------------------------------------
  */
+
 public class SSResultsFragment extends Fragment {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
@@ -150,7 +156,7 @@ public class SSResultsFragment extends Fragment {
         resultsList.setLayoutManager(layoutManager);
     }
 
-    /** ASYNCTASK METHODS ______________________________________________________________________ **/
+    /** SUBCLASSES _____________________________________________________________________________ **/
 
     /**
      * --------------------------------------------------------------------------------------------

@@ -11,6 +11,7 @@ import java.io.IOException;
  *  DESCRIPTION: SSMusicEngine class is used to support music playback for the application.
  *  Code adapted from my own HuhX Game Sound Engine project here:
  *  https://github.com/huhx0015/HuhX_Game_Sound_Engine
+ *  TODO: Reserved for use in P2.
  *  -----------------------------------------------------------------------------------------------
  */
 
@@ -25,7 +26,7 @@ public class SSMusicEngine {
     public int songPosition; // Used for resuming playback on a song that was paused.
     public boolean musicOn; // Used for determining whether music is playing in the background.
 
-    // SYSTEM VARIABLES:
+    // LOGGING VARIABLES:
     private static final String TAG = SSMusicEngine.class.getSimpleName(); // Used for logging output to logcat.
 
     /** INITIALIZATION FUNCTIONALITY ___________________________________________________________ **/
@@ -55,7 +56,7 @@ public class SSMusicEngine {
 
     /** MUSIC FUNCTIONALITY ____________________________________________________________________ **/
 
-    // playSongName(): Plays the music file based on the specified song URL. The song is changed
+    // playSongUrl(): Plays the music file based on the specified song URL. The song is changed
     // only if the specified song does not match the current song that is playing.
     // Set loop variable to true to enable infinite song looping.
     // TRUE: Loops the song infinitely.
