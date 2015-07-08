@@ -44,7 +44,7 @@ public class SSResultsFragment extends Fragment {
     private Boolean isInputEmpty = true; // Used to determine if the EditText input field is empty or not.
 
     // LIST VARIABLES
-    List<SSSpotifyModel> songListResult = new ArrayList<>(); // Stores the track list result that is to be used for the adapter.
+    private List<SSSpotifyModel> songListResult = new ArrayList<>(); // Stores the track list result that is to be used for the adapter.
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSResultsFragment.class.getSimpleName();
@@ -203,39 +203,24 @@ public class SSResultsFragment extends Fragment {
                 // Retrieves the artist's top tracks data from the Spotify background service.
                 Tracks topTracks = SSSpotifyAccessors.retrieveArtistTopTracks(artistId, service);
 
+                // If the track size is not empty, the top tracks are added into the songListResult
+                // List object.
                 if (topTracks.tracks.size() > 0) {
 
                     songListResult = new ArrayList<>(); // Creates a new ArrayList of song tracks.
 
-                    // Retrieves the list of Tracks found and sets it in the list.
-                    for (int i = 0; i < topTracks.tracks.size(); i++) {
+                    // Adds the artist's top tracks into the List object.
+                    songListResult = SSSpotifyAccessors.addArtistTopTracks(params[0], topTracks, songListResult);
 
-                        // Sets the current Track object.
-                        Track currentTrack = topTracks.tracks.get(i);
+                    // If the songListResult object is null, it indicates an error has occurred and
+                    // that the artist's top track retrieval was a failure.
+                    if (songListResult == null) {
+                        tracksRetrieved = false;
+                        return null;
+                    }
 
-                        try {
-
-                            // Retrieves the song name, album name, and album image URL.
-                            String songName = currentTrack.name;
-                            String albumName = currentTrack.album.name.toString();
-                            String albumURL = currentTrack.album.images.get(0).url.toString();
-
-                            Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
-                            Log.d(LOG_TAG, "Track " + i + " Album Name: " + albumName);
-                            Log.d(LOG_TAG, "Track " + i + " Album URL: " + albumURL);
-
-                            // Adds the current track into the ArrayList object.
-                            songListResult.add(new SSSpotifyModel(params[0], albumName, songName, albumURL));
-                        }
-
-                        // NullPointerException handler.
-                        catch (NullPointerException e) {
-                            e.printStackTrace();
-                            Log.e(LOG_TAG, "ERROR: SSSearchSpotifyTask(): A null pointer exception occurred.");
-                            return null;
-                        }
-
-                        // Indicates that the artist's top track retrieval was successful.
+                    // Indicates that the artist's top track retrieval was successful.
+                    else {
                         tracksRetrieved = true;
                     }
                 }
@@ -243,10 +228,14 @@ public class SSResultsFragment extends Fragment {
                 // Outputs an error logcat message, indicating that the Tracks object size was
                 // invalid.
                 else {
+
+                    // Indicates that the artist's top track retrieval failed.
+                    tracksRetrieved = false;
                     Log.e(LOG_TAG, "ERROR: SSSearchSpotifyTask(): The size of the Tracks object was invalid.");
                 }
             }
 
+            // Indicates that the artist's top track retrieval failed.
             else {
                 tracksRetrieved = false;
             }

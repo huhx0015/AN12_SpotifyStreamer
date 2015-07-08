@@ -27,7 +27,6 @@ public class SSMusicEngine {
     public boolean musicOn; // Used for determining whether music is playing in the background.
 
     // SYSTEM VARIABLES:
-    private Context context; // Context for the instance in which this class is used.
     private static final String TAG = SSMusicEngine.class.getSimpleName(); // Used for logging output to logcat.
 
     /** INITIALIZATION FUNCTIONALITY ___________________________________________________________ **/
@@ -42,11 +41,10 @@ public class SSMusicEngine {
     public static SSMusicEngine getInstance() { return ss_music; }
 
     // initializeAudio(): Initializes the SSMusicEngine class variables.
-    public void initializeAudio(Context con) {
+    public void initializeAudio() {
 
         Log.d(TAG, "INITIALIZING: Initializing music engine.");
 
-        context = con; // Context for the instance in which this class is used.
         backgroundSong = new MediaPlayer(); // Instantiates the main MediaPlayer object.
         isPaused = false; // Indicates that the song is not paused by default.
         musicOn = true; // Indicates that music playback is enabled by default.
@@ -66,7 +64,7 @@ public class SSMusicEngine {
     public void playSongUrl(String songUrl, Boolean loop) {
 
         // If the music option has been enabled, a song is selected based on the passed in songUrl string.
-        if (musicOn == true) {
+        if (musicOn) {
 
             // Checks to see if the specified song is already playing.
             if (!currentSong.equals(songUrl)) {
@@ -106,8 +104,7 @@ public class SSMusicEngine {
 
     // isSongPlaying(): Determines if a song is currently playing in the background.
     public Boolean isSongPlaying() {
-        if (backgroundSong.isPlaying()) { return true; }
-        else { return false; }
+        return backgroundSong.isPlaying();
     }
 
     // pauseSong(): Pauses any songs playing in the background and returns it's position.
@@ -131,7 +128,7 @@ public class SSMusicEngine {
     //  playSong(): Sets up a MediaPlayer object and begins playing the song.
     private void playSong(final String songUrl, boolean loop) {
 
-        Boolean isSongReady = false; // Used to determine if song is ready for playback.
+        Boolean isSongReady; // Used to determine if song is ready for playback.
 
         // Checks to see if the MediaPlayer class has been instantiated first before playing a song.
         // This is to prevent a rare null pointer exception bug.
@@ -176,7 +173,7 @@ public class SSMusicEngine {
                 return;
             }
 
-            if (isSongReady == true) {
+            if (isSongReady) {
 
                 // Prepares the song track for playback.
                 try {
@@ -201,7 +198,7 @@ public class SSMusicEngine {
                     public void onPrepared(MediaPlayer mediaPlayer) {
 
                         // If the song was previously paused, resume the song at it's previous location.
-                        if (isPaused == true) {
+                        if (isPaused) {
 
                             Log.d(TAG, "PREPARING: Song was previously paused, resuming song playback.");
 

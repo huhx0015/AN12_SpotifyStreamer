@@ -31,11 +31,12 @@ repositories {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile(name:'spotify-web-api-android-0.1.0', ext:'aar')
-    compile 'com.android.support:design:22.+'
-    compile 'com.android.support:recyclerview-v7:22.+'
-    compile 'com.android.support:cardview-v7:22.+'
-    compile 'com.squareup.picasso:picasso:+'
-    compile 'com.squareup.retrofit:retrofit:+'
-    compile 'com.squareup.okhttp:okhttp:+'
-    compile 'com.jakewharton:butterknife:+'
+    compile 'com.android.support:design:22.2.0'
+    compile 'com.android.support:recyclerview-v7:22.2.0'
+    compile 'com.android.support:cardview-v7:22.2.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.squareup.okhttp:okhttp:2.0.0'
+    compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
+    compile 'com.jakewharton:butterknife:7.0.1'
 }

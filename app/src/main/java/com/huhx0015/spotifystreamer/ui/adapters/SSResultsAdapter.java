@@ -21,7 +21,7 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
     // ACTIVITY VARIABLES
-    public Activity currentActivity;
+    private Activity currentActivity;
 
     // LIST VARIABLES
     private List<SSSpotifyModel> songListResult;
@@ -63,8 +63,7 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
     public SSSongResultViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.ss_song_result_card, parent, false);
-        SSSongResultViewHolder songViewHolder = new SSSongResultViewHolder(view);
-        return songViewHolder;
+        return new SSSongResultViewHolder(view);
     }
 
     // Override the onBindViewHolder to specify the contents of each item of the RecyclerView.

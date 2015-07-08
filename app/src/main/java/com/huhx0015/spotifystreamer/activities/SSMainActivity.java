@@ -12,7 +12,6 @@ import android.widget.FrameLayout;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.fragments.SSResultsFragment;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
-
 import java.lang.ref.WeakReference;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -253,8 +252,7 @@ public class SSMainActivity extends AppCompatActivity {
 
     /** RECYCLE FUNCTIONALITY __________________________________________________________________ **/
 
-    // recycleMemory(): Recycles View objects to clear up memory resources prior to Activity
-    // destruction.
+    // recycleMemory(): Recycles View objects to clear up resources prior to Activity destruction.
     private void recycleMemory() {
 
         // Unbinds all Drawable objects attached to the current layout.

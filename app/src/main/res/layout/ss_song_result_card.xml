@@ -26,8 +26,6 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:id="@+id/ss_album_image"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
                 android:layout_marginRight="16dp"
                 android:layout_gravity="center" />
 
@@ -35,15 +33,12 @@
                 android:orientation="vertical"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/ss_album_image"
                 android:id="@+id/ss_song_info_text_container">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/ss_song_name_text"
-
-                    android:layout_alignParentTop="true"
                     android:textSize="20sp"
                     android:typeface="sans" />
 
@@ -59,7 +54,8 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/ss_album_name_text"
                     android:textSize="14sp"
-                    android:typeface="sans" />
+                    android:typeface="sans"
+                    android:textStyle="italic" />
             </LinearLayout>
         </LinearLayout>
 

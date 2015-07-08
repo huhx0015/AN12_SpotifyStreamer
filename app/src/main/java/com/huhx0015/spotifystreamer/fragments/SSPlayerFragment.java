@@ -52,6 +52,7 @@ public class SSPlayerFragment extends Fragment {
         this.currentActivity = activity; // Sets the currentActivity to attached activity object.
     }
 
+    // onCreate(): Runs when the fragment is first started.
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +60,7 @@ public class SSPlayerFragment extends Fragment {
         setRetainInstance(true); // Retains this fragment during runtime changes.
 
         // AUDIO CLASS INITIALIZATION:
-        ss_music.getInstance().initializeAudio(currentActivity);
+        ss_music.getInstance().initializeAudio();
     }
 
     // onResume(): This function runs immediately after onCreate() finishes and is always re-run
@@ -116,9 +117,11 @@ public class SSPlayerFragment extends Fragment {
     /** LAYOUT METHODS _________________________________________________________________________ **/
 
     // setUpLayout(): Sets up the layout for the fragment.
-    private void setUpLayout() { }
+    private void setUpLayout() {
+        setUpButtons(); // Sets up the button listeners for the fragment.
+    }
 
-    // setUpButtons(): Sets up the button listeners for the activity.
+    // setUpButtons(): Sets up the button listeners for the fragment.
     public void setUpButtons() {
 
         // PLAYER BUTTONS:

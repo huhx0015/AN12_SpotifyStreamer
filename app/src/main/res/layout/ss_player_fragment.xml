@@ -3,14 +3,14 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/ss_player_fragment_layout">
+    android:id="@+id/ss_player_fragment_layout"
+    android:background="@android:color/white">
 
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/ss_player_album_image"
         android:layout_weight="1"
-        android:src="@drawable/sample_cover_1"
         android:padding="16dp" />
 
     <LinearLayout
@@ -32,7 +32,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SONG NAME"
                 android:id="@+id/ss_player_song_name_text"
                 android:textIsSelectable="false"
                 android:textSize="20sp" />
@@ -40,7 +39,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ARTIST"
                 android:id="@+id/ss_player_artist_name_text"
                 android:textSize="16sp" />
         </LinearLayout>

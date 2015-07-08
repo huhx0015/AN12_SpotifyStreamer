@@ -4,7 +4,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/ss_results_fragment_layout">
+    android:id="@+id/ss_results_fragment_layout"
+    android:background="@android:color/white">
 
     <EditText
         android:layout_width="match_parent"
@@ -34,7 +35,8 @@
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/ss_results_recycler_view" />
+            android:id="@+id/ss_results_recycler_view"
+            android:background="@android:color/white" />
 
         <ProgressBar
             style="?android:attr/progressBarStyleLarge"

@@ -7,6 +7,7 @@ import java.util.Map;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
+import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
 /**
@@ -21,6 +22,44 @@ public class SSSpotifyAccessors {
     private static final String LOG_TAG = SSSpotifyAccessors.class.getSimpleName();
 
     /** SPOTIFY METHODS ________________________________________________________________________ **/
+
+    // addArtistTopTracks(): Adds the artist's top track data from the Track data object into the
+    // List object.
+    public static List<SSSpotifyModel> addArtistTopTracks(String artist,
+                                                          Tracks topTracks,
+                                                          List<SSSpotifyModel> songListResult) {
+
+        // Retrieves the list of Tracks found and sets it in the list.
+        for (int i = 0; i < topTracks.tracks.size(); i++) {
+
+            // Sets the current Track object.
+            Track currentTrack = topTracks.tracks.get(i);
+
+            try {
+
+                // Retrieves the song name, album name, and album image URL.
+                String songName = currentTrack.name;
+                String albumName = currentTrack.album.name.toString();
+                String albumURL = currentTrack.album.images.get(0).url.toString();
+
+                Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
+                Log.d(LOG_TAG, "Track " + i + " Album Name: " + albumName);
+                Log.d(LOG_TAG, "Track " + i + " Album URL: " + albumURL);
+
+                // Adds the current track into the ArrayList object.
+                songListResult.add(new SSSpotifyModel(artist, albumName, songName, albumURL));
+            }
+
+            // NullPointerException handler.
+            catch (NullPointerException e) {
+                e.printStackTrace();
+                Log.e(LOG_TAG, "ERROR: addArtistTopTracks(): A null pointer exception occurred.");
+                return null;
+            }
+        }
+
+        return songListResult;
+    }
 
     // queryArtist(): Queries the Spotify service to retrieve the artist's Spotify ID based on the
     // search input by the user.
