@@ -205,6 +205,7 @@ public class SSMainActivity extends AppCompatActivity {
             }
         }
 
+        // Loads the animation from the XML animation resource file.
         Animation fragmentAnimation = AnimationUtils.loadAnimation(this, animationResource);
 
         // Sets the AnimationListener for the animation.
