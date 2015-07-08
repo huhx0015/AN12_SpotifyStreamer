@@ -42,7 +42,7 @@ public class SSSpotifyAccessors {
 
         // If the List of artists is empty, the artistId value is set to null.
         else {
-            Log.e(LOG_TAG, "queryArtist(): The returned List<Artist> object contained no objects.");
+            Log.e(LOG_TAG, "ERROR: queryArtist(): The returned List<Artist> object contained no objects.");
             artistId = null;
         }
 

@@ -198,7 +198,7 @@ public class SSResultsFragment extends Fragment {
                         // NullPointerException handler.
                         catch (NullPointerException e) {
                             e.printStackTrace();
-                            Log.e(LOG_TAG, "SSSearchSpotifyTask(): ERROR: A null pointer exception occurred.");
+                            Log.e(LOG_TAG, "ERROR: SSSearchSpotifyTask(): A null pointer exception occurred.");
                             return null;
                         }
 
@@ -210,7 +210,7 @@ public class SSResultsFragment extends Fragment {
                 // Outputs an error logcat message, indicating that the Tracks object size was
                 // invalid.
                 else {
-                    Log.e(LOG_TAG, "SSSearchSpotifyTask(): ERROR: The size of the Tracks object was invalid.");
+                    Log.e(LOG_TAG, "ERROR: SSSearchSpotifyTask(): The size of the Tracks object was invalid.");
                 }
             }
 

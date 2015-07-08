@@ -134,13 +134,13 @@ public class SSPlayerFragment extends Fragment {
                     // Sets the name of the song and plays the song immediately if music is enabled.
                     if (musicOn) {
                         currentSong = "SONG 1"; // Sets the song name.
-                        ss_music.getInstance().playSongName(currentSong, true);
+                        ss_music.getInstance().playSongUrl(currentSong, true);
                     }
                 }
 
                 // Plays the last selected song.
                 else {
-                    ss_music.getInstance().playSongName(currentSong, true);
+                    ss_music.getInstance().playSongUrl(currentSong, true);
                 }
             }
         });
@@ -167,7 +167,7 @@ public class SSPlayerFragment extends Fragment {
 
         // Checks to see if the song was playing prior to the activity from being
         if (isPlaying) {
-            ss_music.getInstance().playSongName(currentSong, true);
+            ss_music.getInstance().playSongUrl(currentSong, true);
         }
     }
 }

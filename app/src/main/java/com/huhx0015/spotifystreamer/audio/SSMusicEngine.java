@@ -4,13 +4,13 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.util.Log;
-import java.util.LinkedList;
+import java.io.IOException;
 
 /** -----------------------------------------------------------------------------------------------
  *  [SSMusicEngine] CLASS
  *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
  *  DESCRIPTION: SSMusicEngine class is used to support music playback for the application.
- *  Code imported from my own HuhX Game Sound Engine project here:
+ *  Code adapted from my own HuhX Game Sound Engine project here:
  *  https://github.com/huhx0015/HuhX_Game_Sound_Engine
  *  -----------------------------------------------------------------------------------------------
  */
@@ -58,76 +58,43 @@ public class SSMusicEngine {
 
     /** MUSIC FUNCTIONALITY ____________________________________________________________________ **/
 
-    // playSongName(): Plays the music file based on the specified String songName. The song is
-    // changed only if the specified song does not match the current song that is playing.
+    // playSongName(): Plays the music file based on the specified song URL. The song is changed
+    // only if the specified song does not match the current song that is playing.
     // Set loop variable to true to enable infinite song looping.
     // TRUE: Loops the song infinitely.
     // FALSE: Disables song looping.
-    public void playSongName(String songName, Boolean loop) {
+    public void playSongUrl(String songUrl, Boolean loop) {
 
-        boolean musicFound = false; // Used for determining if a corresponding song for songName was found or not.
-        int songID = 0; // Used for storing the reference ID to the raw music resource object.
-
-        // If the music option has been enabled, a song is selected based on the passed in songName string.
+        // If the music option has been enabled, a song is selected based on the passed in songUrl string.
         if (musicOn == true) {
 
-            LinkedList<SSSong> songList = SSMusicList.ssMusicList(); // Retrieves the list of songs.
-            final int NUM_SONGS = songList.size(); // Retrieves the number of songs in the list.
+            // Checks to see if the specified song is already playing.
+            if (!currentSong.equals(songUrl)) {
 
-            // Checks to see if the song list is valid or not.
-            if (NUM_SONGS < 1) {
-                Log.d(TAG, "ERROR: The songlist doesn't contain any valid song objects. Has the song list been populated?");
-                return;
-            }
+                // Checks to see if the songUrl is valid or not.
+                if (songUrl == null) {
 
-            // Loops through the song list to find the specified song in the pre-defined music list.
-            for (int i = 0; i < NUM_SONGS; i++) {
+                    Log.d(TAG, "ERROR: Invalid song track URL was found.");
+                    return;
+                }
 
-                String retrievedSong = songList.get(i).getSongName(); // Retrieves the song name string.
-
-                // Compares the specified song name against the current song name in the list.
-                if (retrievedSong.equals(songName)) {
-
-                    // Checks to see if the specified song is already playing.
-                    if (!currentSong.equals(songName)) {
-
-                        songID = songList.get(i).getMusicRes(); // Sets the music resource file reference.
-
-                        // Checks to see if the songID is a valid reference ID.
-                        if (songID == 0) {
-
-                            Log.d(TAG, "ERROR: Invalid song reference ID was found. ID was " + songID + ".");
-                            return;
-                        }
-
-                        // Sets the currentSong to be the name of the specified song and sets the
-                        // value of musicFound to be true.
-                        else {
-
-                            currentSong = songName;
-                            musicFound = true;
-
-                            Log.d(TAG, "PREPARING: Specified song " + songName + " was found.");
-                        }
-                    }
-
-                    // Indicates that the specified song is already playing and the operation is
-                    // cancelled.
-                    else {
-                        Log.d(TAG, "ERROR: Specified song " + songName + " is already playing!");
-                        return;
-                    }
+                // Sets the currentSong to be the name of the specified song.
+                else {
+                    currentSong = songUrl;
                 }
             }
 
-            // If a song match was found, play the music file from resources.
-            if ( (musicFound) || (isPaused) ) {
-                playSong(songID, loop); // Calls playSong to create a MediaPlayer object and play the song.
+            // Indicates that the specified song is already playing and the operation is
+            // cancelled.
+            else {
+                Log.d(TAG, "ERROR: Specified song is already playing!");
+                return;
             }
 
-            // Outputs a message to logcat indicating that the song could not be found.
-            else {
-                Log.d(TAG, "ERROR: Specified song " + songName + " was not found. Please specify a valid song name.");
+            // If the song is not already playing, calls playSong to create a MediaPlayer object and
+            // play the song.
+            if (isPaused) {
+                playSong(songUrl, loop);
             }
         }
 
@@ -161,8 +128,10 @@ public class SSMusicEngine {
         }
     }
 
-    //  playSong(): Sets up a MediaPlayer object and begins playing the song in the background thread.
-    private void playSong(final int songName, boolean loop) {
+    //  playSong(): Sets up a MediaPlayer object and begins playing the song.
+    private void playSong(final String songUrl, boolean loop) {
+
+        Boolean isSongReady = false; // Used to determine if song is ready for playback.
 
         // Checks to see if the MediaPlayer class has been instantiated first before playing a song.
         // This is to prevent a rare null pointer exception bug.
@@ -187,32 +156,66 @@ public class SSMusicEngine {
 
             Log.d(TAG, "PREPARING: MediaPlayer stream type set to STREAM_MUSIC.");
 
-            backgroundSong = MediaPlayer.create(context, songName); // Sets up the MediaPlayer for the song.
-            backgroundSong.setLooping(loop); // Enables infinite looping of music.
-
-            Log.d(TAG, "PREPARING: Loop condition has been set to " + loop + ".");
-
-            // If the song was previously paused, resume the song at it's previous location.
-            if (isPaused) {
-
-                Log.d(TAG, "PREPARING: Song was previously paused, resuming song playback.");
-
-                backgroundSong.seekTo(songPosition); // Jumps to the position where the song left off.
-                songPosition = 0; // Resets songPosition variable after song's position has been set.
-                isPaused = false; // Indicates that the song is no longer paused.
+            // Attempts to set the data source for the MediaPlayer object.
+            try {
+                backgroundSong.setDataSource(songUrl); // Sets up the MediaPlayer for the song.
+                isSongReady = true;
             }
 
-            // Sets up the listener for the MediaPlayer object. Song playback begins immediately
-            // once the MediaPlayer object is ready.
-            backgroundSong.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            // IO exception handler.
+            catch (IOException e) {
+                e.printStackTrace();
+                Log.e(TAG, "ERROR: playSong(): I/O exception occurred.");
+                return;
+            }
 
-                @Override
-                public void onPrepared(MediaPlayer mediaPlayer) {
+            // Null pointer exception handlers.
+            catch (NullPointerException e) {
+                e.printStackTrace();
+                Log.e(TAG, "ERROR: playSong(): Null pointer exception occurred.");
+                return;
+            }
 
-                    Log.d(TAG, "MUSIC: Song playback has begun.");
-                    mediaPlayer.start(); // Begins playing the song.
+            if (isSongReady == true) {
+
+                // Prepares the song track for playback.
+                try {
+                    backgroundSong.prepare();
                 }
-            });
+
+                catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, "ERROR: playSong(): I/O exception occurred.");
+                    return;
+                }
+
+                backgroundSong.setLooping(loop); // Enables infinite looping of music.
+
+                Log.d(TAG, "PREPARING: Loop condition has been set to " + loop + ".");
+
+                // Sets up the listener for the MediaPlayer object. Song playback begins immediately
+                // once the MediaPlayer object is ready.
+                backgroundSong.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+
+                    @Override
+                    public void onPrepared(MediaPlayer mediaPlayer) {
+
+                        // If the song was previously paused, resume the song at it's previous location.
+                        if (isPaused == true) {
+
+                            Log.d(TAG, "PREPARING: Song was previously paused, resuming song playback.");
+
+                            mediaPlayer.seekTo(songPosition); // Jumps to the position where the song left off.
+                            songPosition = 0; // Resets songPosition variable after song's position has been set.
+                            isPaused = false; // Indicates that the song is no longer paused.
+                        }
+
+                        Log.d(TAG, "MUSIC: Song playback has begun.");
+
+                        mediaPlayer.start(); // Begins playing the song.
+                    }
+                });
+            }
         }
     }
 
