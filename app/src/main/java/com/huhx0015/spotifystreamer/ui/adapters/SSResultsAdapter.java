@@ -1,4 +1,4 @@
-package com.huhx0015.spotifystreamer.ui;
+package com.huhx0015.spotifystreamer.ui.adapters;
 
 import android.app.Activity;
 import android.support.v7.widget.CardView;
@@ -32,6 +32,8 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
         this.currentActivity = act;
         this.songListResult = songListResult;
     }
+
+    /** SUBCLASSES _____________________________________________________________________________ **/
 
     public static class SSSongResultViewHolder extends RecyclerView.ViewHolder {
 
@@ -94,4 +96,5 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
     }
+
 }

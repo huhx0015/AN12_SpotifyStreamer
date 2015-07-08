@@ -2,18 +2,17 @@ package com.huhx0015.spotifystreamer.activities;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.fragments.SSResultsFragment;
+import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
+
 import java.lang.ref.WeakReference;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -33,6 +32,8 @@ public class SSMainActivity extends AppCompatActivity {
 
     /** ACTIVITY LIFECYCLE METHODS _____________________________________________________________ **/
 
+    // onCreate(): The initial function that is called when the activity is run. onCreate() only
+    // runs when the activity is first started.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +43,14 @@ public class SSMainActivity extends AppCompatActivity {
 
         // LAYOUT SETUP:
         setupLayout();
+    }
+
+    // onDestroy(): This function runs when the activity has terminated and is being destroyed.
+    // Calls recycleMemory() to free up memory allocation.
+    @Override
+    public void onDestroy() {
+        recycleMemory(); // Recycles all View objects to free up memory resources.
+        super.onDestroy();
     }
 
     /** ACTIVITY EXTENSION METHODS _____________________________________________________________ **/
@@ -94,8 +103,25 @@ public class SSMainActivity extends AppCompatActivity {
 
         //setupActionBar(); // Sets up the action bar attributes.
 
-        // Sets up sample fragment for the view.
-        setUpFragment(new SSResultsFragment(), "RESULTS", false);
+        setupFragment(); // Initializes the fragment view for the layout.
+    }
+
+    // setupFragment(): Initializes the fragment view for the layout.
+    private void setupFragment() {
+
+        // Checks to see if there are any retained fragments when the activity is re-created from a
+        // screen rotation event.
+        FragmentManager fragManager = getSupportFragmentManager();
+        SSResultsFragment resultsFragment = (SSResultsFragment) fragManager.findFragmentByTag("RESULTS");
+
+        // If the fragment is null, it indicates that it is not on the fragment stack. The fragment
+        // is initialized.
+        if (resultsFragment == null) {
+            resultsFragment = new SSResultsFragment(); // Initializes the SSResultsFragment class.
+        }
+
+        // Sets up SSResultsFragment for the initial view without a transition animation.
+        addFragment(resultsFragment, "RESULTS", false);
     }
 
     /* TODO: Disabled for P1.
@@ -111,15 +137,15 @@ public class SSMainActivity extends AppCompatActivity {
 
     /** FRAGMENT METHODS _______________________________________________________________________ **/
 
-    // setUpFragment(): Sets up the fragment view and the fragment view animation.
-    private void setUpFragment(Fragment fragment, final String fragType, Boolean isAnimated) {
+    // addFragment(): Sets up the fragment view and initiates the fragment addition animation.
+    private void addFragment(Fragment fragment, final String fragType, Boolean isAnimated) {
 
         if ((weakRefActivity.get() != null) && (!weakRefActivity.get().isFinishing())) {
 
             // Initializes the manager and transaction objects for the fragments.
             android.support.v4.app.FragmentManager fragMan = weakRefActivity.get().getSupportFragmentManager();
             android.support.v4.app.FragmentTransaction fragTrans = fragMan.beginTransaction();
-            fragTrans.replace(R.id.ss_main_activity_fragment_container, fragment);
+            fragTrans.replace(R.id.ss_main_activity_fragment_container, fragment, "RESULTS");
 
             // Makes the changes to the fragment manager and transaction objects.
             fragTrans.addToBackStack(null);
@@ -174,8 +200,8 @@ public class SSMainActivity extends AppCompatActivity {
         }
     }
 
-    // removeFragment(): This method is responsible for displaying the remove fragment animation, as
-    // well as removing the fragment view.
+    // removeFragment(): This method is responsible for displaying the fragment removal animation,
+    // as well as removing the fragment view.
     private void removeFragment(final String fragType) {
 
         if ((weakRefActivity.get() != null) && (!weakRefActivity.get().isFinishing())) {
@@ -223,5 +249,16 @@ public class SSMainActivity extends AppCompatActivity {
 
             fragmentContainer.startAnimation(fragmentAnimation); // Starts the animation.
         }
+    }
+
+    /** RECYCLE FUNCTIONALITY __________________________________________________________________ **/
+
+    // recycleMemory(): Recycles View objects to clear up memory resources prior to Activity
+    // destruction.
+    private void recycleMemory() {
+
+        // Unbinds all Drawable objects attached to the current layout.
+        try { SSUnbind.unbindDrawables(findViewById(R.id.ss_main_activity_layout)); }
+        catch (NullPointerException e) { e.printStackTrace(); } // Prints error message.
     }
 }

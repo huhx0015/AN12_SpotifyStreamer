@@ -14,11 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.model.SSSpotifyAccessors;
 import com.huhx0015.spotifystreamer.model.SSSpotifyModel;
-import com.huhx0015.spotifystreamer.ui.SSResultsAdapter;
+import com.huhx0015.spotifystreamer.ui.adapters.SSResultsAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,12 @@ public class SSResultsFragment extends Fragment {
     // ACTIVITY VARIABLES
     private Activity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
+    // LAYOUT VARIABLES
+    private Boolean isInputEmpty = true; // Used to determine if the EditText input field is empty or not.
+
+    // LIST VARIABLES
+    List<SSSpotifyModel> songListResult = new ArrayList<>(); // Stores the track list result that is to be used for the adapter.
+
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSResultsFragment.class.getSimpleName();
 
@@ -46,6 +53,7 @@ public class SSResultsFragment extends Fragment {
     @Bind(R.id.ss_results_search_input) EditText searchInput;
     @Bind(R.id.ss_results_progress_indicator) ProgressBar progressIndicator;
     @Bind(R.id.ss_results_recycler_view) RecyclerView resultsList;
+    @Bind(R.id.ss_results_status_text) TextView statusText;
 
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
 
@@ -55,6 +63,14 @@ public class SSResultsFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         this.currentActivity = activity; // Sets the currentActivity to attached activity object.
+    }
+
+    // onCreate(): Runs when the fragment is first started.
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setRetainInstance(true); // Retains this fragment during runtime changes.
     }
 
     // onCreateView(): Creates and returns the view hierarchy associated with the fragment.
@@ -91,18 +107,34 @@ public class SSResultsFragment extends Fragment {
 
         searchInput.addTextChangedListener(new TextWatcher() {
 
+            // afterTextChanged(): This method is run after the EditText input has changed.
             public void afterTextChanged(Editable s) {}
 
+            // beforeTextChanged(): This method is runs just before the EditText input changes.
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
+            // onTextChanged(): This method is run when the EditText input changes.
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
                 // Retrieves the current string from the EditText object.
                 String currentSearchInput = s.toString();
 
-                // SPOTIFY ASYNCTASK INITIALIZATION:
-                SSSearchSpotifyTask task = new SSSearchSpotifyTask();
-                task.execute(currentSearchInput); // Executes the AsyncTask.
+                // Performs a Spotify service search request as long as the input string is not
+                // empty.
+                if (!currentSearchInput.isEmpty()) {
+
+                    isInputEmpty = false; // Indicates that the input field is not empty.
+
+                    // SPOTIFY ASYNCTASK INITIALIZATION:
+                    SSSearchSpotifyTask task = new SSSearchSpotifyTask();
+                    task.execute(currentSearchInput); // Executes the AsyncTask.
+                }
+
+                // The visibility of the RecyclerView object is set to be hidden.
+                else {
+                    isInputEmpty = true; // Indicates that the input field is empty.
+                    resultsList.setVisibility(View.GONE); // Hides the RecyclerView object.
+                }
             }
         });
     }
@@ -137,21 +169,20 @@ public class SSResultsFragment extends Fragment {
 
         // TRACK VARIABLES
         Boolean tracksRetrieved = false; // Used to determine if track retrieval was successful or not.
-        List<SSSpotifyModel> songListResult = new ArrayList<>(); // Stores the track list result that is to be used for the adapter.
 
         /** ASYNCTASK METHODS __________________________________________________________________ **/
 
-        // onPostExecute(): This method runs on the UI thread after the doInBackground operation has
-        // completed.
+        // onPreExecute(): This method runs on the UI thread just before the doInBackground method
+        // executes.
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void onPreExecute() {
+            super.onPreExecute();
 
-            // Sets the list adapter for the RecyclerView object if the artist's top tracks data
-            // retrieval was successful.
-            if (tracksRetrieved) {
-                setListAdapter(songListResult); // Sets the adapter for the RecyclerView object.
-            }
+            statusText.setVisibility(View.GONE); // Hides the status result TextView object.
+            resultsList.setVisibility(View.GONE); // Hides the RecyclerView object.
+
+            // Displays the progress indicator object.
+            progressIndicator.setVisibility(View.VISIBLE);
         }
 
         // doInBackground(): This method constantly runs in the background while AsyncTask is
@@ -174,6 +205,8 @@ public class SSResultsFragment extends Fragment {
 
                 if (topTracks.tracks.size() > 0) {
 
+                    songListResult = new ArrayList<>(); // Creates a new ArrayList of song tracks.
+
                     // Retrieves the list of Tracks found and sets it in the list.
                     for (int i = 0; i < topTracks.tracks.size(); i++) {
 
@@ -187,9 +220,9 @@ public class SSResultsFragment extends Fragment {
                             String albumName = currentTrack.album.name.toString();
                             String albumURL = currentTrack.album.images.get(0).url.toString();
 
-                            Log.i(LOG_TAG, "Track " + i + " Song Name: " + songName);
-                            Log.i(LOG_TAG, "Track " + i + " Album Name: " + albumName);
-                            Log.i(LOG_TAG, "Track " + i + " Album URL: " + albumURL);
+                            Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
+                            Log.d(LOG_TAG, "Track " + i + " Album Name: " + albumName);
+                            Log.d(LOG_TAG, "Track " + i + " Album URL: " + albumURL);
 
                             // Adds the current track into the ArrayList object.
                             songListResult.add(new SSSpotifyModel(params[0], albumName, songName, albumURL));
@@ -214,7 +247,41 @@ public class SSResultsFragment extends Fragment {
                 }
             }
 
+            else {
+                tracksRetrieved = false;
+            }
+
             return null;
+        }
+
+        // onPostExecute(): This method runs on the UI thread after the doInBackground operation has
+        // completed.
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            progressIndicator.setVisibility(View.GONE); // Hides the progress indicator object.
+
+            // Sets the list adapter for the RecyclerView object if the artist's top tracks data
+            // retrieval was successful.
+            if (tracksRetrieved && !isInputEmpty) {
+
+                // The RecyclerView object is made visible.
+                resultsList.setVisibility(View.VISIBLE);
+
+                setListAdapter(songListResult); // Sets the adapter for the RecyclerView object.
+            }
+
+            // If the user clears the input string before the artist's top track query is completed,
+            // the adapter for the RecyclerView is not set and the RecyclerView is hidden.
+            else if (isInputEmpty) {
+                resultsList.setVisibility(View.GONE);
+            }
+
+            // Displays the NO RESULTS FOUND TextView object.
+            else {
+                statusText.setVisibility(View.VISIBLE);
+            }
         }
     }
 }

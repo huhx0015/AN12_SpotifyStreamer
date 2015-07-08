@@ -56,8 +56,10 @@ public class SSPlayerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setRetainInstance(true); // Retains this fragment during runtime changes.
+
         // AUDIO CLASS INITIALIZATION:
-        ss_music.getInstance().initializeAudio(currentActivity); // Initializes the SSMusicEngine class object.
+        ss_music.getInstance().initializeAudio(currentActivity);
     }
 
     // onResume(): This function runs immediately after onCreate() finishes and is always re-run
