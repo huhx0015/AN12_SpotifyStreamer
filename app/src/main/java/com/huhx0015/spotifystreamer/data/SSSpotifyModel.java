@@ -1,4 +1,4 @@
-package com.huhx0015.spotifystreamer.model;
+package com.huhx0015.spotifystreamer.data;
 
 /**
  * Created by Michael Yoon Huh on 7/2/2015.

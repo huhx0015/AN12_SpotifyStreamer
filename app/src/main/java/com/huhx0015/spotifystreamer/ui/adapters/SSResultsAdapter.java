@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
-import com.huhx0015.spotifystreamer.model.SSSpotifyModel;
+import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.squareup.picasso.Picasso;
 import java.util.List;
 
@@ -44,8 +44,8 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
         ImageView albumImage;
 
         SSSongResultViewHolder(View itemView) {
-
             super(itemView);
+
             songCardView = (CardView) itemView.findViewById(R.id.ss_song_result_cardview_container);
             songName = (TextView) itemView.findViewById(R.id.ss_song_name_text);
             artistName = (TextView) itemView.findViewById(R.id.ss_artist_name_text);
@@ -95,5 +95,4 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
     }
-
 }

@@ -15,19 +15,16 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.huhx0015.spotifystreamer.R;
-import com.huhx0015.spotifystreamer.model.SSSpotifyAccessors;
-import com.huhx0015.spotifystreamer.model.SSSpotifyModel;
+import com.huhx0015.spotifystreamer.data.SSSpotifyAccessors;
+import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.ui.adapters.SSResultsAdapter;
 import java.util.ArrayList;
 import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
 /**
@@ -168,6 +165,7 @@ public class SSResultsFragment extends Fragment {
         /** SUBCLASS VARIABLES _________________________________________________________________ **/
 
         // TRACK VARIABLES
+        Boolean isError = false; // Used to determine if an error has occurred or not.
         Boolean tracksRetrieved = false; // Used to determine if track retrieval was successful or not.
 
         /** ASYNCTASK METHODS __________________________________________________________________ **/
@@ -215,6 +213,7 @@ public class SSResultsFragment extends Fragment {
                     // If the songListResult object is null, it indicates an error has occurred and
                     // that the artist's top track retrieval was a failure.
                     if (songListResult == null) {
+                        isError = true;
                         tracksRetrieved = false;
                         return null;
                     }
@@ -230,6 +229,7 @@ public class SSResultsFragment extends Fragment {
                 else {
 
                     // Indicates that the artist's top track retrieval failed.
+                    isError = true;
                     tracksRetrieved = false;
                     Log.e(LOG_TAG, "ERROR: SSSearchSpotifyTask(): The size of the Tracks object was invalid.");
                 }
@@ -267,9 +267,20 @@ public class SSResultsFragment extends Fragment {
                 resultsList.setVisibility(View.GONE);
             }
 
-            // Displays the NO RESULTS FOUND TextView object.
+            // Displays the status TextView object.
             else {
-                statusText.setVisibility(View.VISIBLE);
+
+                // Sets an error message for the status TextView object.
+                if (isError) {
+                    statusText.setText(R.string.error_message); // Sets the text for the TextView object.
+                }
+
+                // Sets a "No results found." message for the status TextView object.
+                else {
+                    statusText.setText(R.string.no_results); // Sets the text for the TextView object.
+                }
+
+                statusText.setVisibility(View.VISIBLE); // Displays the TextView object.
             }
         }
     }

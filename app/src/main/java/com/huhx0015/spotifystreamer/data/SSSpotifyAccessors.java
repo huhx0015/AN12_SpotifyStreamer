@@ -1,4 +1,4 @@
-package com.huhx0015.spotifystreamer.model;
+package com.huhx0015.spotifystreamer.data;
 
 import android.util.Log;
 import java.util.HashMap;
@@ -39,12 +39,12 @@ public class SSSpotifyAccessors {
 
                 // Retrieves the song name, album name, and album image URL.
                 String songName = currentTrack.name;
-                String albumName = currentTrack.album.name.toString();
-                String albumURL = currentTrack.album.images.get(0).url.toString();
+                String albumName = currentTrack.album.name;
+                String albumURL = currentTrack.album.images.get(0).url;
 
-                Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
-                Log.d(LOG_TAG, "Track " + i + " Album Name: " + albumName);
-                Log.d(LOG_TAG, "Track " + i + " Album URL: " + albumURL);
+                //Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
+                //Log.d(LOG_TAG, "Track " + i + " Album Name: " + albumName);
+                //Log.d(LOG_TAG, "Track " + i + " Album URL: " + albumURL);
 
                 // Adds the current track into the ArrayList object.
                 songListResult.add(new SSSpotifyModel(artist, albumName, songName, albumURL));
@@ -92,8 +92,8 @@ public class SSSpotifyAccessors {
     // service.
     public static Tracks retrieveArtistTopTracks(String id, SpotifyService service) {
 
-        // Creates a new HashMap object containing Spotify identifiers needed for querying
-        // for the artist's top song tracks.
+        // Creates a new HashMap object containing Spotify identifiers needed for querying for the
+        // artist's top song tracks.
         Map<String, Object> artistInfo = new HashMap<>();
         artistInfo.put("country", "US"); // Sets the country identifier.
 

@@ -136,7 +136,7 @@ public class SSMainActivity extends AppCompatActivity {
 
     /** FRAGMENT METHODS _______________________________________________________________________ **/
 
-    // addFragment(): Sets up the fragment view and initiates the fragment addition animation.
+    // addFragment(): Sets up the fragment view.
     private void addFragment(Fragment fragment, final String fragType, Boolean isAnimated) {
 
         if ((weakRefActivity.get() != null) && (!weakRefActivity.get().isFinishing())) {
@@ -152,44 +152,7 @@ public class SSMainActivity extends AppCompatActivity {
 
             // Sets up the transition animation.
             if (isAnimated) {
-
-                int animationResource; // References the animation XML resource file.
-
-                // Sets the animation XML resource file, based on the fragment type.
-                // RESULTS:
-                if (fragType.equals("RESULTS")) {
-                    animationResource = R.anim.bottom_up;
-                }
-
-                // MISCELLANEOUS:
-                else {
-                    animationResource = R.anim.slide_down;
-                }
-
-                Animation fragmentAnimation = AnimationUtils.loadAnimation(this, animationResource);
-
-                // Sets the AnimationListener for the animation.
-                fragmentAnimation.setAnimationListener(new Animation.AnimationListener() {
-
-                    // onAnimationStart(): Runs when the animation is started.
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        fragmentContainer.setVisibility(View.VISIBLE); // Displays the fragment.
-                    }
-
-                    // onAnimationEnd(): The fragment is removed after the animation ends.
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-
-                        Log.d(LOG_TAG, "setUpFragment(): Fragment animation has ended.");
-                    }
-
-                    // onAnimationRepeat(): Runs when the animation is repeated.
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {}
-                });
-
-                fragmentContainer.startAnimation(fragmentAnimation); // Starts the animation.
+                setFragmentTransition(fragType, true); // Sets the fragment transition animation.
             }
 
             // Displays the fragment view without any transition animations.
@@ -199,38 +162,70 @@ public class SSMainActivity extends AppCompatActivity {
         }
     }
 
-    // removeFragment(): This method is responsible for displaying the fragment removal animation,
-    // as well as removing the fragment view.
+    // removeFragment(): This method is responsible for removing the fragment view.
     private void removeFragment(final String fragType) {
 
         if ((weakRefActivity.get() != null) && (!weakRefActivity.get().isFinishing())) {
+            setFragmentTransition(fragType, false); // Sets the fragment transition animation.
+        }
+    }
 
-            int animationResource; // References the animation XML resource file.
+    // setFragmentTransition(): Sets the fragment transition animation, based on the specified
+    // fragment type.
+    private void setFragmentTransition(String fragType, final Boolean isAppearing) {
 
-            // RESULTS:
-            if (fragType.equals("RESULTS")) {
+        int animationResource; // References the animation XML resource file.
+
+        // Sets the animation XML resource file, based on the fragment type.
+        // RESULTS:
+        if (fragType.equals("RESULTS")) {
+
+            // FRAGMENT APPEARANCE ANIMATION:
+            if (isAppearing) {
+                animationResource = R.anim.bottom_up; // Sets the animation XML resource file.
+            }
+
+            // FRAGMENT REMOVAL ANIMATION:
+            else {
                 animationResource = R.anim.bottom_down; // Sets the animation XML resource file.
             }
+        }
 
-            // MISCELLANEOUS
-            else {
-                animationResource = R.anim.slide_up;
+        // MISCELLANEOUS:
+        else {
+
+            // FRAGMENT APPEARANCE ANIMATION:
+            if (isAppearing) {
+                animationResource = R.anim.slide_down; // Sets the animation XML resource file.
             }
 
-            Animation fragmentAnimation = AnimationUtils.loadAnimation(this, animationResource);
+            // FRAGMENT REMOVAL ANIMATION:
+            else {
+                animationResource = R.anim.slide_up; // Sets the animation XML resource file.
+            }
+        }
 
-            // Sets the AnimationListener for the animation.
-            fragmentAnimation.setAnimationListener(new Animation.AnimationListener() {
+        Animation fragmentAnimation = AnimationUtils.loadAnimation(this, animationResource);
 
-                // onAnimationStart(): Runs when the animation is started.
-                @Override
-                public void onAnimationStart(Animation animation) {  }
+        // Sets the AnimationListener for the animation.
+        fragmentAnimation.setAnimationListener(new Animation.AnimationListener() {
 
-                // onAnimationEnd(): The fragment is removed after the animation ends.
-                @Override
-                public void onAnimationEnd(Animation animation) {
+            // onAnimationStart(): Runs when the animation is started.
+            @Override
+            public void onAnimationStart(Animation animation) {
 
-                    Log.d(LOG_TAG, "removeFragment(): Fragment animation has ended. Attempting to remove fragment.");
+                if (isAppearing) {
+                    fragmentContainer.setVisibility(View.VISIBLE); // Displays the fragment.
+                }
+            }
+
+            // onAnimationEnd(): The fragment is removed after the animation ends.
+            @Override
+            public void onAnimationEnd(Animation animation) {
+
+                Log.d(LOG_TAG, "setUpFragment(): Fragment animation has ended.");
+
+                if (!isAppearing) {
 
                     // Initializes the manager and transaction objects for the fragments.
                     FragmentManager fragMan = getSupportFragmentManager();
@@ -240,14 +235,14 @@ public class SSMainActivity extends AppCompatActivity {
 
                     Log.d(LOG_TAG, "removeFragment(): Fragment has been removed.");
                 }
+            }
 
-                // onAnimationRepeat(): Runs when the animation is repeated.
-                @Override
-                public void onAnimationRepeat(Animation animation) { }
-            });
+            // onAnimationRepeat(): Runs when the animation is repeated.
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
 
-            fragmentContainer.startAnimation(fragmentAnimation); // Starts the animation.
-        }
+        fragmentContainer.startAnimation(fragmentAnimation); // Starts the animation.
     }
 
     /** RECYCLE FUNCTIONALITY __________________________________________________________________ **/
