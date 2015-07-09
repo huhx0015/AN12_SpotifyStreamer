@@ -15,12 +15,15 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyAccessors;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.ui.adapters.SSResultsAdapter;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -28,15 +31,15 @@ import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Tracks;
 
 /** -----------------------------------------------------------------------------------------------
- *  [SSResultsFragment] CLASS
+ *  [SSTracksFragment] CLASS
  *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
- *  DESCRIPTION: SSResultsFragment is a fragment class that is responsible for displaying the input
+ *  DESCRIPTION: SSTracksFragment is a fragment class that is responsible for displaying the input
  *  field in which a user can search for an artist's top tracks via Spotify. The results are then
  *  loaded into the RecyclerView object that is handled by this fragment.
  *  -----------------------------------------------------------------------------------------------
  */
 
-public class SSResultsFragment extends Fragment {
+public class SSTracksFragment extends Fragment {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
@@ -50,13 +53,17 @@ public class SSResultsFragment extends Fragment {
     private List<SSSpotifyModel> songListResult = new ArrayList<>(); // Stores the track list result that is to be used for the adapter.
 
     // LOGGING VARIABLES
-    private static final String LOG_TAG = SSResultsFragment.class.getSimpleName();
+    private static final String LOG_TAG = SSArtistsFragment.class.getSimpleName();
 
     // VIEW INJECTION VARIABLES
-    @Bind(R.id.ss_results_search_input) EditText searchInput;
-    @Bind(R.id.ss_results_progress_indicator) ProgressBar progressIndicator;
-    @Bind(R.id.ss_results_recycler_view) RecyclerView resultsList;
-    @Bind(R.id.ss_results_status_text) TextView statusText;
+    @Bind(R.id.ss_results_search_input)
+    EditText searchInput;
+    @Bind(R.id.ss_results_progress_indicator)
+    ProgressBar progressIndicator;
+    @Bind(R.id.ss_results_recycler_view)
+    RecyclerView resultsList;
+    @Bind(R.id.ss_results_status_text)
+    TextView statusText;
 
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
 

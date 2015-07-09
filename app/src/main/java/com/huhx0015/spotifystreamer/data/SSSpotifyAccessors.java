@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.Artists;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
@@ -43,7 +44,17 @@ public class SSSpotifyAccessors {
                 // Retrieves the song name, album name, and album image URL.
                 String songName = currentTrack.name;
                 String albumName = currentTrack.album.name;
-                String albumURL = currentTrack.album.images.get(0).url;
+                String albumURL;
+
+                // Checks to see if there are any valid album images available.
+                if (currentTrack.album.images.size() > 1) {
+                    albumURL = currentTrack.album.images.get(0).url;
+                }
+
+                // If no image exists for the artist, a placeholder image URL is set instead.
+                else {
+                    albumURL = "http://www.yoonhuh.com/Misc/Spotify-Streamer/ss_no_image.png";
+                }
 
                 //Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
                 //Log.d(LOG_TAG, "Track " + i + " Album Name: " + albumName);
@@ -89,6 +100,55 @@ public class SSSpotifyAccessors {
         }
 
         return artistId;
+    }
+
+    // retrieveArtists(): Retrieves the artist data from the Spotify background service.
+    public static List<SSSpotifyModel> retrieveArtists(String artist, List<SSSpotifyModel> artistListResult,
+                                          SpotifyService service) {
+
+        // Accesses the Spotify service to search for a specific artist.
+        ArtistsPager results = service.searchArtists(artist);
+
+        // Retrieves the List of Artists returned from the search query.
+        List<Artist> artists = results.artists.items;
+
+        // Retrieves the list of Artists found.
+        for (int i = 0; i < artists.size(); i++) {
+
+            Artist currentArtist = artists.get(i);
+
+            try {
+
+                // Retrieves the artist's name and image URL.
+                String currentArtistName = currentArtist.name;
+                String currentArtistImage;
+
+                // Checks to see if there are any valid artist images available.
+                if (currentArtist.images.size() > 1) {
+                    currentArtistImage = currentArtist.images.get(0).url;
+                }
+
+                // If no image exists for the artist, a placeholder image URL is set instead.
+                else {
+                    currentArtistImage = "http://www.yoonhuh.com/Misc/Spotify-Streamer/ss_no_image.png";
+                }
+
+                //Log.d(LOG_TAG, "Artist " + i + " Artist Name: " + currentArtistName);
+                //Log.d(LOG_TAG, "Artist " + i + " Artist Image URL: " + currentArtistImage);
+
+                // Adds the current artist into the ArrayList object.
+                artistListResult.add(new SSSpotifyModel(currentArtistName, null, null, currentArtistImage));
+            }
+
+            // NullPointerException handler.
+            catch (NullPointerException e) {
+                e.printStackTrace();
+                Log.e(LOG_TAG, "ERROR: receiveArtists(): A null pointer exception occurred.");
+                return null;
+            }
+        }
+
+        return artistListResult;
     }
 
     // retrieveArtistTopTracks(): Retrieves the artist's top tracks data from the Spotify background

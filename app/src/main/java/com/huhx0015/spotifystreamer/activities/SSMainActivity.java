@@ -10,7 +10,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import com.huhx0015.spotifystreamer.R;
-import com.huhx0015.spotifystreamer.fragments.SSResultsFragment;
+import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
 import java.lang.ref.WeakReference;
 import butterknife.Bind;
@@ -119,16 +119,16 @@ public class SSMainActivity extends AppCompatActivity {
         // Checks to see if there are any retained fragments when the activity is re-created from a
         // screen rotation event.
         FragmentManager fragManager = getSupportFragmentManager();
-        SSResultsFragment resultsFragment = (SSResultsFragment) fragManager.findFragmentByTag("RESULTS");
+        SSArtistsFragment artistsFragment = (SSArtistsFragment) fragManager.findFragmentByTag("ARTISTS");
 
         // If the fragment is null, it indicates that it is not on the fragment stack. The fragment
         // is initialized.
-        if (resultsFragment == null) {
-            resultsFragment = new SSResultsFragment(); // Initializes the SSResultsFragment class.
+        if (artistsFragment == null) {
+            artistsFragment = new SSArtistsFragment(); // Initializes the SSArtistsFragment class.
         }
 
-        // Sets up SSResultsFragment for the initial view without a transition animation.
-        addFragment(resultsFragment, "RESULTS", false);
+        // Sets up SSArtistsFragment for the initial view without a transition animation.
+        addFragment(artistsFragment, "ARTISTS", false);
     }
 
     /* TODO: Disabled for P1.
@@ -152,7 +152,7 @@ public class SSMainActivity extends AppCompatActivity {
             // Initializes the manager and transaction objects for the fragments.
             android.support.v4.app.FragmentManager fragMan = weakRefActivity.get().getSupportFragmentManager();
             android.support.v4.app.FragmentTransaction fragTrans = fragMan.beginTransaction();
-            fragTrans.replace(R.id.ss_main_activity_fragment_container, fragment, "RESULTS");
+            fragTrans.replace(R.id.ss_main_activity_fragment_container, fragment, "ARTISTS");
 
             // Makes the changes to the fragment manager and transaction objects.
             fragTrans.addToBackStack(null);
@@ -186,7 +186,7 @@ public class SSMainActivity extends AppCompatActivity {
 
         // Sets the animation XML resource file, based on the fragment type.
         // RESULTS:
-        if (fragType.equals("RESULTS")) {
+        if (fragType.equals("ARTISTS")) {
 
             // FRAGMENT APPEARANCE ANIMATION:
             if (isAppearing) {

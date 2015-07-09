@@ -17,7 +17,7 @@ import java.util.List;
  *  [SSResultsAdapter] CLASS
  *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
  *  DESCRIPTION: SSResultsAdapter is a RecyclerView adapter class that is used for setting up and
- *  loading a Spotify artist's top track data into a RecyclerView list object.
+ *  loading Spotify data into a RecyclerView list object.
  *  -----------------------------------------------------------------------------------------------
  */
 
