@@ -2,6 +2,7 @@ package com.huhx0015.spotifystreamer.activities;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +12,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
+import com.huhx0015.spotifystreamer.fragments.SSPlayerFragment;
+import com.huhx0015.spotifystreamer.fragments.SSTracksFragment;
+import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
 import java.lang.ref.WeakReference;
 import butterknife.Bind;
@@ -24,7 +28,7 @@ import butterknife.ButterKnife;
  *  -----------------------------------------------------------------------------------------------
  */
 
-public class SSMainActivity extends AppCompatActivity {
+public class SSMainActivity extends AppCompatActivity implements OnSpotifySelectedListener {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
@@ -108,8 +112,6 @@ public class SSMainActivity extends AppCompatActivity {
         setContentView(R.layout.ss_main_activity); // Sets the XML layout file for the activity.
         ButterKnife.bind(this); // ButterKnife view injection initialization.
 
-        //setupActionBar(); // Sets up the action bar attributes.
-
         setupFragment(); // Initializes the fragment view for the layout.
     }
 
@@ -120,27 +122,53 @@ public class SSMainActivity extends AppCompatActivity {
         // screen rotation event.
         FragmentManager fragManager = getSupportFragmentManager();
         SSArtistsFragment artistsFragment = (SSArtistsFragment) fragManager.findFragmentByTag("ARTISTS");
+        SSTracksFragment tracksFragment = (SSTracksFragment) fragManager.findFragmentByTag("TRACKS");
 
-        // If the fragment is null, it indicates that it is not on the fragment stack. The fragment
-        // is initialized.
-        if (artistsFragment == null) {
-            artistsFragment = new SSArtistsFragment(); // Initializes the SSArtistsFragment class.
+        // If the SSTracksFragment was in focus before the screen rotation event, the retained
+        // SSTracksFragment is re-added instead.
+        if (tracksFragment != null) {
+            addFragment(tracksFragment, "TRACKS", false);
+            setupActionBar("TRACKS"); // Sets up the action bar attributes.
         }
 
-        // Sets up SSArtistsFragment for the initial view without a transition animation.
-        addFragment(artistsFragment, "ARTISTS", false);
+        // The SSArtistFragment is setup as the primary fragment in focus.
+        else {
+
+            // If the fragment is null, it indicates that it is not on the fragment stack. The fragment
+            // is initialized.
+            if (artistsFragment == null) {
+                artistsFragment = new SSArtistsFragment(); // Initializes the SSArtistsFragment class.
+            }
+
+            // Sets up SSArtistsFragment for the initial view without a transition animation.
+            addFragment(artistsFragment, "ARTISTS", false);
+            setupActionBar("ARTISTS"); // Sets up the action bar attributes.
+        }
     }
 
-    /* TODO: Disabled for P1.
     // setupActionBar(): Sets up the action bar attributes for the activity.
-    private void setupActionBar() {
+    private void setupActionBar(String actionType) {
 
         ActionBar actionBar = getSupportActionBar();
         //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         //actionBar.setDisplayShowHomeEnabled(false);
         //actionBar.setDisplayShowTitleEnabled(false);
+
+        // TRACKS:
+        if (actionType.equals("TRACKS")) {
+            actionBar.setTitle("Top 10 Tracks"); // Sets the title of the action bar.
+        }
+
+        // PLAYER:
+        else if (actionType.equals("PLAYER")) {
+            actionBar.setTitle("Spotify Streamer Player"); // Sets the title of the action bar.
+        }
+
+        // DEFAULT:
+        else {
+            actionBar.setTitle(R.string.app_name); // Sets the title of the action bar.
+        }
     }
-    */
 
     /** FRAGMENT METHODS _______________________________________________________________________ **/
 
@@ -171,35 +199,55 @@ public class SSMainActivity extends AppCompatActivity {
     }
 
     // removeFragment(): This method is responsible for removing the fragment view.
-    private void removeFragment(final String fragType) {
+    private void removeFragment(final String fragType, Boolean isAnimated) {
 
         if ((weakRefActivity.get() != null) && (!weakRefActivity.get().isFinishing())) {
-            setFragmentTransition(fragType, false); // Sets the fragment transition animation.
+
+            // Animates the fragment transition.
+            if (isAnimated) {
+                setFragmentTransition(fragType, false); // Sets the fragment transition animation.
+            }
+
+            // The fragment is removed from the view layout.
+            else {
+
+                // Initializes the manager and transaction objects for the fragments.
+                FragmentManager fragMan = getSupportFragmentManager();
+                fragMan.popBackStack(); // Pops the fragment from the stack.
+                fragmentContainer.removeAllViews(); // Removes all views in the layout.
+                fragmentContainer.setVisibility(View.INVISIBLE); // Hides the fragment.
+
+                Log.d(LOG_TAG, "removeFragment(): Fragment has been removed.");
+            }
         }
     }
 
     // setFragmentTransition(): Sets the fragment transition animation, based on the specified
     // fragment type.
-    private void setFragmentTransition(String fragType, final Boolean isAppearing) {
+    private void setFragmentTransition(final String fragType, final Boolean isAppearing) {
 
         int animationResource; // References the animation XML resource file.
 
         // Sets the animation XML resource file, based on the fragment type.
-        // RESULTS:
-        if (fragType.equals("ARTISTS")) {
+        // TRACKS & PLAYER:
+        if ( (fragType.equals("TRACKS")) || (fragType.equals("PLAYER")) ) {
 
             // FRAGMENT APPEARANCE ANIMATION:
             if (isAppearing) {
+
+                // TODO: Change to a slide right animation.
                 animationResource = R.anim.bottom_up; // Sets the animation XML resource file.
             }
 
             // FRAGMENT REMOVAL ANIMATION:
             else {
+
+                // TODO: Change to a slide left animation.
                 animationResource = R.anim.bottom_down; // Sets the animation XML resource file.
             }
         }
 
-        // MISCELLANEOUS:
+        // ARTISTS:
         else {
 
             // FRAGMENT APPEARANCE ANIMATION:
@@ -233,18 +281,11 @@ public class SSMainActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animation animation) {
 
-                Log.d(LOG_TAG, "setUpFragment(): Fragment animation has ended.");
+                Log.d(LOG_TAG, "setFragmentTransition(): Fragment animation has ended.");
 
                 // FRAGMENT REMOVAL ANIMATION:
                 if (!isAppearing) {
-
-                    // Initializes the manager and transaction objects for the fragments.
-                    FragmentManager fragMan = getSupportFragmentManager();
-                    fragMan.popBackStack(); // Pops the fragment from the stack.
-                    fragmentContainer.removeAllViews(); // Removes all views in the layout.
-                    fragmentContainer.setVisibility(View.INVISIBLE); // Hides the fragment.
-
-                    Log.d(LOG_TAG, "removeFragment(): Fragment has been removed.");
+                    removeFragment(fragType, false); // Removes the fragment from the view.
                 }
             }
 
@@ -256,7 +297,7 @@ public class SSMainActivity extends AppCompatActivity {
         fragmentContainer.startAnimation(fragmentAnimation); // Starts the animation.
     }
 
-    /** RECYCLE FUNCTIONALITY __________________________________________________________________ **/
+    /** RECYCLE METHODS ________________________________________________________________________ **/
 
     // recycleMemory(): Recycles View objects to clear up resources prior to Activity destruction.
     private void recycleMemory() {
@@ -264,5 +305,86 @@ public class SSMainActivity extends AppCompatActivity {
         // Unbinds all Drawable objects attached to the current layout.
         try { SSUnbind.unbindDrawables(findViewById(R.id.ss_main_activity_layout)); }
         catch (NullPointerException e) { e.printStackTrace(); } // Prints error message.
+    }
+
+    /** INTERFACE METHODS ______________________________________________________________________ **/
+
+    // displayTracksFragment(): Displays or removes the SSTracksFragment from the view layout.
+    @Override
+    public void displayTracksFragment(Boolean isShow, String name, String id) {
+
+        // Displays the SSTracksFragment in the view layout.
+        if (isShow) {
+
+            // Removes the existing SSArtistsFragment from the fragment stack and the view layout.
+            //removeFragment("ARTISTS", false);
+
+            // Adds a new SSTracksFragment onto the fragment stack and is made visible in the view
+            // layout.
+            SSTracksFragment tracksFragment = new SSTracksFragment();
+            tracksFragment.initializeFragment(name, id);
+
+            // Adds the fragment with the transition animation.
+            addFragment(tracksFragment, "TRACKS", true);
+
+            setupActionBar("TRACKS"); // Sets the name of the action bar.
+        }
+
+        // Removes the SSTracksFragment in the view layout and replaces it with a SSTracksFragment.
+        else {
+
+            //removeFragment("TRACKS", false);
+
+            // Adds a new SSArtistsFragment onto the fragment stack and is made visible in the view
+            // layout.
+            SSArtistsFragment artistFragment = new SSArtistsFragment();
+            artistFragment.initializeFragment(name);
+
+            // Adds the fragment with the transition animation.
+            addFragment(artistFragment, "ARTISTS", true);
+
+            setupActionBar("ARTISTS"); // Sets the name of the action bar.
+        }
+    }
+
+    // displayPlayerFragment(): Displays or removes the SSPlayerFragment from the view layout.
+    // TODO: Reserved for P2.
+    @Override
+    public void displayPlayerFragment(Boolean isShow, String artistName, String id, String songName,
+                                      String albumName, String imageURL, String streamURL) {
+
+        // Displays the SSPlayerFragment in the view layout.
+        if (isShow) {
+
+            // Removes the existing SSArtistsFragment from the fragment stack and the view layout.
+            //removeFragment("PLAYER", false);
+
+            // Adds a new SSPlayerFragment onto the fragment stack and is made visible in the view
+            // layout.
+            SSPlayerFragment playerFragment = new SSPlayerFragment();
+            playerFragment.initializeFragment(artistName, id, songName, albumName, imageURL, streamURL);
+
+            // Adds the fragment with the transition animation.
+            addFragment(playerFragment, "PLAYER", true);
+
+            setupActionBar("PLAYER"); // Sets the name of the action bar.
+        }
+
+        // Removes the SSTracksFragment in the view layout and replaces it with a SSTracksFragment.
+        else {
+
+            // Removes the existing SSArtistsFragment from the fragment stack and the view layout.
+            //removeFragment("ARTISTS", false);
+
+            // Adds a new SSTracksFragment onto the fragment stack and is made visible in the view
+            // layout.
+            SSTracksFragment tracksFragment = new SSTracksFragment();
+            tracksFragment.initializeFragment(artistName, id);
+
+            // Adds the fragment with the transition animation.
+            addFragment(tracksFragment, "TRACKS", true);
+
+            setupActionBar("TRACKS"); // Sets the name of the action bar.
+        }
     }
 }

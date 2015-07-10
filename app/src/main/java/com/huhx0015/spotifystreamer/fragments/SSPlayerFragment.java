@@ -7,9 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
+import com.squareup.picasso.Picasso;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -35,6 +37,14 @@ public class SSPlayerFragment extends Fragment {
     private Boolean musicOn = true; // Used to determine if music has been enabled or not.
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
 
+    // FRAGMENT VARIABLES
+    private String artistName = ""; // Stores the name of the artist.
+    private String artistId = ""; // Stores the Artist ID value.
+    private String songName = ""; // Stores the name of the song.
+    private String albumName = ""; // Stores the name of the album.
+    private String albumImageURL = ""; // Stores the image URL of the album.
+    private String streamURL = ""; // Stores the music stream URL of the song.
+
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSPlayerFragment.class.getSimpleName();
 
@@ -45,9 +55,32 @@ public class SSPlayerFragment extends Fragment {
     @Bind(R.id.ss_forward_button) ImageButton forwardButton;
     @Bind(R.id.ss_next_button) ImageButton nextButton;
     @Bind(R.id.ss_previous_button) ImageButton previousButton;
+    @Bind(R.id.ss_player_album_image) ImageView albumImage;
     @Bind(R.id.ss_player_song_name_text) TextView songNameText;
     @Bind(R.id.ss_player_artist_name_text) TextView artistNameText;
 
+    /** INITIALIZATION METHODS _________________________________________________________________ **/
+
+    // SSPlayerFragment(): Default constructor for the SSPlayerFragment fragment class.
+    private final static SSPlayerFragment player_fragment = new SSPlayerFragment();
+
+    // SSPlayerFragment(): Deconstructor method for the SSPlayerFragment fragment class.
+    public SSPlayerFragment() {}
+
+    // getInstance(): Returns the player_fragment instance.
+    public static SSPlayerFragment getInstance() { return player_fragment; }
+
+    // initializeFragment(): Sets the initial values for the fragment.
+    public void initializeFragment(String name, String id, String song, String album, String image,
+                                   String stream) {
+        this.artistName = name;
+        this.artistId = id;
+        this.songName = song;
+        this.albumName = album;
+        this.albumImageURL = image;
+        this.streamURL = stream;
+    }
+    
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
 
     // onAttach(): The initial function that is called when the Fragment is run. The activity is
@@ -125,10 +158,11 @@ public class SSPlayerFragment extends Fragment {
     // setUpLayout(): Sets up the layout for the fragment.
     private void setUpLayout() {
         setUpButtons(); // Sets up the button listeners for the fragment.
+        setUpImage(); // Sets up the images for the ImageView objects for the fragment.
     }
 
     // setUpButtons(): Sets up the button listeners for the fragment.
-    public void setUpButtons() {
+    private void setUpButtons() {
 
         // PLAYER BUTTONS:
         // -----------------------------------------------------------------------------------------
@@ -168,6 +202,15 @@ public class SSPlayerFragment extends Fragment {
                 }
             }
         });
+    }
+
+    // setUpImage(): Sets up the images for the ImageView objects in the fragment
+    private void setUpImage() {
+
+        // Loads the image from the image URL into the albumImage ImageView object.
+        Picasso.with(currentActivity)
+                .load(albumImageURL)
+                .into(albumImage);
     }
 
     /** AUDIO FUNCTIONALITY ____________________________________________________________________ **/

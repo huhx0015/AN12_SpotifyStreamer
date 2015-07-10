@@ -6,24 +6,19 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyAccessors;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
+import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.ui.adapters.SSResultsAdapter;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -33,9 +28,9 @@ import kaaes.spotify.webapi.android.models.Tracks;
 /** -----------------------------------------------------------------------------------------------
  *  [SSTracksFragment] CLASS
  *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
- *  DESCRIPTION: SSTracksFragment is a fragment class that is responsible for displaying the input
- *  field in which a user can search for an artist's top tracks via Spotify. The results are then
- *  loaded into the RecyclerView object that is handled by this fragment.
+ *  DESCRIPTION: SSTracksFragment is a fragment class that is responsible for displaying the
+ *  specified artist's top tracks via Spotify. The results are then loaded into the RecyclerView
+ *  object that is handled by this fragment.
  *  -----------------------------------------------------------------------------------------------
  */
 
@@ -46,6 +41,10 @@ public class SSTracksFragment extends Fragment {
     // ACTIVITY VARIABLES
     private Activity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
+    // FRAGMENT VARIABLES
+    private String artistName = ""; // Stores the name of the artist.
+    private String artistId = ""; // Stores the Artist ID value.
+
     // LAYOUT VARIABLES
     private Boolean isInputEmpty = true; // Used to determine if the EditText input field is empty or not.
 
@@ -53,17 +52,29 @@ public class SSTracksFragment extends Fragment {
     private List<SSSpotifyModel> songListResult = new ArrayList<>(); // Stores the track list result that is to be used for the adapter.
 
     // LOGGING VARIABLES
-    private static final String LOG_TAG = SSArtistsFragment.class.getSimpleName();
+    private static final String LOG_TAG = SSTracksFragment.class.getSimpleName();
 
     // VIEW INJECTION VARIABLES
-    @Bind(R.id.ss_results_search_input)
-    EditText searchInput;
-    @Bind(R.id.ss_results_progress_indicator)
-    ProgressBar progressIndicator;
-    @Bind(R.id.ss_results_recycler_view)
-    RecyclerView resultsList;
-    @Bind(R.id.ss_results_status_text)
-    TextView statusText;
+    @Bind(R.id.ss_tracks_progress_indicator) ProgressBar progressIndicator;
+    @Bind(R.id.ss_tracks_recycler_view) RecyclerView resultsList;
+    @Bind(R.id.ss_tracks_status_text) TextView statusText;
+
+    /** INITIALIZATION METHODS _________________________________________________________________ **/
+
+    // SSTracksFragment(): Default constructor for the SSTracksFragment fragment class.
+    private final static SSTracksFragment tracks_fragment = new SSTracksFragment();
+
+    // SSTracksFragment(): Deconstructor method for the SSTracksFragment fragment class.
+    public SSTracksFragment() {}
+
+    // getInstance(): Returns the tracks_fragment instance.
+    public static SSTracksFragment getInstance() { return tracks_fragment; }
+    
+    // initializeFragment(): Sets the initial values for the fragment.
+    public void initializeFragment(String name, String id) {
+        this.artistName = name;
+        this.artistId = id;
+    }
 
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
 
@@ -88,7 +99,7 @@ public class SSTracksFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View ss_fragment_view = (ViewGroup) inflater.inflate(R.layout.ss_results_fragment, container, false);
+        View ss_fragment_view = (ViewGroup) inflater.inflate(R.layout.ss_tracks_fragment, container, false);
         ButterKnife.bind(this, ss_fragment_view); // ButterKnife view injection initialization.
 
         setUpLayout(); // Sets up the layout for the fragment.
@@ -108,45 +119,15 @@ public class SSTracksFragment extends Fragment {
 
     // setUpLayout(): Sets up the layout for the fragment.
     private void setUpLayout() {
-        setUpTextListener(); // Sets up the EditText listener for the fragment.
+
         setUpRecyclerView(); // Sets up the RecyclerView object.
-    }
 
-    // setUpTextListener(): Sets up the EditText listener for the fragment.
-    private void setUpTextListener() {
-
-        searchInput.addTextChangedListener(new TextWatcher() {
-
-            // afterTextChanged(): This method is run after the EditText input has changed.
-            public void afterTextChanged(Editable s) {}
-
-            // beforeTextChanged(): This method is runs just before the EditText input changes.
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            // onTextChanged(): This method is run when the EditText input changes.
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                // Retrieves the current string from the EditText object.
-                String currentSearchInput = s.toString();
-
-                // Performs a Spotify service search request as long as the input string is not
-                // empty.
-                if (!currentSearchInput.isEmpty()) {
-
-                    isInputEmpty = false; // Indicates that the input field is not empty.
-
-                    // SPOTIFY ASYNCTASK INITIALIZATION:
-                    SSSearchSpotifyTask task = new SSSearchSpotifyTask();
-                    task.execute(currentSearchInput); // Executes the AsyncTask.
-                }
-
-                // The visibility of the RecyclerView object is set to be hidden.
-                else {
-                    isInputEmpty = true; // Indicates that the input field is empty.
-                    resultsList.setVisibility(View.GONE); // Hides the RecyclerView object.
-                }
-            }
-        });
+        // SPOTIFY ASYNCTASK INITIALIZATION: Searches for the artist's top 10 tracks if the ID is
+        // valid.
+        if (!artistId.isEmpty()) {
+            SSSpotifyTrackSearchTask task = new SSSpotifyTrackSearchTask();
+            task.execute(artistId); // Executes the AsyncTask.
+        }
     }
 
     /** RECYCLERVIEW METHODS ___________________________________________________________________ **/
@@ -163,17 +144,25 @@ public class SSTracksFragment extends Fragment {
         resultsList.setLayoutManager(layoutManager);
     }
 
+    /** INTERFACE METHODS ______________________________________________________________________ **/
+
+    // displayPreviousView(): Signals attached activity to display the SSArtistFragment view.
+    private void displayPreviousView(String name, String id) {
+        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(false, name, ""); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
     /** SUBCLASSES _____________________________________________________________________________ **/
 
     /**
      * --------------------------------------------------------------------------------------------
-     * [SSSearchSpotifyTask] CLASS
+     * [SSSpotifyTrackSearchTask] CLASS
      * DESCRIPTION: This is an AsyncTask-based class that accesses and queries the Spotify Service
      * API in the background.
      * --------------------------------------------------------------------------------------------
      */
 
-    public class SSSearchSpotifyTask extends AsyncTask<String, Void, Void> {
+    public class SSSpotifyTrackSearchTask extends AsyncTask<String, Void, Void> {
 
         /** SUBCLASS VARIABLES _________________________________________________________________ **/
 
@@ -244,7 +233,7 @@ public class SSTracksFragment extends Fragment {
                     // Indicates that the artist's top track retrieval failed.
                     isError = true;
                     tracksRetrieved = false;
-                    Log.e(LOG_TAG, "ERROR: SSSearchSpotifyTask(): The size of the Tracks object was invalid.");
+                    Log.e(LOG_TAG, "ERROR: SSSpotifyTrackSearchTask(): The size of the Tracks object was invalid.");
                 }
             }
 
@@ -290,7 +279,7 @@ public class SSTracksFragment extends Fragment {
 
                 // Sets a "No results found." message for the status TextView object.
                 else {
-                    statusText.setText(R.string.no_results); // Sets the text for the TextView object.
+                    statusText.setText(R.string.no_results_tracks); // Sets the text for the TextView object.
                 }
 
                 statusText.setVisibility(View.VISIBLE); // Displays the TextView object.

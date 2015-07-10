@@ -3,6 +3,7 @@ package com.huhx0015.spotifystreamer.ui.adapters;
 import android.app.Activity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
+import com.huhx0015.spotifystreamer.fragments.SSTracksFragment;
 import com.squareup.picasso.Picasso;
 import java.util.List;
 
@@ -48,6 +50,15 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
     public SSSongResultViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.ss_song_result_card, parent, false);
+
+        /*
+        // TODO: TESTING NEW CODE
+        SSResultsAdapter.SSSongResultViewHolder viewHolder = new RecyclerView.ViewHolder(view, new SSResultsAdapter.SSSongResultViewHolder.IMyViewHolderClicks() {
+            public void onPotato(View caller) { Log.d("TEST", "Poh-tah-tos"); };
+            public void onTomato(ImageView callerImage) { Log.d("TEST", "To-m8-tohs"); }
+        });
+        */
+
         return new SSSongResultViewHolder(view);
     }
 
@@ -88,7 +99,9 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
      * RecyclerView list view object.
      * --------------------------------------------------------------------------------------------
      */
-    public static class SSSongResultViewHolder extends RecyclerView.ViewHolder {
+    public static class SSSongResultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        public IMyViewHolderClicks mListener;
 
         CardView songCardView;
         ImageView albumImage;
@@ -106,6 +119,20 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
             songName = (TextView) itemView.findViewById(R.id.ss_song_name_text);
             artistName = (TextView) itemView.findViewById(R.id.ss_artist_name_text);
             albumName = (TextView) itemView.findViewById(R.id.ss_album_name_text);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (v instanceof ImageView) {
+                mListener.onTomato((ImageView)v);
+            } else {
+                mListener.onPotato(v);
+            }
+        }
+
+        public static interface IMyViewHolderClicks {
+            public void onPotato(View caller);
+            public void onTomato(ImageView callerImage);
         }
     }
 }
