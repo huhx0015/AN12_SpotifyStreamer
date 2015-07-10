@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
-import com.huhx0015.spotifystreamer.fragments.SSTracksFragment;
+import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.squareup.picasso.Picasso;
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
  *  -----------------------------------------------------------------------------------------------
  */
 
-public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSongResultViewHolder> {
+public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSResultViewHolder> {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
@@ -47,25 +47,30 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
     // The layout of each item of the RecyclerView is inflated using LayoutInflater, passing the
     // output to the constructor of the custom ViewHolder.
     @Override
-    public SSSongResultViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public SSResultViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
+        // Inflates the layout given the XML layout file for the item view.
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.ss_song_result_card, parent, false);
 
-        /*
-        // TODO: TESTING NEW CODE
-        SSResultsAdapter.SSSongResultViewHolder viewHolder = new RecyclerView.ViewHolder(view, new SSResultsAdapter.SSSongResultViewHolder.IMyViewHolderClicks() {
-            public void onPotato(View caller) { Log.d("TEST", "Poh-tah-tos"); };
-            public void onTomato(ImageView callerImage) { Log.d("TEST", "To-m8-tohs"); }
-        });
-        */
+        // Sets the view holder for the item view. This is needed to handle the individual item
+        // clicks.
+        final SSResultViewHolder viewHolder = new SSResultViewHolder(view, new SSResultViewHolder.OnResultViewHolderClick() {
 
-        return new SSSongResultViewHolder(view);
+            // onItemClick(): Defines an action to take when the item in the list is clicked.
+            @Override
+            public void onItemClick(View caller) {
+
+                // TODO: Insert fragment transition code here.
+            }
+        });
+
+        return viewHolder;
     }
 
     // onBindViewHolder(): Overrides the onBindViewHolder to specify the contents of each item of
     // the RecyclerView. This method is similar to the getView method of a ListView's adapter.
     @Override
-    public void onBindViewHolder(SSSongResultViewHolder holder, int position) {
+    public void onBindViewHolder(SSResultViewHolder holder, int position) {
 
         // Sets the song, album, and artist name into the TextView objects.
         holder.songName.setText(songListResult.get(position).getSong());
@@ -90,26 +95,35 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
         super.onAttachedToRecyclerView(recyclerView);
     }
 
+    /** INTERFACE METHODS ______________________________________________________________________ **/
+
+    // displayTopTracks(): Signals attached activity to display the SSTracksFragment view.
+    private void displayTopTracks(String name, String id) {
+        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(true, name, id); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
     /** SUBCLASSES _____________________________________________________________________________ **/
 
     /**
      * --------------------------------------------------------------------------------------------
-     * [SSSongResultViewHolder] CLASS
+     * [SSResultViewHolder] CLASS
      * DESCRIPTION: This subclass is responsible for referencing the view for an item in the
      * RecyclerView list view object.
      * --------------------------------------------------------------------------------------------
      */
-    public static class SSSongResultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class SSResultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        public IMyViewHolderClicks mListener;
+        public OnResultViewHolderClick resultItemListener; // Interface on-click listener variable.
 
+        // LAYOUT VARIABLES:
         CardView songCardView;
         ImageView albumImage;
         TextView songName;
         TextView artistName;
         TextView albumName;
 
-        SSSongResultViewHolder(View itemView) {
+        SSResultViewHolder(View itemView, OnResultViewHolderClick listener) {
 
             super(itemView);
 
@@ -119,20 +133,32 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSSo
             songName = (TextView) itemView.findViewById(R.id.ss_song_name_text);
             artistName = (TextView) itemView.findViewById(R.id.ss_artist_name_text);
             albumName = (TextView) itemView.findViewById(R.id.ss_album_name_text);
+
+            // Sets the listener for the item view.
+            resultItemListener = listener; // Sets the OnResultViewHolderClick listener.
+            itemView.setOnClickListener(this);
         }
 
+        // onClick(): Defines an action to take when an item is clicked.
         @Override
         public void onClick(View v) {
-            if (v instanceof ImageView) {
-                mListener.onTomato((ImageView)v);
-            } else {
-                mListener.onPotato(v);
-            }
+            resultItemListener.onItemClick(v);
         }
 
-        public static interface IMyViewHolderClicks {
-            public void onPotato(View caller);
-            public void onTomato(ImageView callerImage);
+        /** INTERFACE METHODS __________________________________________________________________ **/
+
+        /**
+         * -----------------------------------------------------------------------------------------
+         * [OnResultViewHolderClick] INTERFACE
+         * DESCRIPTION: This is an interface subclass that is used to provide methods to call when
+         * the RecyclerView items are clicked.
+         * -----------------------------------------------------------------------------------------
+         */
+
+        public interface OnResultViewHolderClick {
+
+            // onItemClick(): The method that is called when an item in the RecyclerView is clicked.
+            void onItemClick(View caller);
         }
     }
 }
