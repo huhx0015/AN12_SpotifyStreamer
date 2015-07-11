@@ -263,7 +263,7 @@ public class SSArtistsFragment extends Fragment {
             }
 
             // Indicates that the retrieval of the list of artists was a failure.
-            else if (artistListResult.size() == 0){
+            else if (artistListResult.size() < 1){
                 artistsRetrieved = false; // Indicates a failure at list of artists retrieval.
             }
 
