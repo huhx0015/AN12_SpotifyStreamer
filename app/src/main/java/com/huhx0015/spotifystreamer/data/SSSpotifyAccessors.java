@@ -55,9 +55,9 @@ public class SSSpotifyAccessors {
                     albumURL = "http://www.yoonhuh.com/Misc/Spotify-Streamer/ss_no_image.png";
                 }
 
-                Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
-                Log.d(LOG_TAG, "Track " + i + " Album Name: " + albumName);
-                Log.d(LOG_TAG, "Track " + i + " Album URL: " + albumURL);
+                //Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
+                //Log.d(LOG_TAG, "Track " + i + " Album Name: " + albumName);
+                //Log.d(LOG_TAG, "Track " + i + " Album URL: " + albumURL);
 
                 // Adds the current track into the ArrayList object.
                 songListResult.add(new SSSpotifyModel(artist, albumName, songName, albumURL));

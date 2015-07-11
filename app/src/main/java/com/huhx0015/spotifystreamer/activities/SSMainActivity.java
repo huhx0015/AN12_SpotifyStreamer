@@ -6,6 +6,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -36,7 +37,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private static WeakReference<SSMainActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
 
     // FRAGMENT VARIABLES
-    private Boolean isSecondaryFragment = false;
+    private Boolean isSecondaryFragment = false; // Used to determine if the secondary fragment is active or not.
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSMainActivity.class.getSimpleName();
@@ -69,7 +70,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
     /** ACTIVITY EXTENSION METHODS _____________________________________________________________ **/
 
-    /* TODO: Action bar buttons disabled for P1.
+    /* TODO: Disabled for P1.
     // onCreateOptionsMenu(): Inflates the menu when the menu key is pressed. This adds items to
     // the action bar if it is present.
     @Override
@@ -79,24 +80,32 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         getMenuInflater().inflate(R.menu.ss_main_activity_menu, menu);
         return true;
     }
+    */
 
-    // onOptionsItemSelected(): Defines the action to take when the menu options are selected. The
-    // GTN_Preferences preference activity is launched when "Settings" is selected.
+    // onOptionsItemSelected(): Defines the action to take when the menu options are selected.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         // Handle action bar item clicks here. The action bar will automatically handle clicks on
         // the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        switch (item.getItemId()) {
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+            // BACK BUTTON:
+            case android.R.id.home:
+
+                displayTracksFragment(false, "");
+
+                return true;
+
+            // OPTIONS:
+            case R.id.action_settings:
+                return true;
+
+            // DEFAULT:
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
-    */
 
     /** PHYSICAL BUTTON METHODS ________________________________________________________________ **/
 
@@ -162,24 +171,25 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // setupActionBar(): Sets up the action bar attributes for the activity.
     private void setupActionBar(String actionType) {
 
-        ActionBar actionBar = getSupportActionBar();
-        //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        //actionBar.setDisplayShowHomeEnabled(false);
-        //actionBar.setDisplayShowTitleEnabled(false);
+        ActionBar actionBar = getSupportActionBar(); // References the action bar.
 
         // TRACKS:
         if (actionType.equals("TRACKS")) {
             actionBar.setTitle("Top 10 Tracks"); // Sets the title of the action bar.
+            actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
         }
 
+        // TODO: Reserved for P2.
         // PLAYER:
         else if (actionType.equals("PLAYER")) {
-            actionBar.setTitle("Spotify Streamer Player"); // Sets the title of the action bar.
+            actionBar.setTitle("Now Playing"); // Sets the title of the action bar.
+            actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
         }
 
         // DEFAULT:
         else {
             actionBar.setTitle(R.string.app_name); // Sets the title of the action bar.
+            actionBar.setDisplayHomeAsUpEnabled(false); // Disables the back button in the action bar.
         }
     }
 
@@ -247,15 +257,11 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // FRAGMENT APPEARANCE ANIMATION:
             if (isAppearing) {
-
-                // TODO: Change to a slide right animation.
                 animationResource = R.anim.slide_left; // Sets the animation XML resource file.
             }
 
             // FRAGMENT REMOVAL ANIMATION:
             else {
-
-                // TODO: Change to a slide left animation.
                 animationResource = R.anim.slide_right; // Sets the animation XML resource file.
             }
         }
@@ -270,7 +276,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // FRAGMENT REMOVAL ANIMATION:
             else {
-                animationResource = R.anim.slide_up; // Sets the animation XML resource file.
+                animationResource = R.anim.slide_left; // Sets the animation XML resource file.
             }
         }
 
@@ -329,9 +335,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Displays the SSTracksFragment in the view layout.
         if (isShow) {
 
-            // Removes the existing SSArtistsFragment from the fragment stack and the view layout.
-            //removeFragment("ARTISTS", false);
-
             // Adds a new SSTracksFragment onto the fragment stack and is made visible in the view
             // layout.
             SSTracksFragment tracksFragment = new SSTracksFragment();
@@ -346,8 +349,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // Removes the SSTracksFragment in the view layout and replaces it with a SSTracksFragment.
         else {
-
-            //removeFragment("TRACKS", true);
 
             // Adds a new SSArtistsFragment onto the fragment stack and is made visible in the view
             // layout.
@@ -371,9 +372,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Displays the SSPlayerFragment in the view layout.
         if (isShow) {
 
-            // Removes the existing SSArtistsFragment from the fragment stack and the view layout.
-            //removeFragment("PLAYER", false);
-
             // Adds a new SSPlayerFragment onto the fragment stack and is made visible in the view
             // layout.
             SSPlayerFragment playerFragment = new SSPlayerFragment();
@@ -387,9 +385,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // Removes the SSTracksFragment in the view layout and replaces it with a SSTracksFragment.
         else {
-
-            // Removes the existing SSArtistsFragment from the fragment stack and the view layout.
-            //removeFragment("ARTISTS", false);
 
             // Adds a new SSTracksFragment onto the fragment stack and is made visible in the view
             // layout.
