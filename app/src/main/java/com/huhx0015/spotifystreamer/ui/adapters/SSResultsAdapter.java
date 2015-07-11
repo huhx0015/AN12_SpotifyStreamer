@@ -27,16 +27,20 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
     // ACTIVITY VARIABLES
-    private Activity currentActivity;
+    private Activity currentActivity; // References the attached activity.
+
+    // LAYOUT VARIABLES:
+    private Boolean isClickable = true; // Used to determine if the items are clickable or not.
 
     // LIST VARIABLES
-    private List<SSSpotifyModel> listResult;
+    private List<SSSpotifyModel> listResult; // References the List of SSSpotifyModels object.
 
     /** INITIALIZATION METHODS _________________________________________________________________ **/
 
     // SSResultsAdapter(): Constructor method for SSResultsAdapter.
-    public SSResultsAdapter(List<SSSpotifyModel> list, Activity act){
+    public SSResultsAdapter(List<SSSpotifyModel> list, Boolean clickable, Activity act){
         this.currentActivity = act;
+        this.isClickable = clickable;
         this.listResult = list;
     }
 
@@ -51,20 +55,25 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
         // Inflates the layout given the XML layout file for the item view.
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.ss_song_result_card, parent, false);
 
-        // Sets the view holder for the item view. This is needed to handle the individual item
-        // clicks.
-        final SSResultViewHolder viewHolder = new SSResultViewHolder(view, new SSResultViewHolder.OnResultViewHolderClick() {
+        if (isClickable) {
 
-            // onItemClick(): Defines an action to take when the item in the list is clicked.
-            @Override
-            public void onItemClick(View caller, String artist) {
+            // Sets the view holder for the item view. This is needed to handle the individual item
+            // clicks.
+            final SSResultViewHolder viewHolder = new SSResultViewHolder(view, new SSResultViewHolder.OnResultViewHolderClick() {
 
-                // Signals the attached activity to switch the fragment to SSTracksFragment.
-                displayTopTracks(artist);
-            }
-        });
+                // onItemClick(): Defines an action to take when the item in the list is clicked.
+                @Override
+                public void onItemClick(View caller, String artist) {
 
-        return viewHolder;
+                    // Signals the attached activity to switch the fragment to SSTracksFragment.
+                    displayTopTracks(artist);
+                }
+            });
+
+            return viewHolder;
+        }
+
+        return new SSResultViewHolder(view, null);
     }
 
     // onBindViewHolder(): Overrides the onBindViewHolder to specify the contents of each item of
@@ -99,7 +108,7 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
 
     // displayTopTracks(): Signals attached activity to display the SSTracksFragment view.
     private void displayTopTracks(String name) {
-        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(true, name, ""); }
+        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(true, name); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
@@ -135,8 +144,10 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
             albumName = (TextView) itemView.findViewById(R.id.ss_album_name_text);
 
             // Sets the listener for the item view.
-            resultItemListener = listener; // Sets the OnResultViewHolderClick listener.
-            itemView.setOnClickListener(this);
+            if (listener != null) {
+                resultItemListener = listener; // Sets the OnResultViewHolderClick listener.
+                itemView.setOnClickListener(this);
+            }
         }
 
         // onClick(): Defines an action to take when an item is clicked.
@@ -159,7 +170,6 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
          * the RecyclerView items are clicked.
          * -----------------------------------------------------------------------------------------
          */
-
         public interface OnResultViewHolderClick {
 
             // onItemClick(): The method that is called when an item in the RecyclerView is clicked.

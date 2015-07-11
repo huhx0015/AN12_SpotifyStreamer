@@ -43,10 +43,6 @@ public class SSTracksFragment extends Fragment {
 
     // FRAGMENT VARIABLES
     private String artistName = ""; // Stores the name of the artist.
-    private String artistId = ""; // Stores the Artist ID value.
-
-    // LAYOUT VARIABLES
-    private Boolean isInputEmpty = true; // Used to determine if the EditText input field is empty or not.
 
     // LIST VARIABLES
     private List<SSSpotifyModel> songListResult = new ArrayList<>(); // Stores the track list result that is to be used for the adapter.
@@ -71,9 +67,8 @@ public class SSTracksFragment extends Fragment {
     public static SSTracksFragment getInstance() { return tracks_fragment; }
     
     // initializeFragment(): Sets the initial values for the fragment.
-    public void initializeFragment(String name, String id) {
+    public void initializeFragment(String name) {
         this.artistName = name;
-        this.artistId = id;
     }
 
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
@@ -124,9 +119,9 @@ public class SSTracksFragment extends Fragment {
 
         // SPOTIFY ASYNCTASK INITIALIZATION: Searches for the artist's top 10 tracks if the ID is
         // valid.
-        if (!artistId.isEmpty()) {
+        if (!artistName.isEmpty()) {
             SSSpotifyTrackSearchTask task = new SSSpotifyTrackSearchTask();
-            task.execute(artistId); // Executes the AsyncTask.
+            task.execute(artistName); // Executes the AsyncTask.
         }
     }
 
@@ -134,7 +129,7 @@ public class SSTracksFragment extends Fragment {
 
     // setListAdapter(): Sets the recycler list adapter based on the songList.
     private void setListAdapter(List<SSSpotifyModel> songList){
-        SSResultsAdapter adapter = new SSResultsAdapter(songList, currentActivity);
+        SSResultsAdapter adapter = new SSResultsAdapter(songList, false, currentActivity);
         resultsList.setAdapter(adapter);
     }
 
@@ -148,7 +143,7 @@ public class SSTracksFragment extends Fragment {
 
     // displayPreviousView(): Signals attached activity to display the SSArtistFragment view.
     private void displayPreviousView(String name, String id) {
-        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(false, name, ""); }
+        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(false, name); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
@@ -190,6 +185,8 @@ public class SSTracksFragment extends Fragment {
         @Override
         protected Void doInBackground(final String... params) {
 
+            Log.d(LOG_TAG, "SSSpotifyTrackSearchTask(): Beginning Spotify top tracks query...");
+
             // Initializes the Spotify API and background service.
             SpotifyApi api = new SpotifyApi();
             SpotifyService service = api.getService();
@@ -226,14 +223,9 @@ public class SSTracksFragment extends Fragment {
                     }
                 }
 
-                // Outputs an error logcat message, indicating that the Tracks object size was
-                // invalid.
+                // Indicates that the artist's top track retrieval was a failure.
                 else {
-
-                    // Indicates that the artist's top track retrieval failed.
-                    isError = true;
                     tracksRetrieved = false;
-                    Log.e(LOG_TAG, "ERROR: SSSpotifyTrackSearchTask(): The size of the Tracks object was invalid.");
                 }
             }
 
@@ -255,18 +247,12 @@ public class SSTracksFragment extends Fragment {
 
             // Sets the list adapter for the RecyclerView object if the artist's top tracks data
             // retrieval was successful.
-            if (tracksRetrieved && !isInputEmpty) {
+            if (tracksRetrieved) {
 
                 // The RecyclerView object is made visible.
                 resultsList.setVisibility(View.VISIBLE);
 
                 setListAdapter(songListResult); // Sets the adapter for the RecyclerView object.
-            }
-
-            // If the user clears the input string before the artist's top track query is completed,
-            // the adapter for the RecyclerView is not set and the RecyclerView is hidden.
-            else if (isInputEmpty) {
-                resultsList.setVisibility(View.GONE);
             }
 
             // Displays the status TextView object.

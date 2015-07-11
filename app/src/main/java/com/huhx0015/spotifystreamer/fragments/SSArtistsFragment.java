@@ -175,15 +175,15 @@ public class SSArtistsFragment extends Fragment {
 
     // displayTopTracks(): Signals attached activity to display the SSTracksFragment view.
     private void displayTopTracks(String name, String id) {
-        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(true, name, id); }
+        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(true, name); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
     /** RECYCLERVIEW METHODS ___________________________________________________________________ **/
 
-    // setListAdapter(): Sets the recycler list adapter based on the songList.
-    private void setListAdapter(List<SSSpotifyModel> songList){
-        SSResultsAdapter adapter = new SSResultsAdapter(songList, currentActivity);
+    // setListAdapter(): Sets the recycler list adapter based on the artistList.
+    private void setListAdapter(List<SSSpotifyModel> artistList){
+        SSResultsAdapter adapter = new SSResultsAdapter(artistList, true, currentActivity);
         resultsList.setAdapter(adapter);
     }
 
@@ -230,6 +230,8 @@ public class SSArtistsFragment extends Fragment {
         // running.
         @Override
         protected Void doInBackground(final String... params) {
+
+            Log.d(LOG_TAG, "SSSpotifyArtistSearchTask(): Beginning Spotify artist query...");
 
             // Initializes the Spotify API and background service.
             SpotifyApi api = new SpotifyApi();
