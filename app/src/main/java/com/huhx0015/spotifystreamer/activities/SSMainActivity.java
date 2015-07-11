@@ -124,9 +124,11 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
-        // Saves the current fragment state into the the instance. Used to determine which fragment
-        // should be shown when the activity is re-created after the rotation change event.
+        // Saves the current fragment state and current artist value into the instance. Used to
+        // determine which fragment should be shown when the activity is re-created after the
+        // rotation change event.
         savedInstanceState.putBoolean(FRAGMENT_STATE, isSecondaryFragment);
+        savedInstanceState.putString(ARTIST_NAME, currentArtist);
 
         // Always calls the superclass, so it can save the view hierarchy state.
         super.onSaveInstanceState(savedInstanceState);
@@ -390,8 +392,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Override
     public void displayTracksFragment(Boolean isShow, String name) {
 
-        currentArtist = name; // Sets the name of the current artist.
-
         // Displays the SSTracksFragment in the view layout.
         if (isShow) {
 
@@ -468,5 +468,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             setupActionBar("TRACKS"); // Sets the name of the action bar.
         }
+    }
+
+    // updateArtistInput(): Invoked by SSArtistsFragment to keep an update of the user's artist
+    // input.
+    @Override
+    public void updateArtistInput(String name) {
+        currentArtist = name;
     }
 }

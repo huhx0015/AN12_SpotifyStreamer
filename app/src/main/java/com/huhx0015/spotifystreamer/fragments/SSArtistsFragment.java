@@ -133,16 +133,14 @@ public class SSArtistsFragment extends Fragment {
 
         // If the artist name value is not empty, this indicates that the SSTracksFragment was
         // previously active. The previous artist search is conducted.
-        if (artistName != null)
+        if (!artistName.isEmpty()) {
 
-            if (!artistName.isEmpty()) {
+            searchInput.setText(artistName); // Sets the artist name in the EditText input field.
 
-                searchInput.setText(artistName); // Sets the artist name in the EditText input field.
-
-                // SPOTIFY ASYNCTASK INITIALIZATION:
-                SSSpotifyArtistSearchTask task = new SSSpotifyArtistSearchTask();
-                task.execute(artistName); // Executes the AsyncTask.
-            }
+            // SPOTIFY ASYNCTASK INITIALIZATION:
+            SSSpotifyArtistSearchTask task = new SSSpotifyArtistSearchTask();
+            task.execute(artistName); // Executes the AsyncTask.
+        }
     }
 
     // setUpTextListener(): Sets up the EditText listener for the fragment.
@@ -161,6 +159,9 @@ public class SSArtistsFragment extends Fragment {
 
                 // Retrieves the current string from the EditText object.
                 String currentSearchInput = s.toString();
+
+                // Updates the artist string value in the attached activity.
+                updateInputName(currentSearchInput);
 
                 // Performs a Spotify service search request as long as the input string is not
                 // empty.
@@ -194,6 +195,14 @@ public class SSArtistsFragment extends Fragment {
     private void setUpRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(currentActivity);
         resultsList.setLayoutManager(layoutManager);
+    }
+
+    /** INTERFACE METHODS __________________________________________________________________ **/
+
+    // updateInputName(): Updates the artist input name value for the attached activity..
+    private void updateInputName(String name) {
+        try { ((OnSpotifySelectedListener) currentActivity).updateArtistInput(name); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
     /** SUBCLASSES _____________________________________________________________________________ **/

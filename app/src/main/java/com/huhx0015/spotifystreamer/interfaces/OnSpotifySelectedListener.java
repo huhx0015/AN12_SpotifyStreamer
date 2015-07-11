@@ -11,6 +11,10 @@ package com.huhx0015.spotifystreamer.interfaces;
 
 public interface OnSpotifySelectedListener {
 
+    // updateArtistInput(): Interface method that is used to keep an update of the user's input in
+    // the SSArtistsFragment view.
+    void updateArtistInput(String name);
+
     // displayTracksFragment(): Interface method which signals the attached activity to switch the
     // fragment view between SSTracksFragment and SSArtistsFragment.
     void displayTracksFragment(Boolean isShow, String name);
