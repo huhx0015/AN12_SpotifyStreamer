@@ -35,6 +35,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
     // ACTIVITY VARIABLES
     private static WeakReference<SSMainActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
+    private static final String FRAGMENT_STATE = "fragmentState"; // Used for restoring the fragment state value for rotation change events.
+    private static final String ARTIST_NAME = "artistName"; // Used for restoring the artist name value for rotation change events.
 
     // FRAGMENT VARIABLES
     private Boolean isSecondaryFragment = false; // Used to determine if the secondary fragment is active or not.
@@ -56,6 +58,15 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // Creates a weak reference of this activity.
         weakRefActivity = new WeakReference<SSMainActivity>(this);
+
+        // Checks to see if there is a saved instance that was saved prior, from events such as
+        // rotation changes.
+        if (savedInstanceState != null) {
+
+            // Restores the saved instance values.
+            isSecondaryFragment = savedInstanceState.getBoolean(FRAGMENT_STATE);
+            currentArtist = savedInstanceState.getString(ARTIST_NAME);
+        }
 
         // LAYOUT SETUP:
         setupLayout();
@@ -95,7 +106,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             case android.R.id.home:
 
                 // Removes the secondary fragment and displays the main SSArtistsFragment view.
-                displayTracksFragment(false, "");
+                displayTracksFragment(false, currentArtist);
                 return true;
 
             // OPTIONS:
@@ -108,6 +119,19 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         }
     }
 
+    // onSaveInstanceState(): Called to retrieve per-instance state from an activity before being
+    // killed so that the state can be restored in onCreate() or onRestoreInstanceState().
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        // Saves the current fragment state into the the instance. Used to determine which fragment
+        // should be shown when the activity is re-created after the rotation change event.
+        savedInstanceState.putBoolean(FRAGMENT_STATE, isSecondaryFragment);
+
+        // Always calls the superclass, so it can save the view hierarchy state.
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
     /** PHYSICAL BUTTON METHODS ________________________________________________________________ **/
 
     // BACK KEY:
@@ -118,7 +142,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // If the SSTracksFragment is currently being displayed, the fragment is removed and
         // switched with the SSArtistsFragment view.
         if (isSecondaryFragment) {
-            displayTracksFragment(false, "");
+            displayTracksFragment(false, currentArtist);
         }
 
         // The activity is finished if the SSArtistsFragment is in focus.
@@ -149,13 +173,15 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // If the SSTracksFragment was in focus before the screen rotation event, the retained
         // SSTracksFragment is re-added instead.
-        if (tracksFragment != null) {
+        if ( (tracksFragment != null) && (isSecondaryFragment)) {
+
             addFragment(tracksFragment, "TRACKS", false); // Adds the fragment without transition.
             setupActionBar("TRACKS"); // Sets up the action bar attributes.
-            isSecondaryFragment = true; // Indicates that the secondary fragment is active.
+
+            Log.d(LOG_TAG, "setupFragment(): Restoring SSTracksFragment from rotation change.");
         }
 
-        // The SSArtistFragment is setup as the primary fragment in focus.
+        // The SSArtistsFragment is setup as the primary fragment in focus.
         else {
 
             // If the fragment is null, it indicates that it is not on the fragment stack. The fragment
@@ -167,7 +193,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // Sets up SSArtistsFragment for the initial view without a transition animation.
             addFragment(artistsFragment, "ARTISTS", false); // Adds the fragment without transition.
             setupActionBar("ARTISTS"); // Sets up the action bar attributes.
-            isSecondaryFragment = false; // Indicates that the secondary fragment is not active.
+
+            Log.d(LOG_TAG, "setupFragment(): Now displaying the SSArtistsFragment.");
         }
     }
 
@@ -178,21 +205,33 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // TRACKS:
         if (actionType.equals("TRACKS")) {
-            actionBar.setTitle("Top 10 Tracks"); // Sets the title of the action bar.
-            actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
+
+            if (actionBar != null) {
+                actionBar.setTitle("Top 10 Tracks"); // Sets the title of the action bar.
+                actionBar.setSubtitle(currentArtist); // Sets the name of the current artist as the subtitle.
+                actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
+            }
         }
 
         // TODO: Reserved for P2.
         // PLAYER:
         else if (actionType.equals("PLAYER")) {
-            actionBar.setTitle("Now Playing"); // Sets the title of the action bar.
-            actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
+
+            if (actionBar != null) {
+                actionBar.setTitle("Now Playing"); // Sets the title of the action bar.
+                actionBar.setSubtitle(null); // Disables the subtitle of the action bar.
+                actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
+            }
         }
 
         // DEFAULT:
         else {
-            actionBar.setTitle(R.string.app_name); // Sets the title of the action bar.
-            actionBar.setDisplayHomeAsUpEnabled(false); // Disables the back button in the action bar.
+
+            if (actionBar != null) {
+                actionBar.setTitle(R.string.app_name); // Sets the title of the action bar.
+                actionBar.setSubtitle(null); // Disables the subtitles of the action bar.
+                actionBar.setDisplayHomeAsUpEnabled(false); // Disables the back button in the action bar.
+            }
         }
     }
 
@@ -240,7 +279,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 // Initializes the manager and transaction objects for the fragments.
                 FragmentManager fragMan = getSupportFragmentManager();
                 Fragment currentFragment = getSupportFragmentManager().findFragmentByTag(fragType);
-                fragMan.beginTransaction().remove(currentFragment).commit(); // Removes fragment.
+                fragMan.beginTransaction().remove(currentFragment).commitAllowingStateLoss();
                 fragMan.popBackStack(); // Pops the fragment from the stack.
                 fragmentContainer.removeAllViews(); // Removes all views in the layout.
                 fragmentContainer.setVisibility(View.INVISIBLE); // Hides the fragment.
@@ -257,17 +296,31 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         int animationResource; // References the animation XML resource file.
 
         // Sets the animation XML resource file, based on the fragment type.
-        // TRACKS & PLAYER:
-        if ( (fragType.equals("TRACKS")) || (fragType.equals("PLAYER")) ) {
+        // TRACKS:
+        if (fragType.equals("TRACKS")) {
 
             // FRAGMENT APPEARANCE ANIMATION:
             if (isAppearing) {
-                animationResource = R.anim.slide_left; // Sets the animation XML resource file.
+                animationResource = R.anim.slide_down; // Sets the animation XML resource file.
             }
 
             // FRAGMENT REMOVAL ANIMATION:
             else {
+                animationResource = R.anim.slide_up; // Sets the animation XML resource file.
+            }
+        }
+
+        // PLAYER:
+        else if (fragType.equals("PLAYER")) {
+
+            // FRAGMENT APPEARANCE ANIMATION:
+            if (isAppearing) {
                 animationResource = R.anim.slide_right; // Sets the animation XML resource file.
+            }
+
+            // FRAGMENT REMOVAL ANIMATION:
+            else {
+                animationResource = R.anim.slide_left; // Sets the animation XML resource file.
             }
         }
 
@@ -276,12 +329,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // FRAGMENT APPEARANCE ANIMATION:
             if (isAppearing) {
-                animationResource = R.anim.slide_right; // Sets the animation XML resource file.
+                animationResource = R.anim.slide_up; // Sets the animation XML resource file.
             }
 
             // FRAGMENT REMOVAL ANIMATION:
             else {
-                animationResource = R.anim.slide_left; // Sets the animation XML resource file.
+                animationResource = R.anim.slide_down; // Sets the animation XML resource file.
             }
         }
 
@@ -337,6 +390,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Override
     public void displayTracksFragment(Boolean isShow, String name) {
 
+        currentArtist = name; // Sets the name of the current artist.
+
         // Displays the SSTracksFragment in the view layout.
         if (isShow) {
 
@@ -352,6 +407,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             setupActionBar("TRACKS"); // Sets the name of the action bar.
             isSecondaryFragment = true; // Indicates that the secondary fragment is active.
+
+            Log.d(LOG_TAG, "displayTracksFragment(): SSTracksFragment now being displayed.");
         }
 
         // Removes the SSTracksFragment in the view layout and replaces it with a SSArtistsFragment.
@@ -369,6 +426,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             setupActionBar("ARTISTS"); // Sets the name of the action bar.
             isSecondaryFragment = false; // Indicates that the secondary fragment is not active.
+
+            Log.d(LOG_TAG, "displayTracksFragment(): SSArtistsFragment now being displayed.");
         }
     }
 

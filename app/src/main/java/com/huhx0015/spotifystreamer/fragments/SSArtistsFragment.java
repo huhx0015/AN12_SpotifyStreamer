@@ -133,12 +133,16 @@ public class SSArtistsFragment extends Fragment {
 
         // If the artist name value is not empty, this indicates that the SSTracksFragment was
         // previously active. The previous artist search is conducted.
-        if (!artistName.isEmpty()) {
+        if (artistName != null)
 
-            // SPOTIFY ASYNCTASK INITIALIZATION:
-            SSSpotifyArtistSearchTask task = new SSSpotifyArtistSearchTask();
-            task.execute(artistName); // Executes the AsyncTask.
-        }
+            if (!artistName.isEmpty()) {
+
+                searchInput.setText(artistName); // Sets the artist name in the EditText input field.
+
+                // SPOTIFY ASYNCTASK INITIALIZATION:
+                SSSpotifyArtistSearchTask task = new SSSpotifyArtistSearchTask();
+                task.execute(artistName); // Executes the AsyncTask.
+            }
     }
 
     // setUpTextListener(): Sets up the EditText listener for the fragment.
@@ -176,14 +180,6 @@ public class SSArtistsFragment extends Fragment {
                 }
             }
         });
-    }
-
-    /** INTERFACE METHODS ______________________________________________________________________ **/
-
-    // displayTopTracks(): Signals attached activity to display the SSTracksFragment view.
-    private void displayTopTracks(String name, String id) {
-        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(true, name); }
-        catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
     /** RECYCLERVIEW METHODS ___________________________________________________________________ **/
