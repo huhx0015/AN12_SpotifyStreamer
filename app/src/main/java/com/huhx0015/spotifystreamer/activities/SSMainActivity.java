@@ -38,6 +38,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
     // FRAGMENT VARIABLES
     private Boolean isSecondaryFragment = false; // Used to determine if the secondary fragment is active or not.
+    private String currentArtist = ""; // Used to determine the name of the artist.
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSMainActivity.class.getSimpleName();
@@ -93,8 +94,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // BACK BUTTON:
             case android.R.id.home:
 
+                // Removes the secondary fragment and displays the main SSArtistsFragment view.
                 displayTracksFragment(false, "");
-
                 return true;
 
             // OPTIONS:
@@ -143,14 +144,15 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Checks to see if there are any retained fragments when the activity is re-created from a
         // screen rotation event.
         FragmentManager fragManager = getSupportFragmentManager();
-        SSArtistsFragment artistsFragment = (SSArtistsFragment) fragManager.findFragmentByTag("ARTISTS");
-        SSTracksFragment tracksFragment = (SSTracksFragment) fragManager.findFragmentByTag("TRACKS");
+        Fragment artistsFragment = fragManager.findFragmentByTag("ARTISTS");
+        Fragment tracksFragment = fragManager.findFragmentByTag("TRACKS");
 
         // If the SSTracksFragment was in focus before the screen rotation event, the retained
         // SSTracksFragment is re-added instead.
         if (tracksFragment != null) {
-            addFragment(tracksFragment, "TRACKS", false);
+            addFragment(tracksFragment, "TRACKS", false); // Adds the fragment without transition.
             setupActionBar("TRACKS"); // Sets up the action bar attributes.
+            isSecondaryFragment = true; // Indicates that the secondary fragment is active.
         }
 
         // The SSArtistFragment is setup as the primary fragment in focus.
@@ -163,8 +165,9 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             }
 
             // Sets up SSArtistsFragment for the initial view without a transition animation.
-            addFragment(artistsFragment, "ARTISTS", false);
+            addFragment(artistsFragment, "ARTISTS", false); // Adds the fragment without transition.
             setupActionBar("ARTISTS"); // Sets up the action bar attributes.
+            isSecondaryFragment = false; // Indicates that the secondary fragment is not active.
         }
     }
 
@@ -203,7 +206,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // Initializes the manager and transaction objects for the fragments.
             android.support.v4.app.FragmentManager fragMan = weakRefActivity.get().getSupportFragmentManager();
             android.support.v4.app.FragmentTransaction fragTrans = fragMan.beginTransaction();
-            fragTrans.replace(R.id.ss_main_activity_fragment_container, fragment, "ARTISTS");
+            fragTrans.replace(R.id.ss_main_activity_fragment_container, fragment, fragType);
 
             // Makes the changes to the fragment manager and transaction objects.
             fragTrans.addToBackStack(null);
@@ -236,6 +239,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
                 // Initializes the manager and transaction objects for the fragments.
                 FragmentManager fragMan = getSupportFragmentManager();
+                Fragment currentFragment = getSupportFragmentManager().findFragmentByTag(fragType);
+                fragMan.beginTransaction().remove(currentFragment).commit(); // Removes fragment.
                 fragMan.popBackStack(); // Pops the fragment from the stack.
                 fragmentContainer.removeAllViews(); // Removes all views in the layout.
                 fragmentContainer.setVisibility(View.INVISIBLE); // Hides the fragment.
@@ -335,6 +340,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Displays the SSTracksFragment in the view layout.
         if (isShow) {
 
+            removeFragment("ARTISTS", false); // Removes the SSArtistsFragment from the stack.
+
             // Adds a new SSTracksFragment onto the fragment stack and is made visible in the view
             // layout.
             SSTracksFragment tracksFragment = new SSTracksFragment();
@@ -347,8 +354,10 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             isSecondaryFragment = true; // Indicates that the secondary fragment is active.
         }
 
-        // Removes the SSTracksFragment in the view layout and replaces it with a SSTracksFragment.
+        // Removes the SSTracksFragment in the view layout and replaces it with a SSArtistsFragment.
         else {
+
+            removeFragment("TRACKS", false); // Removes the SSTracksFragment from the stack.
 
             // Adds a new SSArtistsFragment onto the fragment stack and is made visible in the view
             // layout.
@@ -372,6 +381,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Displays the SSPlayerFragment in the view layout.
         if (isShow) {
 
+            removeFragment("TRACKS", false); // Removes the SSTracksFragment from the stack.
+
             // Adds a new SSPlayerFragment onto the fragment stack and is made visible in the view
             // layout.
             SSPlayerFragment playerFragment = new SSPlayerFragment();
@@ -383,8 +394,10 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             setupActionBar("PLAYER"); // Sets the name of the action bar.
         }
 
-        // Removes the SSTracksFragment in the view layout and replaces it with a SSTracksFragment.
+        // Removes the SSPlayerFragment in the view layout and replaces it with a SSTracksFragment.
         else {
+
+            removeFragment("PLAYER", false); // Removes the SSPlayerFragment from the stack.
 
             // Adds a new SSTracksFragment onto the fragment stack and is made visible in the view
             // layout.

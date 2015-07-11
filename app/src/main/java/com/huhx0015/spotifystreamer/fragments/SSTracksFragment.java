@@ -15,7 +15,6 @@ import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyAccessors;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
-import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.ui.adapters.SSResultsAdapter;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +84,6 @@ public class SSTracksFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setRetainInstance(true); // Retains this fragment during runtime changes.
     }
 
@@ -108,6 +106,14 @@ public class SSTracksFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this); // Sets all injected views to null.
+    }
+
+    // onDetach(): This function is called immediately prior to the fragment no longer being
+    // associated with its activity.
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(LOG_TAG, "onDetach(): Fragment removed.");
     }
 
     /** LAYOUT METHODS _________________________________________________________________________ **/
@@ -137,14 +143,6 @@ public class SSTracksFragment extends Fragment {
     private void setUpRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(currentActivity);
         resultsList.setLayoutManager(layoutManager);
-    }
-
-    /** INTERFACE METHODS ______________________________________________________________________ **/
-
-    // displayPreviousView(): Signals attached activity to display the SSArtistFragment view.
-    private void displayPreviousView(String name, String id) {
-        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(false, name); }
-        catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
     /** SUBCLASSES _____________________________________________________________________________ **/

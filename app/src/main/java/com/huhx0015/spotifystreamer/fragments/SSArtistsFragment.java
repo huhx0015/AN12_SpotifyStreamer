@@ -91,7 +91,6 @@ public class SSArtistsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setRetainInstance(true); // Retains this fragment during runtime changes.
     }
 
@@ -114,6 +113,14 @@ public class SSArtistsFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this); // Sets all injected views to null.
+    }
+
+    // onDetach(): This function is called immediately prior to the fragment no longer being
+    // associated with its activity.
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(LOG_TAG, "onDetach(): Fragment removed.");
     }
 
     /** LAYOUT METHODS _________________________________________________________________________ **/
