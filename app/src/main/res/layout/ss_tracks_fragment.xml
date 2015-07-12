@@ -21,7 +21,9 @@
             android:textSize="22sp"
             android:text="@string/no_results_artists"
             android:textStyle="bold"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:padding="4dp"
+            android:gravity="center" />
 
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"

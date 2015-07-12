@@ -19,6 +19,7 @@ import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyAccessors;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
+import com.huhx0015.spotifystreamer.network.SSConnectivity;
 import com.huhx0015.spotifystreamer.ui.adapters.SSResultsAdapter;
 import java.util.ArrayList;
 import java.util.List;
@@ -220,6 +221,7 @@ public class SSArtistsFragment extends Fragment {
         /** SUBCLASS VARIABLES _________________________________________________________________ **/
 
         // TRACK VARIABLES
+        Boolean isConnected = false; // Used to determine if the device has Internet connectivity.
         Boolean isError = false; // Used to determine if an error has occurred or not.
         Boolean artistsRetrieved = false; // Used to determine if artist retrieval was successful or not.
 
@@ -243,33 +245,40 @@ public class SSArtistsFragment extends Fragment {
         @Override
         protected Void doInBackground(final String... params) {
 
-            Log.d(LOG_TAG, "SSSpotifyArtistSearchTask(): Beginning Spotify artist query...");
+            // Checks the device's current network and Internet connectivity state.
+            isConnected = SSConnectivity.checkConnectivity(currentActivity);
 
-            // Initializes the Spotify API and background service.
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService service = api.getService();
+            // Connects to the Spotify API service to perform the artist search.
+            if (isConnected) {
 
-            artistListResult = new ArrayList<>(); // Creates a new ArrayList of artists.
+                Log.d(LOG_TAG, "SSSpotifyArtistSearchTask(): Beginning Spotify artist query...");
 
-            // Retrieves the list of artists.
-            artistListResult = SSSpotifyAccessors.retrieveArtists(params[0], artistListResult, service);
+                // Initializes the Spotify API and background service.
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService service = api.getService();
 
-            // If the artistListResult object is null, it indicates an error has occurred and
-            // that the retrieval of the list of artists was a failure.
-            if (artistListResult == null) {
-                isError = true;
-                artistsRetrieved = false;
-                Log.e(LOG_TAG, "ERROR: SSSpotifyArtistSearchTask(): The artist list result was invalid.");
-            }
+                artistListResult = new ArrayList<>(); // Creates a new ArrayList of artists.
 
-            // Indicates that the retrieval of the list of artists was a failure.
-            else if (artistListResult.size() < 1){
-                artistsRetrieved = false; // Indicates a failure at list of artists retrieval.
-            }
+                // Retrieves the list of artists.
+                artistListResult = SSSpotifyAccessors.retrieveArtists(params[0], artistListResult, service);
 
-            // Otherwise, the retrieval of the list of artists was successful.
-            else {
-                artistsRetrieved = true; // Indicates a success at list of artists retrieval.
+                // If the artistListResult object is null, it indicates an error has occurred and
+                // that the retrieval of the list of artists was a failure.
+                if (artistListResult == null) {
+                    isError = true;
+                    artistsRetrieved = false;
+                    Log.e(LOG_TAG, "ERROR: SSSpotifyArtistSearchTask(): The artist list result was invalid.");
+                }
+
+                // Indicates that the retrieval of the list of artists was a failure.
+                else if (artistListResult.size() < 1) {
+                    artistsRetrieved = false; // Indicates a failure at list of artists retrieval.
+                }
+
+                // Otherwise, the retrieval of the list of artists was successful.
+                else {
+                    artistsRetrieved = true; // Indicates a success at list of artists retrieval.
+                }
             }
 
             return null;
@@ -302,8 +311,13 @@ public class SSArtistsFragment extends Fragment {
             // Displays the status TextView object.
             else {
 
+                // Sets an error message indicating that there is no Internet connectivity.
+                if (!isConnected) {
+                    statusText.setText(R.string.no_internet); // Sets the text for the TextView object.
+                }
+
                 // Sets an error message for the status TextView object.
-                if (isError) {
+                else if (isError) {
                     statusText.setText(R.string.error_message); // Sets the text for the TextView object.
                 }
 

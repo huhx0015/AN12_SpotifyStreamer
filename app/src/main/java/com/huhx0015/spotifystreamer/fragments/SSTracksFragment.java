@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyAccessors;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
+import com.huhx0015.spotifystreamer.network.SSConnectivity;
 import com.huhx0015.spotifystreamer.ui.adapters.SSResultsAdapter;
 import java.util.ArrayList;
 import java.util.List;
@@ -160,6 +161,7 @@ public class SSTracksFragment extends Fragment {
         /** SUBCLASS VARIABLES _________________________________________________________________ **/
 
         // TRACK VARIABLES
+        Boolean isConnected = false; // Used to determine if the device has Internet connectivity.
         Boolean isError = false; // Used to determine if an error has occurred or not.
         Boolean tracksRetrieved = false; // Used to determine if track retrieval was successful or not.
 
@@ -183,53 +185,60 @@ public class SSTracksFragment extends Fragment {
         @Override
         protected Void doInBackground(final String... params) {
 
-            Log.d(LOG_TAG, "SSSpotifyTrackSearchTask(): Beginning Spotify top tracks query...");
+            // Checks the device's current network and Internet connectivity state.
+            isConnected = SSConnectivity.checkConnectivity(currentActivity);
 
-            // Initializes the Spotify API and background service.
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService service = api.getService();
+            // Connects to the Spotify API service to perform the artist search.
+            if (isConnected) {
 
-            // Retrieves the artist's Spotify ID based on the search input.
-            String artistId = SSSpotifyAccessors.queryArtist(params[0], service);
+                Log.d(LOG_TAG, "SSSpotifyTrackSearchTask(): Beginning Spotify top tracks query...");
 
-            // Retrieves the artist's top tracks as long as the artist ID is valid.
-            if (artistId != null) {
+                // Initializes the Spotify API and background service.
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService service = api.getService();
 
-                // Retrieves the artist's top tracks data from the Spotify background service.
-                Tracks topTracks = SSSpotifyAccessors.retrieveArtistTopTracks(artistId, service);
+                // Retrieves the artist's Spotify ID based on the search input.
+                String artistId = SSSpotifyAccessors.queryArtist(params[0], service);
 
-                // If the track size is not empty, the top tracks are added into the songListResult
-                // List object.
-                if (topTracks.tracks.size() > 0) {
+                // Retrieves the artist's top tracks as long as the artist ID is valid.
+                if (artistId != null) {
 
-                    songListResult = new ArrayList<>(); // Creates a new ArrayList of song tracks.
+                    // Retrieves the artist's top tracks data from the Spotify background service.
+                    Tracks topTracks = SSSpotifyAccessors.retrieveArtistTopTracks(artistId, service);
 
-                    // Adds the artist's top tracks into the List object.
-                    songListResult = SSSpotifyAccessors.addArtistTopTracks(params[0], topTracks, songListResult);
+                    // If the track size is not empty, the top tracks are added into the songListResult
+                    // List object.
+                    if (topTracks.tracks.size() > 0) {
 
-                    // If the songListResult object is null, it indicates an error has occurred and
-                    // that the artist's top track retrieval was a failure.
-                    if (songListResult == null) {
-                        isError = true;
-                        tracksRetrieved = false;
-                        return null;
+                        songListResult = new ArrayList<>(); // Creates a new ArrayList of song tracks.
+
+                        // Adds the artist's top tracks into the List object.
+                        songListResult = SSSpotifyAccessors.addArtistTopTracks(params[0], topTracks, songListResult);
+
+                        // If the songListResult object is null, it indicates an error has occurred and
+                        // that the artist's top track retrieval was a failure.
+                        if (songListResult == null) {
+                            isError = true;
+                            tracksRetrieved = false;
+                            return null;
+                        }
+
+                        // Indicates that the artist's top track retrieval was successful.
+                        else {
+                            tracksRetrieved = true;
+                        }
                     }
 
-                    // Indicates that the artist's top track retrieval was successful.
+                    // Indicates that the artist's top track retrieval was a failure.
                     else {
-                        tracksRetrieved = true;
+                        tracksRetrieved = false;
                     }
                 }
 
-                // Indicates that the artist's top track retrieval was a failure.
+                // Indicates that the artist's top track retrieval failed.
                 else {
                     tracksRetrieved = false;
                 }
-            }
-
-            // Indicates that the artist's top track retrieval failed.
-            else {
-                tracksRetrieved = false;
             }
 
             return null;
@@ -256,8 +265,13 @@ public class SSTracksFragment extends Fragment {
             // Displays the status TextView object.
             else {
 
+                // Sets an error message indicating that there is no Internet connectivity.
+                if (!isConnected) {
+                    statusText.setText(R.string.no_internet); // Sets the text for the TextView object.
+                }
+
                 // Sets an error message for the status TextView object.
-                if (isError) {
+                else if (isError) {
                     statusText.setText(R.string.error_message); // Sets the text for the TextView object.
                 }
 

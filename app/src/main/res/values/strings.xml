@@ -5,4 +5,5 @@
     <string name="no_results_artists">No artists found by that name.</string>
     <string name="no_results_tracks">No tracks were found.</string>
     <string name="error_message">An error has occurred.</string>
+    <string name="no_internet">No data connection detected. Please check your network settings and try again.</string>
 </resources>
