@@ -130,7 +130,6 @@ public class SSArtistsFragment extends Fragment {
     private void setUpLayout() {
 
         setUpTextListener(); // Sets up the EditText listener for the fragment.
-        setUpRecyclerView(); // Sets up the RecyclerView object.
 
         // If the artist name value is not empty, this indicates that the SSTracksFragment was
         // previously active. The previous artist search is conducted.
@@ -299,6 +298,7 @@ public class SSArtistsFragment extends Fragment {
                 // The RecyclerView object is made visible.
                 resultsList.setVisibility(View.VISIBLE);
 
+                setUpRecyclerView(); // Sets up the RecyclerView object.
                 setListAdapter(artistListResult); // Sets the adapter for the RecyclerView object.
             }
 

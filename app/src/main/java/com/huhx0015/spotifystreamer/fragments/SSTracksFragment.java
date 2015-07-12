@@ -122,8 +122,6 @@ public class SSTracksFragment extends Fragment {
     // setUpLayout(): Sets up the layout for the fragment.
     private void setUpLayout() {
 
-        setUpRecyclerView(); // Sets up the RecyclerView object.
-
         // SPOTIFY ASYNCTASK INITIALIZATION: Searches for the artist's top 10 tracks if the ID is
         // valid.
         if (!artistName.isEmpty()) {
@@ -259,6 +257,7 @@ public class SSTracksFragment extends Fragment {
                 // The RecyclerView object is made visible.
                 resultsList.setVisibility(View.VISIBLE);
 
+                setUpRecyclerView(); // Sets up the RecyclerView object.
                 setListAdapter(songListResult); // Sets the adapter for the RecyclerView object.
             }
 
