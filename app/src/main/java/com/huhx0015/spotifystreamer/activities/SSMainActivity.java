@@ -181,10 +181,17 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // SSTracksFragment is re-added instead.
         if ( (tracksFragment != null) && (isSecondaryFragment)) {
 
-            addFragment(tracksFragment, "TRACKS", false); // Adds the fragment without transition.
-            setupActionBar("TRACKS", currentArtist); // Sets up the action bar attributes.
+            // Checks to see if the tracksFragment already exists in the layout. If not, the
+            // fragment is added.
+            if (!tracksFragment.isInLayout()) {
+                addFragment(tracksFragment, "TRACKS", false); // Adds the fragment without transition.
+                setupActionBar("TRACKS", currentArtist); // Sets up the action bar attributes.
+                Log.d(LOG_TAG, "setupFragment(): Adding SSTracksFragment to the layout.");
+            }
 
-            Log.d(LOG_TAG, "setupFragment(): Restoring SSTracksFragment from rotation change.");
+            else {
+                Log.d(LOG_TAG, "setupFragment(): Restoring he SSTracksFragment from a rotation change event.");
+            }
         }
 
         // The SSArtistsFragment is setup as the primary fragment in focus.
@@ -196,11 +203,17 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 artistsFragment = new SSArtistsFragment(); // Initializes the SSArtistsFragment class.
             }
 
-            // Sets up SSArtistsFragment for the initial view without a transition animation.
-            addFragment(artistsFragment, "ARTISTS", false); // Adds the fragment without transition.
-            setupActionBar("ARTISTS", null); // Sets up the action bar attributes.
+            // Checks to see if the artistFragment already exists in the layout. If not, the
+            // fragment is added.
+            if (!artistsFragment.isInLayout()) {
+                addFragment(artistsFragment, "ARTISTS", false); // Adds the fragment without transition.
+                setupActionBar("ARTISTS", null); // Sets up the action bar attributes.
+                Log.d(LOG_TAG, "setupFragment(): Adding the SSArtistsFragment to the layout.");
+            }
 
-            Log.d(LOG_TAG, "setupFragment(): Now displaying the SSArtistsFragment.");
+            else {
+                Log.d(LOG_TAG, "setupFragment(): Restoring the SSArtistsFragment from a rotation change event.");
+            }
         }
     }
 
@@ -254,7 +267,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             fragTrans.replace(R.id.ss_main_activity_fragment_container, fragment, fragType);
 
             // Makes the changes to the fragment manager and transaction objects.
-            fragTrans.addToBackStack(null);
             fragTrans.commitAllowingStateLoss();
 
             // Sets up the transition animation.

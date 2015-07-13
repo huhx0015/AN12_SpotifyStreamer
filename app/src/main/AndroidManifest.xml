@@ -13,7 +13,7 @@
         android:theme="@style/AppTheme"
         android:hardwareAccelerated="true"
         android:largeHeap="true"
-        android:launchMode="singleTask"
+        android:launchMode="singleTop"
         android:alwaysRetainTaskState="true">
 
         <activity

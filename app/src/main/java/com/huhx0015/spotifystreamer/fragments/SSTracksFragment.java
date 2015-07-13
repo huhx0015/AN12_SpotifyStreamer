@@ -45,10 +45,14 @@ public class SSTracksFragment extends Fragment {
     private String artistName = ""; // Stores the name of the artist.
 
     // LIST VARIABLES
-    private List<SSSpotifyModel> songListResult = new ArrayList<>(); // Stores the track list result that is to be used for the adapter.
+    private ArrayList<SSSpotifyModel> songListResult = new ArrayList<>(); // Stores the track list result that is to be used for the adapter.
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSTracksFragment.class.getSimpleName();
+
+    // PARCELABLE VARIABLES
+    private Boolean isExistingData = false; // Used to indicate that the songListResult has been restored from a previous instance.
+    private static final String SONG_LIST = "songListResult"; // Parcelable key value for the song list.
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_tracks_progress_indicator) ProgressBar progressIndicator;
@@ -96,6 +100,14 @@ public class SSTracksFragment extends Fragment {
         View ss_fragment_view = (ViewGroup) inflater.inflate(R.layout.ss_tracks_fragment, container, false);
         ButterKnife.bind(this, ss_fragment_view); // ButterKnife view injection initialization.
 
+        // If there is existing Parcelable data to be restored from a previous instance, the data
+        // is restored here.
+        if (savedInstanceState != null) {
+            songListResult = savedInstanceState.getParcelableArrayList(SONG_LIST);
+            isExistingData = true; // Indicates that the artist list result has been restored.
+            Log.d(LOG_TAG, "onCreate(): The Parcelable data has been restored.");
+        }
+
         setUpLayout(); // Sets up the layout for the fragment.
 
         return ss_fragment_view;
@@ -117,16 +129,39 @@ public class SSTracksFragment extends Fragment {
         Log.d(LOG_TAG, "onDetach(): Fragment removed.");
     }
 
+    /** FRAGMENT EXTENSION METHOD ______________________________________________________________ **/
+
+    // onSaveInstanceState(): Called to retrieve per-instance state from an fragment before being
+    // killed so that the state can be restored in onCreate() or onRestoreInstanceState().
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        outState.putParcelableArrayList(SONG_LIST, songListResult);
+        Log.d(LOG_TAG, "onSaveInstanceState(): The Parcelable data has been saved.");
+
+        super.onSaveInstanceState(outState);
+    }
+
     /** LAYOUT METHODS _________________________________________________________________________ **/
 
     // setUpLayout(): Sets up the layout for the fragment.
     private void setUpLayout() {
 
-        // SPOTIFY ASYNCTASK INITIALIZATION: Searches for the artist's top 10 tracks if the ID is
-        // valid.
-        if (!artistName.isEmpty()) {
-            SSSpotifyTrackSearchTask task = new SSSpotifyTrackSearchTask();
-            task.execute(artistName); // Executes the AsyncTask.
+        // If the Parcelable data has been restored successfully, the RecyclerView adapter is
+        // restored.
+        if (isExistingData) {
+            setUpRecyclerView(); // Sets up the RecyclerView object.
+            setListAdapter(songListResult); // Sets the adapter for the RecyclerView object.
+        }
+
+        else {
+
+            // SPOTIFY ASYNCTASK INITIALIZATION: Searches for the artist's top 10 tracks if the ID is
+            // valid.
+            if (!artistName.isEmpty()) {
+                SSSpotifyTrackSearchTask task = new SSSpotifyTrackSearchTask();
+                task.execute(artistName); // Executes the AsyncTask.
+            }
         }
     }
 

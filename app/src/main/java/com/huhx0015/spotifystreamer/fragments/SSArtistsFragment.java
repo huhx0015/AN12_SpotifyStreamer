@@ -51,10 +51,14 @@ public class SSArtistsFragment extends Fragment {
     private Boolean isInputEmpty = true; // Used to determine if the EditText input field is empty or not.
 
     // LIST VARIABLES
-    private List<SSSpotifyModel> artistListResult = new ArrayList<>(); // Stores the artist list result that is to be used for the adapter.
+    private ArrayList<SSSpotifyModel> artistListResult = new ArrayList<>(); // Stores the artist list result that is to be used for the adapter.
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSArtistsFragment.class.getSimpleName();
+
+    // PARCELABLE VARIABLES
+    private Boolean isExistingData = false; // Used to indicate that the artistListResult has been restored from a previous instance.
+    private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_artist_search_search_input) EditText searchInput;
@@ -103,9 +107,24 @@ public class SSArtistsFragment extends Fragment {
         View ss_fragment_view = (ViewGroup) inflater.inflate(R.layout.ss_artist_search_fragment, container, false);
         ButterKnife.bind(this, ss_fragment_view); // ButterKnife view injection initialization.
 
+        // If there is existing Parcelable data to be restored from a previous instance, the data
+        // is restored here.
+        if (savedInstanceState != null) {
+            artistListResult = savedInstanceState.getParcelableArrayList(ARTIST_LIST);
+            isExistingData = true; // Indicates that the artist list result has been restored.
+            Log.d(LOG_TAG, "onCreate(): The Parcelable data has been restored.");
+        }
+
         setUpLayout(); // Sets up the layout for the fragment.
 
         return ss_fragment_view;
+    }
+
+    // onResume(): This function is run when the fragment is resumed from an onPause state.
+    @Override
+    public void onResume() {
+        super.onResume();
+        setUpTextListener(); // Sets up the EditText listener for the fragment.
     }
 
     // onDestroyView(): This function runs when the screen is no longer visible and the view is
@@ -124,22 +143,45 @@ public class SSArtistsFragment extends Fragment {
         Log.d(LOG_TAG, "onDetach(): Fragment removed.");
     }
 
+    /** FRAGMENT EXTENSION METHOD ______________________________________________________________ **/
+
+    // onSaveInstanceState(): Called to retrieve per-instance state from an fragment before being
+    // killed so that the state can be restored in onCreate() or onRestoreInstanceState().
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        outState.putParcelableArrayList(ARTIST_LIST, artistListResult);
+        Log.d(LOG_TAG, "onSaveInstanceState(): The Parcelable data has been saved.");
+
+        super.onSaveInstanceState(outState);
+    }
+
     /** LAYOUT METHODS _________________________________________________________________________ **/
 
     // setUpLayout(): Sets up the layout for the fragment.
     private void setUpLayout() {
 
-        setUpTextListener(); // Sets up the EditText listener for the fragment.
+        // If the Parcelable data has been restored successfully, the RecyclerView adapter is
+        // restored.
+        if (isExistingData) {
+            setUpRecyclerView(); // Sets up the RecyclerView object.
+            setListAdapter(artistListResult); // Sets the adapter for the RecyclerView object.
+        }
 
-        // If the artist name value is not empty, this indicates that the SSTracksFragment was
-        // previously active. The previous artist search is conducted.
-        if (!artistName.isEmpty()) {
+        else {
 
-            searchInput.setText(artistName); // Sets the artist name in the EditText input field.
+            /* TODO: This code needs to be revised...
+            // If the artist name value is not empty, this indicates that the SSTracksFragment was
+            // previously active. The previous artist search is conducted.
+            if (!artistName.isEmpty()) {
 
-            // SPOTIFY ASYNCTASK INITIALIZATION:
-            SSSpotifyArtistSearchTask task = new SSSpotifyArtistSearchTask();
-            task.execute(artistName); // Executes the AsyncTask.
+                searchInput.setText(artistName); // Sets the artist name in the EditText input field.
+
+                // SPOTIFY ASYNCTASK INITIALIZATION:
+                SSSpotifyArtistSearchTask task = new SSSpotifyArtistSearchTask();
+                task.execute(artistName); // Executes the AsyncTask.
+            }
+            */
         }
     }
 
@@ -149,13 +191,7 @@ public class SSArtistsFragment extends Fragment {
         searchInput.addTextChangedListener(new TextWatcher() {
 
             // afterTextChanged(): This method is run after the EditText input has changed.
-            public void afterTextChanged(Editable s) {}
-
-            // beforeTextChanged(): This method is runs just before the EditText input changes.
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            // onTextChanged(): This method is run when the EditText input changes.
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void afterTextChanged(Editable s) {
 
                 // Retrieves the current string from the EditText object.
                 String currentSearchInput = s.toString();
@@ -180,6 +216,12 @@ public class SSArtistsFragment extends Fragment {
                     resultsList.setVisibility(View.GONE); // Hides the RecyclerView object.
                 }
             }
+
+            // beforeTextChanged(): This method is runs just before the EditText input changes.
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            // onTextChanged(): This method is run when the EditText input changes.
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
     }
 

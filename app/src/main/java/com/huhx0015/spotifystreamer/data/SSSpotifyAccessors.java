@@ -1,6 +1,7 @@
 package com.huhx0015.spotifystreamer.data;
 
 import android.util.Log;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +29,9 @@ public class SSSpotifyAccessors {
 
     // addArtistTopTracks(): Adds the artist's top track data from the Track data object into the
     // List object.
-    public static List<SSSpotifyModel> addArtistTopTracks(String artist,
+    public static ArrayList<SSSpotifyModel> addArtistTopTracks(String artist,
                                                           Tracks topTracks,
-                                                          List<SSSpotifyModel> songListResult) {
+                                                          ArrayList<SSSpotifyModel> songListResult) {
 
         // Retrieves the list of Tracks found and sets it in the list.
         for (int i = 0; i < topTracks.tracks.size(); i++) {
@@ -102,8 +103,9 @@ public class SSSpotifyAccessors {
     }
 
     // retrieveArtists(): Retrieves the artist data from the Spotify background service.
-    public static List<SSSpotifyModel> retrieveArtists(String artist, List<SSSpotifyModel> artistListResult,
-                                          SpotifyService service) {
+    public static ArrayList<SSSpotifyModel> retrieveArtists(String artist,
+                                                            ArrayList<SSSpotifyModel> artistListResult,
+                                                            SpotifyService service) {
 
         // Accesses the Spotify service to search for a specific artist.
         ArtistsPager results = service.searchArtists(artist);

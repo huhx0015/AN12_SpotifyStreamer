@@ -1,5 +1,8 @@
 package com.huhx0015.spotifystreamer.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /** -----------------------------------------------------------------------------------------------
  *  [SSSpotifyModel] CLASS
  *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
@@ -7,7 +10,7 @@ package com.huhx0015.spotifystreamer.data;
  *  -----------------------------------------------------------------------------------------------
  */
 
-public class SSSpotifyModel {
+public class SSSpotifyModel implements Parcelable {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
@@ -24,6 +27,50 @@ public class SSSpotifyModel {
         this.album = album;
         this.song = song;
         this.album_image = image;
+    }
+
+    /** PARCELABLE METHODS _____________________________________________________________________ **/
+
+    // SSSpotifyModel(): A parcelable method for reading in data for the class.
+    protected SSSpotifyModel(Parcel in) {
+        album_image = in.readString();
+        artist = in.readString();
+        album = in.readString();
+        song = in.readString();
+    }
+
+    // Creator(): An interface that must be implemented and provided as a public CREATOR field that
+    // generates instances of your Parcelable class from a Parcel.
+    public static final Creator<SSSpotifyModel> CREATOR = new Creator<SSSpotifyModel>() {
+
+        // createFromParcel(): Creates a new instance of the Parcelable class, instantiating it from
+        // the given Parcel whose data had previously been written by Parcelable.writeToParcel().
+        @Override
+        public SSSpotifyModel createFromParcel(Parcel in) {
+            return new SSSpotifyModel(in);
+        }
+
+        // newArray(): Creates a new array of the Parcelable class.
+        @Override
+        public SSSpotifyModel[] newArray(int size) {
+            return new SSSpotifyModel[size];
+        }
+    };
+
+    // describeContents(): Describe the kinds of special objects contained in this Parcelable's
+    // marshalled representation.
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    // writeToParcel(): Flattens this object in to a Parcel.
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(album_image);
+        dest.writeString(artist);
+        dest.writeString(album);
+        dest.writeString(song);
     }
 
     /** GET / SET METHODS ______________________________________________________________________ **/
