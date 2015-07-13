@@ -41,6 +41,10 @@ public class SSTracksFragment extends Fragment {
     // ACTIVITY VARIABLES
     private Activity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
+    // DATA VARIABLES
+    private Boolean isExistingData = false; // Used to indicate that the songListResult has been restored from a previous instance.
+    private static final String SONG_LIST = "songListResult"; // Parcelable key value for the song list.
+
     // FRAGMENT VARIABLES
     private String artistName = ""; // Stores the name of the artist.
 
@@ -49,10 +53,6 @@ public class SSTracksFragment extends Fragment {
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSTracksFragment.class.getSimpleName();
-
-    // PARCELABLE VARIABLES
-    private Boolean isExistingData = false; // Used to indicate that the songListResult has been restored from a previous instance.
-    private static final String SONG_LIST = "songListResult"; // Parcelable key value for the song list.
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_tracks_progress_indicator) ProgressBar progressIndicator;
@@ -134,12 +134,12 @@ public class SSTracksFragment extends Fragment {
     // onSaveInstanceState(): Called to retrieve per-instance state from an fragment before being
     // killed so that the state can be restored in onCreate() or onRestoreInstanceState().
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle savedInstanceState) {
 
-        outState.putParcelableArrayList(SONG_LIST, songListResult);
+        savedInstanceState.putParcelableArrayList(SONG_LIST, songListResult);
         Log.d(LOG_TAG, "onSaveInstanceState(): The Parcelable data has been saved.");
 
-        super.onSaveInstanceState(outState);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     /** LAYOUT METHODS _________________________________________________________________________ **/

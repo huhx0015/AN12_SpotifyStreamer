@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
+import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.data.SSSpotifyAccessors;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
@@ -42,9 +43,14 @@ public class SSArtistsFragment extends Fragment {
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
     // ACTIVITY VARIABLES
-    private Activity currentActivity; // Used to determine the activity class this fragment is currently attached to.
+    private SSMainActivity currentActivity; // Used to determine the activity class this fragment is currently attached to.
+
+    // DATA VARIABLES
+    private Boolean isExistingData = false; // Used to indicate that the artistListResult has been restored from a previous instance.
+    private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
 
     // FRAGMENT VARIABLES
+    private Boolean isRestore = false; // Used to determine if the previous artist result should be restored after focus is returned to this fragment.
     private String artistName = ""; // Stores the name of the artist.
 
     // LAYOUT VARIABLES
@@ -55,10 +61,6 @@ public class SSArtistsFragment extends Fragment {
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSArtistsFragment.class.getSimpleName();
-
-    // PARCELABLE VARIABLES
-    private Boolean isExistingData = false; // Used to indicate that the artistListResult has been restored from a previous instance.
-    private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_artist_search_search_input) EditText searchInput;
@@ -78,8 +80,9 @@ public class SSArtistsFragment extends Fragment {
     public static SSArtistsFragment getInstance() { return artists_fragment; }
 
     // initializeFragment(): Sets the initial values for the fragment.
-    public void initializeFragment(String name) {
+    public void initializeFragment(String name, Boolean restore) {
         this.artistName = name;
+        this.isRestore = restore;
     }
 
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
@@ -89,7 +92,7 @@ public class SSArtistsFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.currentActivity = activity; // Sets the currentActivity to attached activity object.
+        this.currentActivity = (SSMainActivity) activity; // Sets the currentActivity to attached activity object.
     }
 
     // onCreate(): Runs when the fragment is first started.
@@ -148,12 +151,12 @@ public class SSArtistsFragment extends Fragment {
     // onSaveInstanceState(): Called to retrieve per-instance state from an fragment before being
     // killed so that the state can be restored in onCreate() or onRestoreInstanceState().
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle savedInstanceState) {
 
-        outState.putParcelableArrayList(ARTIST_LIST, artistListResult);
+        savedInstanceState.putParcelableArrayList(ARTIST_LIST, artistListResult);
         Log.d(LOG_TAG, "onSaveInstanceState(): The Parcelable data has been saved.");
 
-        super.onSaveInstanceState(outState);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     /** LAYOUT METHODS _________________________________________________________________________ **/
@@ -170,18 +173,24 @@ public class SSArtistsFragment extends Fragment {
 
         else {
 
-            /* TODO: This code needs to be revised...
             // If the artist name value is not empty, this indicates that the SSTracksFragment was
             // previously active. The previous artist search is conducted.
             if (!artistName.isEmpty()) {
 
                 searchInput.setText(artistName); // Sets the artist name in the EditText input field.
 
-                // SPOTIFY ASYNCTASK INITIALIZATION:
-                SSSpotifyArtistSearchTask task = new SSSpotifyArtistSearchTask();
-                task.execute(artistName); // Executes the AsyncTask.
+                // If focus is returning to this fragment, the existing artist list result stored
+                // in the parent activity is set for the RecyclerView object.
+                if (isRestore) {
+
+                    // Retrieves the artist list result from the parent activity.
+                    artistListResult = currentActivity.getArtistResults();
+                    setUpRecyclerView(); // Sets up the RecyclerView object.
+                    setListAdapter(artistListResult); // Sets the adapter for the RecyclerView object.
+
+                    Log.d(LOG_TAG, "setUpLayout(): Restored artist list result from SSMainActivity.");
+                }
             }
-            */
         }
     }
 
@@ -342,6 +351,9 @@ public class SSArtistsFragment extends Fragment {
 
                 setUpRecyclerView(); // Sets up the RecyclerView object.
                 setListAdapter(artistListResult); // Sets the adapter for the RecyclerView object.
+
+                // Sets the list results in the parent activity.
+                currentActivity.setArtistResults(artistListResult);
             }
 
             // If the user clears the input string before the artist's top track query is completed,
