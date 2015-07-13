@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
+import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.data.SSSpotifyAccessors;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.network.SSConnectivity;
@@ -39,13 +40,17 @@ public class SSTracksFragment extends Fragment {
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
     // ACTIVITY VARIABLES
-    private Activity currentActivity; // Used to determine the activity class this fragment is currently attached to.
+    private SSMainActivity currentActivity; // Used to determine the activity class this fragment is currently attached to.
+
+    // ASYNCTASK VARIABLES
+    private SSSpotifyTrackSearchTask task; // References the AsyncTask.
 
     // DATA VARIABLES
     private Boolean isExistingData = false; // Used to indicate that the songListResult has been restored from a previous instance.
     private static final String SONG_LIST = "songListResult"; // Parcelable key value for the song list.
 
     // FRAGMENT VARIABLES
+    private Boolean isRestore = false; // Used to determine if the previous track result should be restored after focus is returned to this fragment.
     private String artistName = ""; // Stores the name of the artist.
 
     // LIST VARIABLES
@@ -71,8 +76,9 @@ public class SSTracksFragment extends Fragment {
     public static SSTracksFragment getInstance() { return tracks_fragment; }
     
     // initializeFragment(): Sets the initial values for the fragment.
-    public void initializeFragment(String name) {
+    public void initializeFragment(String name, Boolean restore) {
         this.artistName = name;
+        this.isRestore = restore;
     }
 
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
@@ -82,7 +88,7 @@ public class SSTracksFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.currentActivity = activity; // Sets the currentActivity to attached activity object.
+        this.currentActivity = (SSMainActivity) activity; // Sets the currentActivity to attached activity object.
     }
 
     // onCreate(): Runs when the fragment is first started.
@@ -118,6 +124,15 @@ public class SSTracksFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        // If the AsyncTask is still running in the background, it is cancelled at this point.
+        if (null != task) {
+            if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                task.cancel(true); // Cancels the AsyncTask operation.
+                Log.d(LOG_TAG, "onDestroyView(): AsyncTask has been cancelled.");
+            }
+        }
+
         ButterKnife.unbind(this); // Sets all injected views to null.
     }
 
@@ -156,11 +171,27 @@ public class SSTracksFragment extends Fragment {
 
         else {
 
-            // SPOTIFY ASYNCTASK INITIALIZATION: Searches for the artist's top 10 tracks if the ID is
-            // valid.
-            if (!artistName.isEmpty()) {
-                SSSpotifyTrackSearchTask task = new SSSpotifyTrackSearchTask();
-                task.execute(artistName); // Executes the AsyncTask.
+            // If focus is returning to this fragment and the tracks were previously searched for
+            // the selected artist, the existing track list result stored in the parent activity is
+            // set for the RecyclerView object.
+            if (isRestore) {
+
+                // Retrieves the track list result from the parent activity.
+                songListResult = currentActivity.getTrackResults();
+                setUpRecyclerView(); // Sets up the RecyclerView object.
+                setListAdapter(songListResult); // Sets the adapter for the RecyclerView object.
+
+                Log.d(LOG_TAG, "setUpLayout(): Restored track list result from SSMainActivity.");
+            }
+
+            else {
+
+                // SPOTIFY ASYNCTASK INITIALIZATION: Searches for the artist's top 10 tracks if the ID is
+                // valid.
+                if (!artistName.isEmpty()) {
+                    task = new SSSpotifyTrackSearchTask();
+                    task.execute(artistName); // Executes the AsyncTask.
+                }
             }
         }
     }
@@ -283,38 +314,44 @@ public class SSTracksFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            progressIndicator.setVisibility(View.GONE); // Hides the progress indicator object.
+            if (!isCancelled()) {
 
-            // Sets the list adapter for the RecyclerView object if the artist's top tracks data
-            // retrieval was successful.
-            if (tracksRetrieved) {
+                progressIndicator.setVisibility(View.GONE); // Hides the progress indicator object.
 
-                // The RecyclerView object is made visible.
-                resultsList.setVisibility(View.VISIBLE);
+                // Sets the list adapter for the RecyclerView object if the artist's top tracks data
+                // retrieval was successful.
+                if (tracksRetrieved) {
 
-                setUpRecyclerView(); // Sets up the RecyclerView object.
-                setListAdapter(songListResult); // Sets the adapter for the RecyclerView object.
-            }
+                    // The RecyclerView object is made visible.
+                    resultsList.setVisibility(View.VISIBLE);
 
-            // Displays the status TextView object.
-            else {
+                    setUpRecyclerView(); // Sets up the RecyclerView object.
+                    setListAdapter(songListResult); // Sets the adapter for the RecyclerView object.
 
-                // Sets an error message indicating that there is no Internet connectivity.
-                if (!isConnected) {
-                    statusText.setText(R.string.no_internet); // Sets the text for the TextView object.
+                    // Sets the list results in the parent activity.
+                    currentActivity.setTrackResults(songListResult);
                 }
 
-                // Sets an error message for the status TextView object.
-                else if (isError) {
-                    statusText.setText(R.string.error_message); // Sets the text for the TextView object.
-                }
-
-                // Sets a "No results found." message for the status TextView object.
+                // Displays the status TextView object.
                 else {
-                    statusText.setText(R.string.no_results_tracks); // Sets the text for the TextView object.
-                }
 
-                statusText.setVisibility(View.VISIBLE); // Displays the TextView object.
+                    // Sets an error message indicating that there is no Internet connectivity.
+                    if (!isConnected) {
+                        statusText.setText(R.string.no_internet); // Sets the text for the TextView object.
+                    }
+
+                    // Sets an error message for the status TextView object.
+                    else if (isError) {
+                        statusText.setText(R.string.error_message); // Sets the text for the TextView object.
+                    }
+
+                    // Sets a "No results found." message for the status TextView object.
+                    else {
+                        statusText.setText(R.string.no_results_tracks); // Sets the text for the TextView object.
+                    }
+
+                    statusText.setVisibility(View.VISIBLE); // Displays the TextView object.
+                }
             }
         }
     }

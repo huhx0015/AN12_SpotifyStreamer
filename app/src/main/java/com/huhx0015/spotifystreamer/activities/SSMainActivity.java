@@ -43,6 +43,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private static final String ARTIST_INPUT = "artistInput"; // Used for restoring the artist input value for rotation change events.
     private static final String ARTIST_NAME = "artistName"; // Used for restoring the artist name value for rotation change events.
     private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
+    private static final String TRACK_LIST = "trackListResult"; // Parcelable key value for the track list.
 
     // FRAGMENT VARIABLES
     private Boolean isSecondaryFragment = false; // Used to determine if the secondary fragment is active or not.
@@ -50,7 +51,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private String currentInput = ""; // Used to determine the current artist input.
 
     // LIST VARIABLES
-    private ArrayList<SSSpotifyModel> artistListResult = new ArrayList<>(); // Stores the artist list result..
+    private ArrayList<SSSpotifyModel> artistListResult = new ArrayList<>(); // Stores the artist list result.
+    private ArrayList<SSSpotifyModel> trackListResult = new ArrayList<>(); // Stores the track list result.
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSMainActivity.class.getSimpleName();
@@ -76,6 +78,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // Restores the saved instance values.
             isSecondaryFragment = savedInstanceState.getBoolean(FRAGMENT_STATE);
             artistListResult = savedInstanceState.getParcelableArrayList(ARTIST_LIST);
+            trackListResult = savedInstanceState.getParcelableArrayList(TRACK_LIST);
             currentArtist = savedInstanceState.getString(ARTIST_NAME);
             currentInput = savedInstanceState.getString(ARTIST_INPUT);
         }
@@ -136,11 +139,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
-        // Saves the current fragment state and current artist values into the instance. Used to
-        // determine which fragment should be shown when the activity is re-created after the
-        // rotation change event.
+        // Saves the current fragment state and current artist and track list values into the
+        // instance. Used to determine which fragment should be shown when the activity is
+        // re-created after the rotation change event.
         savedInstanceState.putBoolean(FRAGMENT_STATE, isSecondaryFragment);
         savedInstanceState.putParcelableArrayList(ARTIST_LIST, artistListResult);
+        savedInstanceState.putParcelableArrayList(TRACK_LIST, trackListResult);
         savedInstanceState.putString(ARTIST_INPUT, currentInput);
         savedInstanceState.putString(ARTIST_NAME, currentArtist);
 
@@ -174,9 +178,19 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         return artistListResult;
     }
 
+    // getTrackResults(): Retrieves the existing track list result from this activity.
+    public ArrayList<SSSpotifyModel> getTrackResults() {
+        return trackListResult;
+    }
+
     // setArtistResults(): Sets the artist list result for this activity.
     public void setArtistResults(ArrayList<SSSpotifyModel> list) {
         this.artistListResult = list;
+    }
+
+    // setTrackResults(): Sets the track list result for this activity.
+    public void setTrackResults(ArrayList<SSSpotifyModel> list) {
+        this.trackListResult = list;
     }
 
     /** LAYOUT METHODS _________________________________________________________________________ **/
@@ -444,20 +458,30 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Override
     public void displayTracksFragment(Boolean isShow, String name) {
 
-        currentArtist = name; // Sets the name of the current artist.
-
         // Displays the SSTracksFragment in the view layout.
         if (isShow) {
 
             // Adds a new SSTracksFragment onto the fragment stack and is made visible in the view
             // layout.
             SSTracksFragment tracksFragment = new SSTracksFragment();
-            tracksFragment.initializeFragment(name);
+
+            // If the current artist name matches the name from the previous selected artist,
+            // SSTracksFragment will load the previous track result list.
+            if (currentArtist.equals(name)) {
+                tracksFragment.initializeFragment(name, true);
+            }
+
+            // The Spotify API will be queried for the newly selected artist.
+            else {
+                tracksFragment.initializeFragment(name, false);
+            }
 
             // Removes the previous fragment and adds the new fragment.
             changeFragment(tracksFragment, "TRACKS", "ARTISTS", name, true, true);
 
             Log.d(LOG_TAG, "displayTracksFragment(): SSTracksFragment now being displayed.");
+
+            currentArtist = name; // Sets the name of the current artist.
         }
 
         // Removes the SSTracksFragment in the view layout and replaces it with a SSArtistsFragment.
@@ -499,7 +523,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // Adds a new SSTracksFragment onto the fragment stack and is made visible in the view
             // layout.
             SSTracksFragment tracksFragment = new SSTracksFragment();
-            tracksFragment.initializeFragment(artistName);
+            tracksFragment.initializeFragment(artistName, true);
 
             // Removes the previous fragment and adds the new fragment.
             changeFragment(tracksFragment, "PLAYER", "TRACKS", artistName, false, false);

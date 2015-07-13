@@ -45,6 +45,9 @@ public class SSArtistsFragment extends Fragment {
     // ACTIVITY VARIABLES
     private SSMainActivity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
+    // ASYNCTASK VARIABLES
+    private SSSpotifyArtistSearchTask task; // References the AsyncTask.
+
     // DATA VARIABLES
     private Boolean isExistingData = false; // Used to indicate that the artistListResult has been restored from a previous instance.
     private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
@@ -135,6 +138,15 @@ public class SSArtistsFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        // If the AsyncTask is still running in the background, it is cancelled at this point.
+        if (null != task) {
+            if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                task.cancel(true); // Cancels the AsyncTask operation.
+                Log.d(LOG_TAG, "onDestroyView(): AsyncTask has been cancelled.");
+            }
+        }
+
         ButterKnife.unbind(this); // Sets all injected views to null.
     }
 
@@ -215,7 +227,7 @@ public class SSArtistsFragment extends Fragment {
                     isInputEmpty = false; // Indicates that the input field is not empty.
 
                     // SPOTIFY ASYNCTASK INITIALIZATION:
-                    SSSpotifyArtistSearchTask task = new SSSpotifyArtistSearchTask();
+                    task = new SSSpotifyArtistSearchTask();
                     task.execute(currentSearchInput); // Executes the AsyncTask.
                 }
 
@@ -340,47 +352,50 @@ public class SSArtistsFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            progressIndicator.setVisibility(View.GONE); // Hides the progress indicator object.
+            if (!isCancelled()) {
 
-            // Sets the list adapter for the RecyclerView object if the artist's top tracks data
-            // retrieval was successful.
-            if (artistsRetrieved && !isInputEmpty) {
+                progressIndicator.setVisibility(View.GONE); // Hides the progress indicator object.
 
-                // The RecyclerView object is made visible.
-                resultsList.setVisibility(View.VISIBLE);
+                // Sets the list adapter for the RecyclerView object if the artist's top tracks data
+                // retrieval was successful.
+                if (artistsRetrieved && !isInputEmpty) {
 
-                setUpRecyclerView(); // Sets up the RecyclerView object.
-                setListAdapter(artistListResult); // Sets the adapter for the RecyclerView object.
+                    // The RecyclerView object is made visible.
+                    resultsList.setVisibility(View.VISIBLE);
 
-                // Sets the list results in the parent activity.
-                currentActivity.setArtistResults(artistListResult);
-            }
+                    setUpRecyclerView(); // Sets up the RecyclerView object.
+                    setListAdapter(artistListResult); // Sets the adapter for the RecyclerView object.
 
-            // If the user clears the input string before the artist's top track query is completed,
-            // the adapter for the RecyclerView is not set and the RecyclerView is hidden.
-            else if (isInputEmpty) {
-                resultsList.setVisibility(View.GONE);
-            }
-
-            // Displays the status TextView object.
-            else {
-
-                // Sets an error message indicating that there is no Internet connectivity.
-                if (!isConnected) {
-                    statusText.setText(R.string.no_internet); // Sets the text for the TextView object.
+                    // Sets the list results in the parent activity.
+                    currentActivity.setArtistResults(artistListResult);
                 }
 
-                // Sets an error message for the status TextView object.
-                else if (isError) {
-                    statusText.setText(R.string.error_message); // Sets the text for the TextView object.
+                // If the user clears the input string before the artist's top track query is completed,
+                // the adapter for the RecyclerView is not set and the RecyclerView is hidden.
+                else if (isInputEmpty) {
+                    resultsList.setVisibility(View.GONE);
                 }
 
-                // Sets a status message for the status TextView object.
+                // Displays the status TextView object.
                 else {
-                    statusText.setText(R.string.no_results_artists); // Sets the text for the TextView object.
-                }
 
-                statusText.setVisibility(View.VISIBLE); // Displays the TextView object.
+                    // Sets an error message indicating that there is no Internet connectivity.
+                    if (!isConnected) {
+                        statusText.setText(R.string.no_internet); // Sets the text for the TextView object.
+                    }
+
+                    // Sets an error message for the status TextView object.
+                    else if (isError) {
+                        statusText.setText(R.string.error_message); // Sets the text for the TextView object.
+                    }
+
+                    // Sets a status message for the status TextView object.
+                    else {
+                        statusText.setText(R.string.no_results_artists); // Sets the text for the TextView object.
+                    }
+
+                    statusText.setVisibility(View.VISIBLE); // Displays the TextView object.
+                }
             }
         }
     }
