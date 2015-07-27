@@ -1,5 +1,8 @@
 package com.huhx0015.spotifystreamer.interfaces;
 
+import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
+import java.util.ArrayList;
+
 /**
  * -------------------------------------------------------------------------------------------------
  * [OnSpotifySelectedListener] INTERFACE
@@ -21,7 +24,5 @@ public interface OnSpotifySelectedListener {
 
     // displayPlayerFragment(): Interface method which signals the attached activity to switch the
     // fragment view between SSTracksFragment and the SSPlayerFragment.
-    // TODO: Reserved for P2.
-    void displayPlayerFragment(Boolean isShow, String artistName, String id, String songName,
-                               String albumName, String imageURL, String streamURL);
+    void displayPlayerFragment(Boolean isShow, ArrayList<SSSpotifyModel> list, int position);
 }

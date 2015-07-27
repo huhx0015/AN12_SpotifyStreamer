@@ -18,14 +18,18 @@ public class SSSpotifyModel implements Parcelable {
     private String artist; // Stores the name of the artist.
     private String album; // Stores the name of the album.
     private String song; // Stores the name of the song.
+    private String songId; // Stores the id of the song.
+    private String songURL; // Stores the URL of the song.
 
     /** INITIALIZATION METHODS _________________________________________________________________ **/
 
     // SSSpotifyModel(): Constructor method for the class.
-    public SSSpotifyModel(String artist, String album, String song, String image) {
+    public SSSpotifyModel(String artist, String album, String song, String id, String sUrl, String image) {
         this.artist = artist;
         this.album = album;
         this.song = song;
+        this.songId = id;
+        this.songURL = sUrl;
         this.album_image = image;
     }
 
@@ -37,6 +41,8 @@ public class SSSpotifyModel implements Parcelable {
         artist = in.readString();
         album = in.readString();
         song = in.readString();
+        songId = in.readString();
+        songURL = in.readString();
     }
 
     // Creator(): An interface that must be implemented and provided as a public CREATOR field that
@@ -71,6 +77,8 @@ public class SSSpotifyModel implements Parcelable {
         dest.writeString(artist);
         dest.writeString(album);
         dest.writeString(song);
+        dest.writeString(songId);
+        dest.writeString(songURL);
     }
 
     /** GET / SET METHODS ______________________________________________________________________ **/
@@ -93,6 +101,16 @@ public class SSSpotifyModel implements Parcelable {
         return song;
     }
 
+    // getSongId(): Returns the song ID.
+    public String getSongId() {
+        return songId;
+    }
+
+    // getSongURL(): Returns the song.
+    public String getSongURL() {
+        return songURL;
+    }
+
     // setAlbumImage(): Sets the album image URL.
     public void setAlbumImage(String image) { this.album_image = image; }
 
@@ -107,5 +125,13 @@ public class SSSpotifyModel implements Parcelable {
     // setSong(): Sets the song name for the class.
     public void setSong(String song) {
         this.song = song;
+    }
+
+    // setSongId(): Sets the song ID for the class.
+    public void setSongId(String id) { this.songId = id; }
+
+    // setSongURL(): Sets the song URL for the class.
+    public void setSongURL(String url) {
+        this.songURL = url;
     }
 }

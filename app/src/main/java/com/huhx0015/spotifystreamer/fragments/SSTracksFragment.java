@@ -199,8 +199,8 @@ public class SSTracksFragment extends Fragment {
     /** RECYCLERVIEW METHODS ___________________________________________________________________ **/
 
     // setListAdapter(): Sets the recycler list adapter based on the songList.
-    private void setListAdapter(List<SSSpotifyModel> songList){
-        SSResultsAdapter adapter = new SSResultsAdapter(songList, false, currentActivity);
+    private void setListAdapter(ArrayList<SSSpotifyModel> songList){
+        SSResultsAdapter adapter = new SSResultsAdapter(songList, true, true, currentActivity);
         resultsList.setAdapter(adapter);
     }
 

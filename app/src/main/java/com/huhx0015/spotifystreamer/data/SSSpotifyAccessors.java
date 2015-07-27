@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.AlbumsPager;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import kaaes.spotify.webapi.android.models.Track;
@@ -43,8 +42,10 @@ public class SSSpotifyAccessors {
             try {
 
                 // Retrieves the song name, album name, and album image URL.
-                String songName = currentTrack.name;
                 String albumName = currentTrack.album.name;
+                String songName = currentTrack.name;
+                String songId = currentTrack.id;
+                String songURL = currentTrack.preview_url;
                 String albumURL;
 
                 // Checks to see if there are any valid album images available.
@@ -59,10 +60,11 @@ public class SSSpotifyAccessors {
 
                 //Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
                 //Log.d(LOG_TAG, "Track " + i + " Album Name: " + albumName);
+                Log.d(LOG_TAG, "Track " + i + " Song URL: " + songURL);
                 //Log.d(LOG_TAG, "Track " + i + " Album URL: " + albumURL);
 
                 // Adds the current track into the ArrayList object.
-                songListResult.add(new SSSpotifyModel(artist, albumName, songName, albumURL));
+                songListResult.add(new SSSpotifyModel(artist, albumName, songName, songId, songURL, albumURL));
             }
 
             // NullPointerException handler.
@@ -139,7 +141,7 @@ public class SSSpotifyAccessors {
                 //Log.d(LOG_TAG, "Artist " + i + " Artist Image URL: " + currentArtistImage);
 
                 // Adds the current artist into the ArrayList object.
-                artistListResult.add(new SSSpotifyModel(currentArtistName, null, null, currentArtistImage));
+                artistListResult.add(new SSSpotifyModel(currentArtistName, null, null, null, null, currentArtistImage));
             }
 
             // NullPointerException handler.

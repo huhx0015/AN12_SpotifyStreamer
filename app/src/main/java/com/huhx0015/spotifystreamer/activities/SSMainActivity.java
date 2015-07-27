@@ -20,6 +20,8 @@ import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -500,10 +502,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     }
 
     // displayPlayerFragment(): Displays or removes the SSPlayerFragment from the view layout.
-    // TODO: Reserved for P2.
     @Override
-    public void displayPlayerFragment(Boolean isShow, String artistName, String id, String songName,
-                                      String albumName, String imageURL, String streamURL) {
+    public void displayPlayerFragment(Boolean isShow, ArrayList<SSSpotifyModel> list, int position) {
 
         // Displays the SSPlayerFragment in the view layout.
         if (isShow) {
@@ -511,10 +511,10 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // Adds a new SSPlayerFragment onto the fragment stack and is made visible in the view
             // layout.
             SSPlayerFragment playerFragment = new SSPlayerFragment();
-            playerFragment.initializeFragment(artistName, id, songName, albumName, imageURL, streamURL);
+            playerFragment.initializeFragment(list, position);
 
             // Removes the previous fragment and adds the new fragment.
-            changeFragment(playerFragment, "PLAYER", "TRACKS", songName, true, true);
+            changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true, true);
         }
 
         // Removes the SSPlayerFragment in the view layout and replaces it with a SSTracksFragment.
@@ -523,10 +523,10 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // Adds a new SSTracksFragment onto the fragment stack and is made visible in the view
             // layout.
             SSTracksFragment tracksFragment = new SSTracksFragment();
-            tracksFragment.initializeFragment(artistName, true);
+            tracksFragment.initializeFragment(list.get(position).getArtist(), true);
 
             // Removes the previous fragment and adds the new fragment.
-            changeFragment(tracksFragment, "PLAYER", "TRACKS", artistName, false, false);
+            changeFragment(tracksFragment, "PLAYER", "TRACKS", list.get(position).getArtist(), false, false);
         }
     }
 

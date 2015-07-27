@@ -12,6 +12,8 @@ import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /** -----------------------------------------------------------------------------------------------
@@ -33,14 +35,19 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
     private Boolean isClickable = true; // Used to determine if the items are clickable or not.
 
     // LIST VARIABLES
-    private List<SSSpotifyModel> listResult; // References the List of SSSpotifyModels object.
+    private Boolean isTrack = false; // Used to determine if the current list is a list of tracks.
+    private ArrayList<SSSpotifyModel> listResult; // References the ArrayList of SSSpotifyModels object.
+
+    // LOGGING VARIABLES
+    private static final String LOG_TAG = SSResultsAdapter.class.getSimpleName();
 
     /** INITIALIZATION METHODS _________________________________________________________________ **/
 
     // SSResultsAdapter(): Constructor method for SSResultsAdapter.
-    public SSResultsAdapter(List<SSSpotifyModel> list, Boolean clickable, Activity act){
+    public SSResultsAdapter(ArrayList<SSSpotifyModel> list, Boolean clickable, Boolean tracks, Activity act){
         this.currentActivity = act;
         this.isClickable = clickable;
+        this.isTrack = tracks;
         this.listResult = list;
     }
 
@@ -55,25 +62,35 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
         // Inflates the layout given the XML layout file for the item view.
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.ss_song_result_card, parent, false);
 
+        // Sets the action if the RecyclerView item property is set to be clickable.
         if (isClickable) {
 
             // Sets the view holder for the item view. This is needed to handle the individual item
             // clicks.
-            final SSResultViewHolder viewHolder = new SSResultViewHolder(view, new SSResultViewHolder.OnResultViewHolderClick() {
+            final SSResultViewHolder viewHolder = new SSResultViewHolder(view, isTrack, new SSResultViewHolder.OnResultViewHolderClick() {
 
                 // onItemClick(): Defines an action to take when the item in the list is clicked.
                 @Override
-                public void onItemClick(View caller, String artist) {
+                public void onItemClick(View caller, int position) {
 
-                    // Signals the attached activity to switch the fragment to SSTracksFragment.
-                    displayTopTracks(artist);
+                    // SSTracksFragment: Signals the attached activity to switch the fragment to the
+                    // SSPlayerFragment.
+                    if (isTrack) {
+                        displayPlayer(listResult, position);
+                    }
+
+                    // SSArtistsFragment: Signals the attached activity to switch the fragment to
+                    // SSTracksFragment.
+                    else {
+                        displayTopTracks(listResult.get(position).getArtist());
+                    }
                 }
             });
 
             return viewHolder;
         }
 
-        return new SSResultViewHolder(view, null);
+        return new SSResultViewHolder(view, isTrack, null);
     }
 
     // onBindViewHolder(): Overrides the onBindViewHolder to specify the contents of each item of
@@ -106,6 +123,12 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
 
     /** INTERFACE METHODS ______________________________________________________________________ **/
 
+    // displayPlayer(): Signals attached activity to display the SSPlayerFragment view.
+    private void displayPlayer(ArrayList<SSSpotifyModel> list, int position) {
+        try { ((OnSpotifySelectedListener) currentActivity).displayPlayerFragment(true, list, position); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
     // displayTopTracks(): Signals attached activity to display the SSTracksFragment view.
     private void displayTopTracks(String name) {
         try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(true, name); }
@@ -123,7 +146,7 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
      */
     public static class SSResultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        public OnResultViewHolderClick resultItemListener; // Interface on-click listener variable.
+        /** SUBCLASS VARIABLES _________________________________________________________________ **/
 
         // LAYOUT VARIABLES:
         CardView songCardView;
@@ -132,7 +155,15 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
         TextView artistName;
         TextView albumName;
 
-        SSResultViewHolder(View itemView, OnResultViewHolderClick listener) {
+        // LIST VARIABLES
+        Boolean isTrack = false; // Used to determine if this is view holder is for an artist or track list.
+
+        // LISTENER VARIABLES
+        public OnResultViewHolderClick resultItemListener; // Interface on-click listener variable.
+
+        /** SUBCLASS METHODS ___________________________________________________________________ **/
+
+        SSResultViewHolder(View itemView, Boolean tracks, OnResultViewHolderClick listener) {
 
             super(itemView);
 
@@ -142,6 +173,8 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
             songName = (TextView) itemView.findViewById(R.id.ss_song_name_text);
             artistName = (TextView) itemView.findViewById(R.id.ss_artist_name_text);
             albumName = (TextView) itemView.findViewById(R.id.ss_album_name_text);
+
+            isTrack = tracks; // Sets the list type for the view holder.
 
             // Sets the listener for the item view.
             if (listener != null) {
@@ -154,11 +187,8 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
         @Override
         public void onClick(View v) {
 
-            // Retrieves the the artist string from the clicked item.
-            String artistNameString = artistName.getText().toString();
-
-            // Triggers the onItemClick interface method to onCreateViewHolder.
-            resultItemListener.onItemClick(v, artistNameString);
+            int itemPos = getAdapterPosition(); // Retrieves the clicked item position.
+            resultItemListener.onItemClick(v, itemPos); // Sets the item listener.
         }
 
         /** INTERFACE METHODS __________________________________________________________________ **/
@@ -173,7 +203,7 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
         public interface OnResultViewHolderClick {
 
             // onItemClick(): The method that is called when an item in the RecyclerView is clicked.
-            void onItemClick(View caller, String artist);
+            void onItemClick(View caller, int position);
         }
     }
 }

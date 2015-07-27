@@ -3,6 +3,7 @@ package com.huhx0015.spotifystreamer.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
+import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -31,6 +37,8 @@ public class SSPlayerFragment extends Fragment {
     // ACTIVITY VARIABLES
     private Activity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
+    // TODO: Access the top tracks data from currentActivity.getTrackData method.
+
     // AUDIO VARIABLES
     private SSMusicEngine ss_music; // SSMusicEngine class object that is used for music functionality.
     private String currentSong = "NONE"; // Sets the default song for the activity.
@@ -44,6 +52,10 @@ public class SSPlayerFragment extends Fragment {
     private String albumName = ""; // Stores the name of the album.
     private String albumImageURL = ""; // Stores the image URL of the album.
     private String streamURL = ""; // Stores the music stream URL of the song.
+
+    // LIST VARIABLES
+    private ArrayList<SSSpotifyModel> trackList = new ArrayList<>(); // References the track list.
+    private int selectedPosition = 0; // References the selected position in the track list.
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSPlayerFragment.class.getSimpleName();
@@ -71,14 +83,15 @@ public class SSPlayerFragment extends Fragment {
     public static SSPlayerFragment getInstance() { return player_fragment; }
 
     // initializeFragment(): Sets the initial values for the fragment.
-    public void initializeFragment(String name, String id, String song, String album, String image,
-                                   String stream) {
-        this.artistName = name;
-        this.artistId = id;
-        this.songName = song;
-        this.albumName = album;
-        this.albumImageURL = image;
-        this.streamURL = stream;
+    public void initializeFragment(ArrayList<SSSpotifyModel> list, int position) {
+        this.trackList = list;
+        this.selectedPosition = position;
+        this.artistName = list.get(position).getArtist();
+        this.artistId = "NaN";
+        this.songName = list.get(position).getSong();
+        this.albumName = list.get(position).getAlbum();
+        this.albumImageURL = list.get(position).getAlbumImage();
+        this.streamURL = list.get(position).getSongURL();
     }
     
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
@@ -159,6 +172,7 @@ public class SSPlayerFragment extends Fragment {
     private void setUpLayout() {
         setUpButtons(); // Sets up the button listeners for the fragment.
         setUpImage(); // Sets up the images for the ImageView objects for the fragment.
+        setUpText(); // Sets up the text for the TextView objects for the fragment.
     }
 
     // setUpButtons(): Sets up the button listeners for the fragment.
@@ -167,19 +181,21 @@ public class SSPlayerFragment extends Fragment {
         // PLAYER BUTTONS:
         // -----------------------------------------------------------------------------------------
 
-        // Sets up the listener and the actions for the PLAY button.
+        // PLAY: Sets up the listener and the actions for the PLAY button.
         playButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
 
-                // If no song has been selected, the first song is played by default.
+                // If no song is currently playing, the song from the stream URL is loaded.
                 if (currentSong.equals("NONE")) {
 
-                    // Sets the name of the song and plays the song immediately if music is enabled.
+                    // Plays the song immediately if music is enabled.
                     if (musicOn) {
-                        currentSong = "SONG 1"; // Sets the song name.
+                        currentSong = streamURL; // Sets the stream URL.
                         ss_music.getInstance().playSongUrl(currentSong, true);
+
+                        Log.d(LOG_TAG, "Now playing: " + currentSong);
                     }
                 }
 
@@ -190,7 +206,7 @@ public class SSPlayerFragment extends Fragment {
             }
         });
 
-        // Sets up the listener and the actions for the PAUSE button.
+        // PAUSE: Sets up the listener and the actions for the PAUSE button.
         pauseButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -202,15 +218,31 @@ public class SSPlayerFragment extends Fragment {
                 }
             }
         });
+
+        // REWIND: Sets up the listener and the actions for the REWIND button.
+        rewindButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                // TODO: Rewind action here.
+            }
+        });
     }
 
-    // setUpImage(): Sets up the images for the ImageView objects in the fragment
+    // setUpImage(): Sets up the images for the ImageView objects in the fragment.
     private void setUpImage() {
 
         // Loads the image from the image URL into the albumImage ImageView object.
         Picasso.with(currentActivity)
                 .load(albumImageURL)
                 .into(albumImage);
+    }
+
+    // setUpText(): Sets up the texts for the TextView objects in the fragment.
+    private void setUpText() {
+        artistNameText.setText(artistName); // Sets the artist name for the TextView object.
+        songNameText.setText(songName); // Sets the song name for the TextView object.
     }
 
     /** AUDIO FUNCTIONALITY ____________________________________________________________________ **/
