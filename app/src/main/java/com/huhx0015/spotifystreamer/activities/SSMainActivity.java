@@ -20,8 +20,6 @@ import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -41,20 +39,25 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private static WeakReference<SSMainActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
 
     // DATA VARIABLES
+    private static final String CURRENT_FRAGMENT = "currentFragment"; // Used for restoring the proper fragment for rotation change events.
     private static final String FRAGMENT_STATE = "fragmentState"; // Used for restoring the fragment state value for rotation change events.
     private static final String ARTIST_INPUT = "artistInput"; // Used for restoring the artist input value for rotation change events.
     private static final String ARTIST_NAME = "artistName"; // Used for restoring the artist name value for rotation change events.
     private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
     private static final String TRACK_LIST = "trackListResult"; // Parcelable key value for the track list.
+    private static final String PLAYER_STATE = "playerState"; // Parcelable key value for the SSMusicEngine state.
 
     // FRAGMENT VARIABLES
-    private Boolean isSecondaryFragment = false; // Used to determine if the secondary fragment is active or not.
+    //private Boolean isSecondaryFragment = false; // Used to determine if the secondary fragment is active or not.
+    private Boolean isSongPlaying = false; // Used to determine if a song was playing in the SSPlayerFragment.
+    private String currentFragment = ""; // Used to determine which fragment is currently active.
     private String currentArtist = ""; // Used to determine the current artist name.
     private String currentInput = ""; // Used to determine the current artist input.
 
     // LIST VARIABLES
     private ArrayList<SSSpotifyModel> artistListResult = new ArrayList<>(); // Stores the artist list result.
     private ArrayList<SSSpotifyModel> trackListResult = new ArrayList<>(); // Stores the track list result.
+    private int listPosition; // Used to determine the current position in the top tracks list.
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSMainActivity.class.getSimpleName();
@@ -78,11 +81,15 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         if (savedInstanceState != null) {
 
             // Restores the saved instance values.
-            isSecondaryFragment = savedInstanceState.getBoolean(FRAGMENT_STATE);
+            currentFragment = savedInstanceState.getString(CURRENT_FRAGMENT);
+            //isSecondaryFragment = savedInstanceState.getBoolean(FRAGMENT_STATE);
             artistListResult = savedInstanceState.getParcelableArrayList(ARTIST_LIST);
             trackListResult = savedInstanceState.getParcelableArrayList(TRACK_LIST);
             currentArtist = savedInstanceState.getString(ARTIST_NAME);
             currentInput = savedInstanceState.getString(ARTIST_INPUT);
+
+            // TODO: Testing... Used to determine if the Player Fragment is active or not.
+            isSongPlaying = savedInstanceState.getBoolean(PLAYER_STATE);
         }
 
         // LAYOUT SETUP:
@@ -144,7 +151,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Saves the current fragment state and current artist and track list values into the
         // instance. Used to determine which fragment should be shown when the activity is
         // re-created after the rotation change event.
-        savedInstanceState.putBoolean(FRAGMENT_STATE, isSecondaryFragment);
+        savedInstanceState.putString(CURRENT_FRAGMENT, currentFragment);
+        //savedInstanceState.putBoolean(FRAGMENT_STATE, isSecondaryFragment);
         savedInstanceState.putParcelableArrayList(ARTIST_LIST, artistListResult);
         savedInstanceState.putParcelableArrayList(TRACK_LIST, trackListResult);
         savedInstanceState.putString(ARTIST_INPUT, currentInput);
@@ -161,10 +169,17 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Override
     public void onBackPressed() {
 
+        // If the SSPlayerFragment is currently being displayed, the fragment is removed and
+        // switched with the SSTracksFragmentView.
+        if (currentFragment.equals("PLAYER")) {
+            displayPlayerFragment(false, trackListResult, listPosition);
+        }
+
         // If the SSTracksFragment is currently being displayed, the fragment is removed and
         // switched with the SSArtistsFragment view.
-        if (isSecondaryFragment) {
+        else if (currentFragment.equals("TRACKS")) {
             displayTracksFragment(false, currentInput);
+
         }
 
         // The activity is finished if the SSArtistsFragment is in focus.
@@ -217,7 +232,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // If the SSTracksFragment was in focus before the screen rotation event, the retained
         // SSTracksFragment is re-added instead.
-        if ( (tracksFragment != null) && (isSecondaryFragment)) {
+        if ( (tracksFragment != null) && (currentFragment.equals("TRACKS"))) {
 
             // Checks to see if the tracksFragment already exists in the layout. If not, the
             // fragment is added.
@@ -270,7 +285,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             }
         }
 
-        // TODO: Reserved for P2.
         // PLAYER:
         else if (actionType.equals("PLAYER")) {
 
@@ -330,7 +344,9 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         addFragment(frag, fragToAdd, isAnimated);
 
         setupActionBar(fragToAdd, subtitle); // Sets the name of the action bar.
-        isSecondaryFragment = isSecondary; // Sets the condition of the secondary fragment.
+        //isSecondaryFragment = isSecondary; // Sets the condition of the secondary fragment.
+
+        currentFragment = fragToAdd; // Sets the current active fragment.
     }
 
     // removeFragment(): This method is responsible for removing the fragment view.
@@ -508,6 +524,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Displays the SSPlayerFragment in the view layout.
         if (isShow) {
 
+            this.listPosition = position; // Sets the selected position in the top tracks list.
+
             // Adds a new SSPlayerFragment onto the fragment stack and is made visible in the view
             // layout.
             SSPlayerFragment playerFragment = new SSPlayerFragment();
@@ -515,6 +533,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // Removes the previous fragment and adds the new fragment.
             changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true, true);
+
+            Log.d(LOG_TAG, "displayPlayerFragment(): SSPlayerFragment now being displayed.");
         }
 
         // Removes the SSPlayerFragment in the view layout and replaces it with a SSTracksFragment.
@@ -526,7 +546,9 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             tracksFragment.initializeFragment(list.get(position).getArtist(), true);
 
             // Removes the previous fragment and adds the new fragment.
-            changeFragment(tracksFragment, "PLAYER", "TRACKS", list.get(position).getArtist(), false, false);
+            changeFragment(tracksFragment, "TRACKS", "PLAYER", list.get(position).getArtist(), false, false);
+
+            Log.d(LOG_TAG, "displayPlayerFragment(): SSTracksFragment now being displayed.");
         }
     }
 

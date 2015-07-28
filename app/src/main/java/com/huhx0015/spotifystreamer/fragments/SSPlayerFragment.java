@@ -14,10 +14,7 @@ import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.squareup.picasso.Picasso;
-
 import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -26,7 +23,6 @@ import butterknife.ButterKnife;
  *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
  *  DESCRIPTION: SSPlayerFragment is a fragment class that is responsible for displaying the music
  *  player in which a user can interact with to listen to streaming Spotify songs.
- *  TODO: Reserved for use in P2.
  *  -----------------------------------------------------------------------------------------------
  */
 
@@ -37,13 +33,14 @@ public class SSPlayerFragment extends Fragment {
     // ACTIVITY VARIABLES
     private Activity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
-    // TODO: Access the top tracks data from currentActivity.getTrackData method.
-
     // AUDIO VARIABLES
     private SSMusicEngine ss_music; // SSMusicEngine class object that is used for music functionality.
     private String currentSong = "NONE"; // Sets the default song for the activity.
     private Boolean musicOn = true; // Used to determine if music has been enabled or not.
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
+
+    // DATA VARIABLES
+    private static final String PLAYER_STATE = "playerState"; // Parcelable key value for the SSMusicEngine state.
 
     // FRAGMENT VARIABLES
     private String artistName = ""; // Stores the name of the artist.
@@ -70,6 +67,7 @@ public class SSPlayerFragment extends Fragment {
     @Bind(R.id.ss_player_album_image) ImageView albumImage;
     @Bind(R.id.ss_player_song_name_text) TextView songNameText;
     @Bind(R.id.ss_player_artist_name_text) TextView artistNameText;
+    @Bind(R.id.ss_player_album_name_text) TextView albumNameText;
 
     /** INITIALIZATION METHODS _________________________________________________________________ **/
 
@@ -166,6 +164,28 @@ public class SSPlayerFragment extends Fragment {
         ss_music.getInstance().releaseMedia();
     }
 
+    // onDetach(): This function is called immediately prior to the fragment no longer being
+    // associated with its activity.
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(LOG_TAG, "onDetach(): Fragment removed.");
+    }
+
+    /** FRAGMENT EXTENSION METHOD ______________________________________________________________ **/
+
+    // onSaveInstanceState(): Called to retrieve per-instance state from an fragment before being
+    // killed so that the state can be restored in onCreate() or onRestoreInstanceState().
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        // Saves the current state of the SSMusicEngine object.
+        savedInstanceState.putBoolean(PLAYER_STATE, ss_music.getInstance().isSongPlaying());
+        Log.d(LOG_TAG, "onSaveInstanceState(): The Parcelable data has been saved.");
+
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
     /** LAYOUT METHODS _________________________________________________________________________ **/
 
     // setUpLayout(): Sets up the layout for the fragment.
@@ -194,8 +214,6 @@ public class SSPlayerFragment extends Fragment {
                     if (musicOn) {
                         currentSong = streamURL; // Sets the stream URL.
                         ss_music.getInstance().playSongUrl(currentSong, true);
-
-                        //Log.d(LOG_TAG, "Now playing: " + currentSong);
                     }
                 }
 
@@ -241,6 +259,7 @@ public class SSPlayerFragment extends Fragment {
 
     // setUpText(): Sets up the texts for the TextView objects in the fragment.
     private void setUpText() {
+        albumNameText.setText(albumName); // Sets the album name for the TextView object.
         artistNameText.setText(artistName); // Sets the artist name for the TextView object.
         songNameText.setText(songName); // Sets the song name for the TextView object.
     }

@@ -23,7 +23,6 @@ import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.network.SSConnectivity;
 import com.huhx0015.spotifystreamer.ui.adapters.SSResultsAdapter;
 import java.util.ArrayList;
-import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.SpotifyApi;
