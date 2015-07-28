@@ -1,5 +1,6 @@
 package com.huhx0015.spotifystreamer.data;
 
+import android.net.Uri;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -47,7 +47,7 @@ public class SSPlayerFragment extends Fragment {
 
     // FRAGMENT VARIABLES
     private String artistName = ""; // Stores the name of the artist.
-    private String artistId = ""; // Stores the Artist ID value.
+    private String songId = ""; // Stores the song ID value.
     private String songName = ""; // Stores the name of the song.
     private String albumName = ""; // Stores the name of the album.
     private String albumImageURL = ""; // Stores the image URL of the album.
@@ -87,7 +87,7 @@ public class SSPlayerFragment extends Fragment {
         this.trackList = list;
         this.selectedPosition = position;
         this.artistName = list.get(position).getArtist();
-        this.artistId = "NaN";
+        this.songId = list.get(position).getSongId();
         this.songName = list.get(position).getSong();
         this.albumName = list.get(position).getAlbum();
         this.albumImageURL = list.get(position).getAlbumImage();
@@ -112,7 +112,7 @@ public class SSPlayerFragment extends Fragment {
         setRetainInstance(true); // Retains this fragment during runtime changes.
 
         // AUDIO CLASS INITIALIZATION:
-        ss_music.getInstance().initializeAudio();
+        ss_music.getInstance().initializeAudio(currentActivity);
     }
 
     // onResume(): This function runs immediately after onCreate() finishes and is always re-run
@@ -195,7 +195,7 @@ public class SSPlayerFragment extends Fragment {
                         currentSong = streamURL; // Sets the stream URL.
                         ss_music.getInstance().playSongUrl(currentSong, true);
 
-                        Log.d(LOG_TAG, "Now playing: " + currentSong);
+                        //Log.d(LOG_TAG, "Now playing: " + currentSong);
                     }
                 }
 

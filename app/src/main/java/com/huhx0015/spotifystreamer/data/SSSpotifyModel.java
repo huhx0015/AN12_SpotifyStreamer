@@ -1,5 +1,6 @@
 package com.huhx0015.spotifystreamer.data;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,12 +26,12 @@ public class SSSpotifyModel implements Parcelable {
 
     // SSSpotifyModel(): Constructor method for the class.
     public SSSpotifyModel(String artist, String album, String song, String id, String sUrl, String image) {
-        this.artist = artist;
         this.album = album;
+        this.album_image = image;
+        this.artist = artist;
         this.song = song;
         this.songId = id;
         this.songURL = sUrl;
-        this.album_image = image;
     }
 
     /** PARCELABLE METHODS _____________________________________________________________________ **/
@@ -106,7 +107,7 @@ public class SSSpotifyModel implements Parcelable {
         return songId;
     }
 
-    // getSongURL(): Returns the song.
+    // getSongURL(): Returns the song URL.
     public String getSongURL() {
         return songURL;
     }

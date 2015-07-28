@@ -1,5 +1,6 @@
 package com.huhx0015.spotifystreamer.audio;
 
+import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.util.Log;
@@ -11,13 +12,15 @@ import java.io.IOException;
  *  DESCRIPTION: SSMusicEngine class is used to support music playback for the application.
  *  Code adapted from my own HuhX Game Sound Engine project here:
  *  https://github.com/huhx0015/HuhX_Game_Sound_Engine
- *  TODO: Reserved for use in P2.
  *  -----------------------------------------------------------------------------------------------
  */
 
 public class SSMusicEngine {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
+
+    // ACTIVITY VARIABLES:
+    private Context activityContext; // References the activity context.
 
     // AUDIO VARIABLES:
     private MediaPlayer backgroundSong; // MediaPlayer variable for background song.
@@ -41,15 +44,16 @@ public class SSMusicEngine {
     public static SSMusicEngine getInstance() { return ss_music; }
 
     // initializeAudio(): Initializes the SSMusicEngine class variables.
-    public void initializeAudio() {
+    public void initializeAudio(Context con) {
 
         Log.d(TAG, "INITIALIZING: Initializing music engine.");
 
-        backgroundSong = new MediaPlayer(); // Instantiates the main MediaPlayer object.
-        isPaused = false; // Indicates that the song is not paused by default.
-        musicOn = true; // Indicates that music playback is enabled by default.
-        currentSong = "STOPPED"; // Sets the "STOPPED" condition for the song name string.
-        songPosition = 0; // Sets the song position to the beginning of the song by default.
+        this.activityContext = con; // Sets the activity context for the SSMusicEngine.
+        this.backgroundSong = new MediaPlayer(); // Instantiates the main MediaPlayer object.
+        this.isPaused = true; // Indicates that the song is not paused by default.
+        this.musicOn = true; // Indicates that music playback is enabled by default.
+        this.currentSong = "STOPPED"; // Sets the "STOPPED" condition for the song name string.
+        this.songPosition = 0; // Sets the song position to the beginning of the song by default.
 
         Log.d(TAG, "INITIALIZING: Music engine initialization complete.");
     }
@@ -91,37 +95,13 @@ public class SSMusicEngine {
 
             // If the song is not already playing, calls playSong to create a MediaPlayer object and
             // play the song.
-            if (isPaused) {
-                playSong(songUrl, loop);
-            }
+            Log.d(TAG, "PREPARING: Preparing song for playback.");
+            playSong(songUrl, loop);
         }
 
         // Outputs a message to logcat indicating that the song cannot be played.
         else {
             Log.d(TAG, "ERROR: Song cannot be played. Music engine is currently disabled.");
-        }
-    }
-
-    // isSongPlaying(): Determines if a song is currently playing in the background.
-    public Boolean isSongPlaying() {
-        return backgroundSong.isPlaying();
-    }
-
-    // pauseSong(): Pauses any songs playing in the background and returns it's position.
-    public void pauseSong() {
-
-        Log.d(TAG, "MUSIC: Music playback has been paused.");
-
-        // Checks to see if mapSong has been initialized first before saving the song position and pausing the song.
-        if (backgroundSong != null) {
-
-            songPosition = backgroundSong.getCurrentPosition(); // Retrieves the current song position and saves it.
-
-            // Pauses the song only if there is a song is currently playing.
-            if (backgroundSong.isPlaying()) { backgroundSong.pause(); } // Pauses the song.
-
-            isPaused = true; // Indicates that the song is currently paused.
-            currentSong = "PAUSED";
         }
     }
 
@@ -155,7 +135,7 @@ public class SSMusicEngine {
 
             // Attempts to set the data source for the MediaPlayer object.
             try {
-                backgroundSong.setDataSource(songUrl); // Sets up the MediaPlayer for the song.
+                backgroundSong.setDataSource(songUrl);
                 isSongReady = true;
             }
 
@@ -178,6 +158,7 @@ public class SSMusicEngine {
                 // Prepares the song track for playback.
                 try {
                     backgroundSong.prepare();
+                    Log.d(TAG, "PREPARE: MediaPlayer object being prepared.");
                 }
 
                 catch (IOException e) {
@@ -216,21 +197,26 @@ public class SSMusicEngine {
         }
     }
 
-    // releaseMedia(): Used to release the resources being used by mediaPlayer objects.
-    public void releaseMedia() {
+    // isSongPlaying(): Determines if a song is currently playing in the background.
+    public Boolean isSongPlaying() {
+        return backgroundSong.isPlaying();
+    }
 
-        // Releases MediaPool resources.
+    // pauseSong(): Pauses any songs playing in the background and returns it's position.
+    public void pauseSong() {
+
+        Log.d(TAG, "MUSIC: Music playback has been paused.");
+
+        // Checks to see if mapSong has been initialized first before saving the song position and pausing the song.
         if (backgroundSong != null) {
 
-            backgroundSong.reset();
-            backgroundSong.release();
-            backgroundSong = null;
+            songPosition = backgroundSong.getCurrentPosition(); // Retrieves the current song position and saves it.
 
-            Log.d(TAG, "RELEASE: MediaPlayer object has been released.");
-        }
+            // Pauses the song only if there is a song is currently playing.
+            if (backgroundSong.isPlaying()) { backgroundSong.pause(); } // Pauses the song.
 
-        else {
-            Log.d(TAG, "ERROR: MediaPlayer object is null and cannot be released.");
+            isPaused = true; // Indicates that the song is currently paused.
+            currentSong = "PAUSED";
         }
     }
 
@@ -246,6 +232,24 @@ public class SSMusicEngine {
 
         else {
             Log.d(TAG, "ERROR: Cannot stop song, as MediaPlayer object is already null.");
+        }
+    }
+
+    // releaseMedia(): Used to release the resources being used by mediaPlayer objects.
+    public void releaseMedia() {
+
+        // Releases MediaPool resources.
+        if (backgroundSong != null) {
+
+            backgroundSong.reset();
+            backgroundSong.release();
+            backgroundSong = null;
+
+            Log.d(TAG, "RELEASE: MediaPlayer object has been released.");
+        }
+
+        else {
+            Log.d(TAG, "ERROR: MediaPlayer object is null and cannot be released.");
         }
     }
 }
