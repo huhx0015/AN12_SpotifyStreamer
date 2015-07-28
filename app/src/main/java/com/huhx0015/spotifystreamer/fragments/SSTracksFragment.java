@@ -196,6 +196,47 @@ public class SSTracksFragment extends Fragment {
         }
     }
 
+    // updateView(): Updates the layout view after the SSSpotifyTrackSearchTask has completed.
+    private void updateView(Boolean tracksRetrieved, Boolean isConnected, Boolean isError) {
+
+        progressIndicator.setVisibility(View.GONE); // Hides the progress indicator object.
+
+        // Sets the list adapter for the RecyclerView object if the artist's top tracks data
+        // retrieval was successful.
+        if (tracksRetrieved) {
+
+            // The RecyclerView object is made visible.
+            resultsList.setVisibility(View.VISIBLE);
+
+            setUpRecyclerView(); // Sets up the RecyclerView object.
+            setListAdapter(songListResult); // Sets the adapter for the RecyclerView object.
+
+            // Sets the list results in the parent activity.
+            currentActivity.setTrackResults(songListResult);
+        }
+
+        // Displays the status TextView object.
+        else {
+
+            // Sets an error message indicating that there is no Internet connectivity.
+            if (!isConnected) {
+                statusText.setText(R.string.no_internet); // Sets the text for the TextView object.
+            }
+
+            // Sets an error message for the status TextView object.
+            else if (isError) {
+                statusText.setText(R.string.error_message); // Sets the text for the TextView object.
+            }
+
+            // Sets a "No results found." message for the status TextView object.
+            else {
+                statusText.setText(R.string.no_results_tracks); // Sets the text for the TextView object.
+            }
+
+            statusText.setVisibility(View.VISIBLE); // Displays the TextView object.
+        }
+    }
+
     /** RECYCLERVIEW METHODS ___________________________________________________________________ **/
 
     // setListAdapter(): Sets the recycler list adapter based on the songList.
@@ -316,42 +357,14 @@ public class SSTracksFragment extends Fragment {
 
             if (!isCancelled()) {
 
-                progressIndicator.setVisibility(View.GONE); // Hides the progress indicator object.
+                // Runs on the UI thread.
+                currentActivity.runOnUiThread(new Runnable() {
 
-                // Sets the list adapter for the RecyclerView object if the artist's top tracks data
-                // retrieval was successful.
-                if (tracksRetrieved) {
-
-                    // The RecyclerView object is made visible.
-                    resultsList.setVisibility(View.VISIBLE);
-
-                    setUpRecyclerView(); // Sets up the RecyclerView object.
-                    setListAdapter(songListResult); // Sets the adapter for the RecyclerView object.
-
-                    // Sets the list results in the parent activity.
-                    currentActivity.setTrackResults(songListResult);
-                }
-
-                // Displays the status TextView object.
-                else {
-
-                    // Sets an error message indicating that there is no Internet connectivity.
-                    if (!isConnected) {
-                        statusText.setText(R.string.no_internet); // Sets the text for the TextView object.
+                    // Updates the layout view.
+                    public void run() {
+                        updateView(tracksRetrieved, isConnected, isError);
                     }
-
-                    // Sets an error message for the status TextView object.
-                    else if (isError) {
-                        statusText.setText(R.string.error_message); // Sets the text for the TextView object.
-                    }
-
-                    // Sets a "No results found." message for the status TextView object.
-                    else {
-                        statusText.setText(R.string.no_results_tracks); // Sets the text for the TextView object.
-                    }
-
-                    statusText.setVisibility(View.VISIBLE); // Displays the TextView object.
-                }
+                });
             }
         }
     }

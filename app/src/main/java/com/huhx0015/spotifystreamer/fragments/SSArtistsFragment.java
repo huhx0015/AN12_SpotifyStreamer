@@ -246,6 +246,53 @@ public class SSArtistsFragment extends Fragment {
         });
     }
 
+    // updateView(): Updates the layout view after the SSSpotifyArtistSearchTask has completed.
+    private void updateView(Boolean artistsRetrieved, Boolean isConnected, Boolean isError) {
+
+        progressIndicator.setVisibility(View.GONE); // Hides the progress indicator object.
+
+        // Sets the list adapter for the RecyclerView object if the artist's top tracks data
+        // retrieval was successful.
+        if (artistsRetrieved && !isInputEmpty) {
+
+            // The RecyclerView object is made visible.
+            resultsList.setVisibility(View.VISIBLE);
+
+            setUpRecyclerView(); // Sets up the RecyclerView object.
+            setListAdapter(artistListResult); // Sets the adapter for the RecyclerView object.
+
+            // Sets the list results in the parent activity.
+            currentActivity.setArtistResults(artistListResult);
+        }
+
+        // If the user clears the input string before the artist's top track query is completed,
+        // the adapter for the RecyclerView is not set and the RecyclerView is hidden.
+        else if (isInputEmpty) {
+            resultsList.setVisibility(View.GONE);
+        }
+
+        // Displays the status TextView object.
+        else {
+
+            // Sets an error message indicating that there is no Internet connectivity.
+            if (!isConnected) {
+                statusText.setText(R.string.no_internet); // Sets the text for the TextView object.
+            }
+
+            // Sets an error message for the status TextView object.
+            else if (isError) {
+                statusText.setText(R.string.error_message); // Sets the text for the TextView object.
+            }
+
+            // Sets a status message for the status TextView object.
+            else {
+                statusText.setText(R.string.no_results_artists); // Sets the text for the TextView object.
+            }
+
+            statusText.setVisibility(View.VISIBLE); // Displays the TextView object.
+        }
+    }
+
     /** RECYCLERVIEW METHODS ___________________________________________________________________ **/
 
     // setListAdapter(): Sets the recycler list adapter based on the artistList.
@@ -354,48 +401,14 @@ public class SSArtistsFragment extends Fragment {
 
             if (!isCancelled()) {
 
-                progressIndicator.setVisibility(View.GONE); // Hides the progress indicator object.
+                // Runs on the UI thread.
+                currentActivity.runOnUiThread(new Runnable() {
 
-                // Sets the list adapter for the RecyclerView object if the artist's top tracks data
-                // retrieval was successful.
-                if (artistsRetrieved && !isInputEmpty) {
-
-                    // The RecyclerView object is made visible.
-                    resultsList.setVisibility(View.VISIBLE);
-
-                    setUpRecyclerView(); // Sets up the RecyclerView object.
-                    setListAdapter(artistListResult); // Sets the adapter for the RecyclerView object.
-
-                    // Sets the list results in the parent activity.
-                    currentActivity.setArtistResults(artistListResult);
-                }
-
-                // If the user clears the input string before the artist's top track query is completed,
-                // the adapter for the RecyclerView is not set and the RecyclerView is hidden.
-                else if (isInputEmpty) {
-                    resultsList.setVisibility(View.GONE);
-                }
-
-                // Displays the status TextView object.
-                else {
-
-                    // Sets an error message indicating that there is no Internet connectivity.
-                    if (!isConnected) {
-                        statusText.setText(R.string.no_internet); // Sets the text for the TextView object.
+                    // Updates the layout view.
+                    public void run() {
+                        updateView(artistsRetrieved, isConnected, isError);
                     }
-
-                    // Sets an error message for the status TextView object.
-                    else if (isError) {
-                        statusText.setText(R.string.error_message); // Sets the text for the TextView object.
-                    }
-
-                    // Sets a status message for the status TextView object.
-                    else {
-                        statusText.setText(R.string.no_results_artists); // Sets the text for the TextView object.
-                    }
-
-                    statusText.setVisibility(View.VISIBLE); // Displays the TextView object.
-                }
+                });
             }
         }
     }
