@@ -293,57 +293,65 @@ public class SSTracksFragment extends Fragment {
             // Checks the device's current network and Internet connectivity state.
             isConnected = SSConnectivity.checkConnectivity(currentActivity);
 
-            // Connects to the Spotify API service to perform the artist search.
-            if (isConnected) {
+            try {
 
-                Log.d(LOG_TAG, "SSSpotifyTrackSearchTask(): Beginning Spotify top tracks query...");
+                // Connects to the Spotify API service to perform the artist search.
+                if (isConnected) {
 
-                // Initializes the Spotify API and background service.
-                SpotifyApi api = new SpotifyApi();
-                SpotifyService service = api.getService();
+                    Log.d(LOG_TAG, "SSSpotifyTrackSearchTask(): Beginning Spotify top tracks query...");
 
-                // Retrieves the artist's Spotify ID based on the search input.
-                String artistId = SSSpotifyAccessors.queryArtist(params[0], service);
+                    // Initializes the Spotify API and background service.
+                    SpotifyApi api = new SpotifyApi();
+                    SpotifyService service = api.getService();
 
-                // Retrieves the artist's top tracks as long as the artist ID is valid.
-                if (artistId != null) {
+                    // Retrieves the artist's Spotify ID based on the search input.
+                    String artistId = SSSpotifyAccessors.queryArtist(params[0], service);
 
-                    // Retrieves the artist's top tracks data from the Spotify background service.
-                    Tracks topTracks = SSSpotifyAccessors.retrieveArtistTopTracks(artistId, service);
+                    // Retrieves the artist's top tracks as long as the artist ID is valid.
+                    if (artistId != null) {
 
-                    // If the track size is not empty, the top tracks are added into the songListResult
-                    // List object.
-                    if (topTracks.tracks.size() > 0) {
+                        // Retrieves the artist's top tracks data from the Spotify background service.
+                        Tracks topTracks = SSSpotifyAccessors.retrieveArtistTopTracks(artistId, service);
 
-                        songListResult = new ArrayList<>(); // Creates a new ArrayList of song tracks.
+                        // If the track size is not empty, the top tracks are added into the songListResult
+                        // List object.
+                        if (topTracks.tracks.size() > 0) {
 
-                        // Adds the artist's top tracks into the List object.
-                        songListResult = SSSpotifyAccessors.addArtistTopTracks(params[0], topTracks, songListResult);
+                            songListResult = new ArrayList<>(); // Creates a new ArrayList of song tracks.
 
-                        // If the songListResult object is null, it indicates an error has occurred and
-                        // that the artist's top track retrieval was a failure.
-                        if (songListResult == null) {
-                            isError = true;
-                            tracksRetrieved = false;
-                            return null;
+                            // Adds the artist's top tracks into the List object.
+                            songListResult = SSSpotifyAccessors.addArtistTopTracks(params[0], topTracks, songListResult);
+
+                            // If the songListResult object is null, it indicates an error has occurred and
+                            // that the artist's top track retrieval was a failure.
+                            if (songListResult == null) {
+                                isError = true;
+                                tracksRetrieved = false;
+                                return null;
+                            }
+
+                            // Indicates that the artist's top track retrieval was successful.
+                            else {
+                                tracksRetrieved = true;
+                            }
                         }
 
-                        // Indicates that the artist's top track retrieval was successful.
+                        // Indicates that the artist's top track retrieval was a failure.
                         else {
-                            tracksRetrieved = true;
+                            tracksRetrieved = false;
                         }
                     }
 
-                    // Indicates that the artist's top track retrieval was a failure.
+                    // Indicates that the artist's top track retrieval failed.
                     else {
                         tracksRetrieved = false;
                     }
                 }
+            }
 
-                // Indicates that the artist's top track retrieval failed.
-                else {
-                    tracksRetrieved = false;
-                }
+            // Exception error handler.
+            catch (Exception e) {
+                Log.e(LOG_TAG, "doInBackground: An error was encountered during Spotify API access: " + e);
             }
 
             return null;

@@ -357,37 +357,45 @@ public class SSArtistsFragment extends Fragment {
             // Checks the device's current network and Internet connectivity state.
             isConnected = SSConnectivity.checkConnectivity(currentActivity);
 
-            // Connects to the Spotify API service to perform the artist search.
-            if (isConnected) {
+            try {
 
-                Log.d(LOG_TAG, "SSSpotifyArtistSearchTask(): Beginning Spotify artist query...");
+                // Connects to the Spotify API service to perform the artist search.
+                if (isConnected) {
 
-                // Initializes the Spotify API and background service.
-                SpotifyApi api = new SpotifyApi();
-                SpotifyService service = api.getService();
+                    Log.d(LOG_TAG, "SSSpotifyArtistSearchTask(): Beginning Spotify artist query...");
 
-                artistListResult = new ArrayList<>(); // Creates a new ArrayList of artists.
+                    // Initializes the Spotify API and background service.
+                    SpotifyApi api = new SpotifyApi();
+                    SpotifyService service = api.getService();
 
-                // Retrieves the list of artists.
-                artistListResult = SSSpotifyAccessors.retrieveArtists(params[0], artistListResult, service);
+                    artistListResult = new ArrayList<>(); // Creates a new ArrayList of artists.
 
-                // If the artistListResult object is null, it indicates an error has occurred and
-                // that the retrieval of the list of artists was a failure.
-                if (artistListResult == null) {
-                    isError = true;
-                    artistsRetrieved = false;
-                    Log.e(LOG_TAG, "ERROR: SSSpotifyArtistSearchTask(): The artist list result was invalid.");
+                    // Retrieves the list of artists.
+                    artistListResult = SSSpotifyAccessors.retrieveArtists(params[0], artistListResult, service);
+
+                    // If the artistListResult object is null, it indicates an error has occurred and
+                    // that the retrieval of the list of artists was a failure.
+                    if (artistListResult == null) {
+                        isError = true;
+                        artistsRetrieved = false;
+                        Log.e(LOG_TAG, "ERROR: SSSpotifyArtistSearchTask(): The artist list result was invalid.");
+                    }
+
+                    // Indicates that the retrieval of the list of artists was a failure.
+                    else if (artistListResult.size() < 1) {
+                        artistsRetrieved = false; // Indicates a failure at list of artists retrieval.
+                    }
+
+                    // Otherwise, the retrieval of the list of artists was successful.
+                    else {
+                        artistsRetrieved = true; // Indicates a success at list of artists retrieval.
+                    }
                 }
+            }
 
-                // Indicates that the retrieval of the list of artists was a failure.
-                else if (artistListResult.size() < 1) {
-                    artistsRetrieved = false; // Indicates a failure at list of artists retrieval.
-                }
-
-                // Otherwise, the retrieval of the list of artists was successful.
-                else {
-                    artistsRetrieved = true; // Indicates a success at list of artists retrieval.
-                }
+            // Exception error handler.
+            catch (Exception e) {
+                Log.e(LOG_TAG, "doInBackground: An error was encountered during Spotify API access: " + e);
             }
 
             return null;
