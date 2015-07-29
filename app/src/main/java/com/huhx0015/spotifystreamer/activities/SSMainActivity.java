@@ -141,8 +141,18 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // BACK BUTTON:
             case android.R.id.home:
 
-                // Removes the secondary fragment and displays the main SSArtistsFragment view.
-                displayTracksFragment(false, currentInput);
+                // SSPlayerFragment: Removes the SSPlayerFragment and displays the main
+                // SSTracksFragment view.
+                if (currentFragment.equals("PLAYER")) {
+                    displayPlayerFragment(false, trackListResult, listPosition);
+                }
+
+                // SSTracksFragment: Removes the SSTracksFragment and displays the main
+                // SSArtistsFragment view.
+                else if (currentFragment.equals("TRACKS")) {
+                    displayTracksFragment(false, currentInput);
+                }
+
                 return true;
 
             // OPTIONS:
@@ -190,7 +200,6 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         // switched with the SSArtistsFragment view.
         else if (currentFragment.equals("TRACKS")) {
             displayTracksFragment(false, currentInput);
-
         }
 
         // The activity is finished if the SSArtistsFragment is in focus.
