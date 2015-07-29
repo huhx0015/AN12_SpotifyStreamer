@@ -158,17 +158,7 @@ public class SSMusicEngine {
             if (isSongReady) {
 
                 // Prepares the song track for playback.
-                try {
-                    backgroundSong.prepare();
-                    Log.d(TAG, "PREPARE: MediaPlayer object being prepared.");
-                }
-
-                catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, "ERROR: playSong(): I/O exception occurred.");
-                    return;
-                }
-
+                backgroundSong.prepareAsync(); // Prepares the stream asynchronously.
                 backgroundSong.setLooping(loop); // Enables infinite looping of music.
 
                 Log.d(TAG, "PREPARING: Loop condition has been set to " + loop + ".");
