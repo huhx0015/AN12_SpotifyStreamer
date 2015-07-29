@@ -306,9 +306,9 @@ public class SSArtistsFragment extends Fragment {
         resultsList.setLayoutManager(layoutManager);
     }
 
-    /** INTERFACE METHODS __________________________________________________________________ **/
+    /** INTERFACE METHODS ______________________________________________________________________ **/
 
-    // updateInputName(): Updates the artist input name value for the attached activity..
+    // updateInputName(): Updates the artist input name value for the attached activity.
     private void updateInputName(String name) {
         try { ((OnSpotifySelectedListener) currentActivity).updateArtistInput(name); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.

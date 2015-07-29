@@ -3,6 +3,7 @@ package com.huhx0015.spotifystreamer.audio;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.PowerManager;
 import android.util.Log;
 import java.io.IOException;
 
@@ -19,9 +20,6 @@ public class SSMusicEngine {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
-    // ACTIVITY VARIABLES:
-    private Context activityContext; // References the activity context.
-
     // AUDIO VARIABLES:
     private MediaPlayer backgroundSong; // MediaPlayer variable for background song.
     private String currentSong; // Used for determining what song is playing in the background.
@@ -31,6 +29,9 @@ public class SSMusicEngine {
 
     // LOGGING VARIABLES:
     private static final String TAG = SSMusicEngine.class.getSimpleName(); // Used for logging output to logcat.
+
+    // SYSTEM VARIABLES:
+    private Context context; // References the application context.
 
     /** INITIALIZATION FUNCTIONALITY ___________________________________________________________ **/
 
@@ -48,7 +49,7 @@ public class SSMusicEngine {
 
         Log.d(TAG, "INITIALIZING: Initializing music engine.");
 
-        this.activityContext = con; // Sets the activity context for the SSMusicEngine.
+        this.context = con; // Sets the application Context reference.
         this.backgroundSong = new MediaPlayer(); // Instantiates the main MediaPlayer object.
         this.isPaused = true; // Indicates that the song is not paused by default.
         this.musicOn = true; // Indicates that music playback is enabled by default.
@@ -129,6 +130,7 @@ public class SSMusicEngine {
             // Sets up the MediaPlayer object for the song to be played.
             releaseMedia(); // Releases MediaPool resources.
             backgroundSong = new MediaPlayer(); // Initializes the MediaPlayer.
+            backgroundSong.setWakeMode(context.getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK); // Sets the wake lock mode.
             backgroundSong.setAudioStreamType(AudioManager.STREAM_MUSIC); // Sets the audio type for the MediaPlayer object.
 
             Log.d(TAG, "PREPARING: MediaPlayer stream type set to STREAM_MUSIC.");

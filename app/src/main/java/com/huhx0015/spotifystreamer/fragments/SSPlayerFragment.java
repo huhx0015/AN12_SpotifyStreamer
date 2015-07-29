@@ -1,7 +1,12 @@
 package com.huhx0015.spotifystreamer.fragments;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,8 +16,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
-import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
+import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
+import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
+import com.huhx0015.spotifystreamer.services.SSMusicService;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import butterknife.Bind;
@@ -34,15 +41,17 @@ public class SSPlayerFragment extends Fragment {
     private Activity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
     // AUDIO VARIABLES
-    private SSMusicEngine ss_music; // SSMusicEngine class object that is used for music functionality.
+    //private SSMusicEngine ss_music; // SSMusicEngine class object that is used for music functionality.
     private String currentSong = "NONE"; // Sets the default song for the activity.
     private Boolean musicOn = true; // Used to determine if music has been enabled or not.
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
+    private Boolean isLoop = true; // Indicates the song will be looped infinitely.
 
     // DATA VARIABLES
     private static final String PLAYER_STATE = "playerState"; // Parcelable key value for the SSMusicEngine state.
 
     // FRAGMENT VARIABLES
+    private Boolean isRotationEvent = false; // Used to determine if a rotation event is going on.
     private String artistName = ""; // Stores the name of the artist.
     private String songId = ""; // Stores the song ID value.
     private String songName = ""; // Stores the name of the song.
@@ -110,7 +119,7 @@ public class SSPlayerFragment extends Fragment {
         setRetainInstance(true); // Retains this fragment during runtime changes.
 
         // AUDIO CLASS INITIALIZATION:
-        ss_music.getInstance().initializeAudio(currentActivity);
+        //ss_music.getInstance().initializeAudio(currentActivity);
     }
 
     // onResume(): This function runs immediately after onCreate() finishes and is always re-run
@@ -119,9 +128,22 @@ public class SSPlayerFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        // Indicates that a rotation change event is no longer occurring.
+        if (isRotationEvent) {
+
+            // TODO: Re-set up the layout.
+            isRotationEvent = false;
+        }
+
+        /*
         // Checks to see if songs were playing in the background previously; this call resumes
         // the audio playback.
-        resumeAudioState();
+        else {
+            resumeAudioState();
+        }
+        */
+
+        Log.d(LOG_TAG, "onResume(): Fragment resumed.");
     }
 
     // onPause(): This function is called whenever the fragment is suspended.
@@ -130,8 +152,16 @@ public class SSPlayerFragment extends Fragment {
         super.onPause();
 
         // Sets the isPlaying variable to determine if the song is currently playing.
-        isPlaying = ss_music.getInstance().isSongPlaying();
-        ss_music.getInstance().pauseSong(); // Pauses any song that is playing in the background.
+        //isPlaying = ss_music.getInstance().isSongPlaying();
+
+        /*
+        // Pauses any song that is playing in the background.
+        if (!isRotationEvent) {
+            ss_music.getInstance().pauseSong();
+        }
+        */
+
+        Log.d(LOG_TAG, "onPause(): Fragment paused.");
     }
 
     // onCreateView(): Creates and returns the view hierarchy associated with the fragment.
@@ -152,7 +182,10 @@ public class SSPlayerFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
         ButterKnife.unbind(this); // Sets all injected views to null.
+
+        Log.d(LOG_TAG, "onDestroyView(): Fragment view destroyed.");
     }
 
     // onDestroy(): This function runs when the fragment has terminated and is being destroyed.
@@ -161,7 +194,9 @@ public class SSPlayerFragment extends Fragment {
         super.onDestroy();
 
         // Releases all audio-related instances if the application is terminating.
-        ss_music.getInstance().releaseMedia();
+        //ss_music.getInstance().releaseMedia();
+
+        Log.d(LOG_TAG, "onDestroy(): Fragment destroyed.");
     }
 
     // onDetach(): This function is called immediately prior to the fragment no longer being
@@ -169,7 +204,8 @@ public class SSPlayerFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d(LOG_TAG, "onDetach(): Fragment removed.");
+
+        Log.d(LOG_TAG, "onDetach(): Fragment detached.");
     }
 
     /** FRAGMENT EXTENSION METHOD ______________________________________________________________ **/
@@ -179,8 +215,10 @@ public class SSPlayerFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
+        isRotationEvent = true; // Indicates that the rotation event has occurred.
+
         // Saves the current state of the SSMusicEngine object.
-        savedInstanceState.putBoolean(PLAYER_STATE, ss_music.getInstance().isSongPlaying());
+        //savedInstanceState.putBoolean(PLAYER_STATE, ss_music.getInstance().isSongPlaying());
         Log.d(LOG_TAG, "onSaveInstanceState(): The Parcelable data has been saved.");
 
         super.onSaveInstanceState(savedInstanceState);
@@ -207,6 +245,14 @@ public class SSPlayerFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
+                // Signals the activity to signal the SSMusicService to begin streaming playback of
+                // the current track.
+                playTrack(streamURL, isLoop);
+
+                // TODO: Maybe no longer needed?
+                currentSong = streamURL; // Sets the current song playing in the background.
+
+                /*
                 // If no song is currently playing, the song from the stream URL is loaded.
                 if (currentSong.equals("NONE")) {
 
@@ -221,6 +267,7 @@ public class SSPlayerFragment extends Fragment {
                 else {
                     ss_music.getInstance().playSongUrl(currentSong, true);
                 }
+                */
             }
         });
 
@@ -230,10 +277,14 @@ public class SSPlayerFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
+                pauseTrack(); // Signals the activity to signal the SSMusicService to pause the song.
+
+                /*
                 // Pauses the song that is currently playing in the background.
                 if (ss_music.getInstance().isSongPlaying()) {
                     ss_music.getInstance().pauseSong();
                 }
+                */
             }
         });
 
@@ -242,7 +293,6 @@ public class SSPlayerFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-
                 // TODO: Rewind action here.
             }
         });
@@ -272,7 +322,20 @@ public class SSPlayerFragment extends Fragment {
 
         // Checks to see if the song was playing prior to the activity from being
         if (isPlaying) {
-            ss_music.getInstance().playSongUrl(currentSong, true);
+            //ss_music.getInstance().playSongUrl(currentSong, true);
         }
+    }
+
+    /** INTERFACE METHODS __________________________________________________________________ **/
+
+
+    private void playTrack(String url, Boolean loop) {
+        try { ((OnMusicServiceListener) currentActivity).playTrack(url, loop); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    private void pauseTrack() {
+        try { ((OnMusicServiceListener) currentActivity).pauseTrack(); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 }

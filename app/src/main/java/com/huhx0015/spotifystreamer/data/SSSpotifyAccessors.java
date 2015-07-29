@@ -1,6 +1,5 @@
 package com.huhx0015.spotifystreamer.data;
 
-import android.net.Uri;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +61,7 @@ public class SSSpotifyAccessors {
 
                 //Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
                 //Log.d(LOG_TAG, "Track " + i + " Album Name: " + albumName);
-                Log.d(LOG_TAG, "Track " + i + " Song URL: " + songURL);
+                //Log.d(LOG_TAG, "Track " + i + " Song URL: " + songURL);
                 //Log.d(LOG_TAG, "Track " + i + " Album URL: " + albumURL);
 
                 // Adds the current track into the ArrayList object.

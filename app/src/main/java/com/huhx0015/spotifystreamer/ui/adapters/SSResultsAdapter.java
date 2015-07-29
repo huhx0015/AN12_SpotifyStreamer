@@ -12,9 +12,7 @@ import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.squareup.picasso.Picasso;
-
 import java.util.ArrayList;
-import java.util.List;
 
 /** -----------------------------------------------------------------------------------------------
  *  [SSResultsAdapter] CLASS
