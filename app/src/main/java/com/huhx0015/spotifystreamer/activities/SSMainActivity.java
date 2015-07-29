@@ -309,7 +309,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     }
 
     // setupActionBar(): Sets up the action bar attributes for the activity.
-    private void setupActionBar(String actionType, String artistName) {
+    private void setupActionBar(String actionType, String subtitle) {
 
         ActionBar actionBar = getSupportActionBar(); // References the action bar.
 
@@ -318,7 +318,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
             if (actionBar != null) {
                 actionBar.setTitle("Top 10 Tracks"); // Sets the title of the action bar.
-                actionBar.setSubtitle(artistName); // Sets the name of the current artist as the subtitle.
+                actionBar.setSubtitle(subtitle); // Sets the name of the current artist as the subtitle.
                 actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
             }
         }
@@ -328,7 +328,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
             if (actionBar != null) {
                 actionBar.setTitle("Now Playing"); // Sets the title of the action bar.
-                actionBar.setSubtitle(null); // Disables the subtitle of the action bar.
+                actionBar.setSubtitle(currentArtist + " - " + subtitle); // Sets the name of the track as the subtitle.
                 actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
             }
         }
