@@ -52,10 +52,8 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     private static final String ARTIST_NAME = "artistName"; // Used for restoring the artist name value for rotation change events.
     private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
     private static final String TRACK_LIST = "trackListResult"; // Parcelable key value for the track list.
-    private static final String PLAYER_STATE = "playerState"; // Parcelable key value for the SSMusicEngine state.
 
     // FRAGMENT VARIABLES
-    private Boolean isSongPlaying = false; // Used to determine if a song was playing in the SSPlayerFragment.
     private String currentFragment = ""; // Used to determine which fragment is currently active.
     private String currentArtist = ""; // Used to determine the current artist name.
     private String currentInput = ""; // Used to determine the current artist input.
@@ -67,6 +65,11 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSMainActivity.class.getSimpleName();
+
+    // SERVICE VARIABLES
+    private Boolean serviceBound = false; // Used to determine if the SSMusicService is currently bound to the activity.
+    private Intent audioIntent; // An Intent object that references the Intent for the SSMusicService.
+    private SSMusicService musicService; // A service that handles the control of audio playback in the background.
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
@@ -92,22 +95,16 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             trackListResult = savedInstanceState.getParcelableArrayList(TRACK_LIST);
             currentArtist = savedInstanceState.getString(ARTIST_NAME);
             currentInput = savedInstanceState.getString(ARTIST_INPUT);
-
-            // TODO: Testing... Used to determine if the Player Fragment is active or not.
-            isSongPlaying = savedInstanceState.getBoolean(PLAYER_STATE);
         }
 
         // LAYOUT SETUP:
-        setupLayout();
+        setupLayout(); // Sets up the layout for the activity.
     }
 
-
-    // onStart(): Called when the fragment is made visible.
+    // onStart(): Called when the activity is made visible.
     @Override
     public void onStart() {
         super.onStart();
-
-        // TODO: Test audio service.
         setUpAudioService(); // Sets up the background audio service.
     }
 
@@ -492,34 +489,29 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
     /** SERVICE METHODS ________________________________________________________________________ **/
 
-    //TODO: Test Service Variables
-    private SSMusicService musicService;
-    private Intent audioIntent;
-    private boolean musicBound=false;
+    // musicConnection(): A ServiceConnection object for managing the service connection states for
+    // the SSMusicService service.
+    private ServiceConnection musicConnection = new ServiceConnection() {
 
-    //connect to the service
-    private ServiceConnection musicConnection = new ServiceConnection(){
-
+        // onServiceConnected(): Runs when the service is connected to the activity.
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
 
+            // Sets the binder for the service.
             SSMusicService.SSMusicBinder binder = (SSMusicService.SSMusicBinder) service;
-
-            //get service
             musicService = binder.getService();
-
-            //pass list
-            //musicService.setList(songList);
-            //musicBound = true;
+            serviceBound = true; // Indicates that the service is bounded.
         }
 
+        // onServiceDisconnnected: Runs when the service is disconnected from the activity.
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            musicBound = false;
+            serviceBound = false; // Indicates that the service is no longer bound.
         }
     };
 
-    // setUpAudioService():
+    // setUpAudioService(): Sets up the SSMusicService service for playing audio from the
+    // SSMusicEngine class in the background.
     private void setUpAudioService() {
 
         if (audioIntent == null) {
@@ -531,7 +523,6 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         }
     }
 
-
     /** RECYCLE METHODS ________________________________________________________________________ **/
 
     // recycleMemory(): Recycles background services and View objects to clear up resources prior to
@@ -540,9 +531,9 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
         try {
 
-            // TODO: Test audio service.
-            if (musicService != null) {
-                stopService(audioIntent); // Stops the SSMusicService running in the background.
+            // Stops the SSMusicService running in the background.
+            if (audioIntent != null) {
+                stopService(audioIntent); // Stops the service.
                 musicService = null;
             }
 
@@ -639,22 +630,24 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         }
     }
 
+    // pauseTrack(): Invoked by SSPlayerFragment to signal the SSMusicService to pause the song
+    // stream.
+    @Override
+    public void pauseTrack() {
+        musicService.pauseTrack(); // Signals the SSMusicService to pause the song stream.
+    }
+
+    // playTrack(): Invoked by SSPlayerFragment to signal the SSMusicService to play the selected
+    // stream.
+    @Override
+    public void playTrack(String url, Boolean loop) {
+        musicService.playTrack(url, loop); // Signals the SSMusicService to play the song stream.
+    }
+
     // updateArtistInput(): Invoked by SSArtistsFragment to keep an update of the user's artist
     // input.
     @Override
     public void updateArtistInput(String name) {
-        currentInput = name;
-    }
-
-
-
-    @Override
-    public void playTrack(String url, Boolean loop) {
-        musicService.playTrack(url, loop);
-    }
-
-    @Override
-    public void pauseTrack() {
-        musicService.pauseTrack();
+        currentInput = name; // Sets the current artist input name.
     }
 }

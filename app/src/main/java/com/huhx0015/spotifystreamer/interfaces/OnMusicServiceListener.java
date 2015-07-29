@@ -1,12 +1,22 @@
 package com.huhx0015.spotifystreamer.interfaces;
 
 /**
- * Created by Michael Yoon Huh on 7/28/2015.
+ * -------------------------------------------------------------------------------------------------
+ * [OnMusicServiceListener] INTERFACE
+ * PROGRAMMER: Michael Yoon Huh (Huh X0015)
+ * DESCRIPTION: This is an interface class that is used as a signalling conduit between the
+ * SSMainActivity class and the SSPlayerFragment class for mananging the SSMusicService service
+ * running in the background.
+ * -------------------------------------------------------------------------------------------------
  */
+
 public interface OnMusicServiceListener {
 
-    void playTrack(String url, Boolean loop);
-
+    // pauseTrack(): Interface method that signals the attached activity to pause the playback of a
+    // Spotify track in the SSMusicService class.
     void pauseTrack();
 
+    // playTrack(): Interface method that signals the attached activity to begin the playback of a
+    // Spotify track in the SSMusicService class.
+    void playTrack(String url, Boolean loop);
 }
