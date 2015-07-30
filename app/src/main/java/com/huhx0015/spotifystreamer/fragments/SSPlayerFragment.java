@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
+import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import butterknife.ButterKnife;
  *  -----------------------------------------------------------------------------------------------
  */
 
-public class SSPlayerFragment extends Fragment {
+public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
@@ -59,16 +60,14 @@ public class SSPlayerFragment extends Fragment {
     private static final String LOG_TAG = SSPlayerFragment.class.getSimpleName();
 
     // VIEW INJECTION VARIABLES
-    @Bind(R.id.ss_play_button) ImageButton playButton;
-    @Bind(R.id.ss_pause_button) ImageButton pauseButton;
+    @Bind(R.id.ss_play_pause_button) ImageButton playPauseButton;
     @Bind(R.id.ss_rewind_button) ImageButton rewindButton;
     @Bind(R.id.ss_forward_button) ImageButton forwardButton;
     @Bind(R.id.ss_next_button) ImageButton nextButton;
     @Bind(R.id.ss_previous_button) ImageButton previousButton;
     @Bind(R.id.ss_player_album_image) ImageView albumImage;
     @Bind(R.id.ss_player_song_name_text) TextView songNameText;
-    @Bind(R.id.ss_player_artist_name_text) TextView artistNameText;
-    @Bind(R.id.ss_player_album_name_text) TextView albumNameText;
+    @Bind(R.id.ss_player_artist_album_name_text) TextView artistAlbumNameText;
 
     /** INITIALIZATION METHODS _________________________________________________________________ **/
 
@@ -173,9 +172,6 @@ public class SSPlayerFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
 
-        // Releases all audio-related instances if the application is terminating.
-        //ss_music.getInstance().releaseMedia();
-
         Log.d(LOG_TAG, "onDestroy(): Fragment destroyed.");
     }
 
@@ -217,28 +213,32 @@ public class SSPlayerFragment extends Fragment {
         // PLAYER BUTTONS:
         // -----------------------------------------------------------------------------------------
 
-        // PLAY: Sets up the listener and the actions for the PLAY button.
-        playButton.setOnClickListener(new View.OnClickListener() {
+        // PLAY / PAUSE: Sets up the listener and the actions for the PLAY / PAUSE button.
+        playPauseButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
 
-                // Signals the activity to signal the SSMusicService to begin streaming playback of
-                // the current track.
-                playTrack(streamURL, isLoop);
+                // PAUSE: Pauses the song if the song is currently playing.
+                if (isPlaying) {
 
-                // TODO: Maybe no longer needed?
-                currentSong = streamURL; // Sets the current song playing in the background.
-            }
-        });
+                    Log.d(LOG_TAG, "PAUSE: Pause button has been pressed.");
 
-        // PAUSE: Sets up the listener and the actions for the PAUSE button.
-        pauseButton.setOnClickListener(new View.OnClickListener() {
+                    // Signals the activity to signal the SSMusicService to pause the song.
+                    pauseTrack();
+                }
 
-            @Override
-            public void onClick(View v) {
+                // PLAY: Plays the song if no song is currently playing in the background.
+                else {
 
-                pauseTrack(); // Signals the activity to signal the SSMusicService to pause the song.
+                    Log.d(LOG_TAG, "PLAY: Play button has been pressed.");
+                    Log.d(LOG_TAG, "Playing: " + streamURL);
+
+                    // Signals the activity to signal the SSMusicService to begin streaming playback of
+                    // the current track.
+                    playTrack(streamURL, isLoop);
+                    currentSong = streamURL; // Sets the current song playing in the background.
+                }
             }
         });
 
@@ -263,12 +263,41 @@ public class SSPlayerFragment extends Fragment {
 
     // setUpText(): Sets up the texts for the TextView objects in the fragment.
     private void setUpText() {
-        albumNameText.setText(albumName); // Sets the album name for the TextView object.
-        artistNameText.setText(artistName); // Sets the artist name for the TextView object.
+        artistAlbumNameText.setText(artistName + " - " + albumName); // Sets the artist and album name for the TextView object.
         songNameText.setText(songName); // Sets the song name for the TextView object.
     }
 
+    // updateControlButtons(): Updates the graphics of the playback control buttons.
+    private void updateControlButtons(Boolean isPlay) {
+
+        // PLAYING:
+        if (isPlay) {
+
+            // Loads the image from the image URL into the play/pause ImageView object.
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.ic_media_play)
+                    .into(playPauseButton);
+        }
+
+        // STOP / PAUSED:
+        else {
+
+            // Loads the image from the image URL into the play/pause ImageView object.
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.ic_media_pause)
+                    .into(playPauseButton);
+        }
+    }
+
     /** INTERFACE METHODS __________________________________________________________________ **/
+
+    // playbackStatus(): An interface method invoked by the SSMusicEngine on the current playback
+    // status of the song.
+    @Override
+    public void playbackStatus(Boolean isPlay) {
+        isPlaying = isPlay; // Updates the current playback status of the streaming song.
+        updateControlButtons(isPlaying); // Updates the player control buttons.
+    }
 
     // pauseTrack(): Signals the attached activity to invoke the SSMusicService to pause playback
     // of the streamed Spotify track.

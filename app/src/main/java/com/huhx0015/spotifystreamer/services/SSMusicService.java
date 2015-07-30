@@ -7,9 +7,14 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
+import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 
-/**
- * Created by Michael Yoon Huh on 7/28/2015.
+/** -----------------------------------------------------------------------------------------------
+ *  [SSMusicService] CLASS
+ *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
+ *  DESCRIPTION: SSMusicService is a service class that handles the playback of streaming Spotify
+ *  tracks in the background.
+ *  -----------------------------------------------------------------------------------------------
  */
 public class SSMusicService extends Service implements MediaPlayer.OnPreparedListener {
 
@@ -21,32 +26,41 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     private Boolean musicOn = true; // Used to determine if music has been enabled or not.
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
 
+    // SERVICE VARIABLES
+    private final IBinder audioBind = new SSMusicBinder(); // IBinder object that is used to bind this service to an activity.
+
     /** SERVICE LIFECYCLE METHODS ______________________________________________________________ **/
 
+    // onCreate(): The system calls this method when the service is first created, to perform
+    // one-time setup procedures (before it calls either onStartCommand() or onBind()).
     @Override
     public void onCreate() {
         super.onCreate();
 
-        setUpPlayer();
+        // AUDIO CLASS INITIALIZATION:
+        ss_music.getInstance().initializeAudio(getApplicationContext());
     }
 
-    /** MEDIAPLAYER EXTENSION METHODS __________________________________________________________ **/
+    /** SERVICE EXTENSION METHODS ______________________________________________________________ **/
 
     @Override
-    public void onPrepared(MediaPlayer mp) {
+    public void onPrepared(MediaPlayer mp) {}
 
-    }
-
+    // onBind(): Runs when this service is successfully bound to the application.
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-
         return audioBind;
-        //return null;
     }
 
+    // onUnbind(): Runs when this service is unbound from the application.
     @Override
     public boolean onUnbind(Intent intent){
+
+        // If a song is currently playing in the background, the song playback is stopped.
+        if (ss_music.getInstance().isSongPlaying()) {
+            ss_music.getInstance().stopSong(); // Stops the playback of the song.
+        }
 
         // Releases all audio-related instances if the service is unbound.
         ss_music.getInstance().releaseMedia();
@@ -56,62 +70,35 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
     /** SERVICE METHODS ________________________________________________________________________ **/
 
-    private void setUpPlayer() {
+    // pauseTrack(): Accesses the SSMusicEngine instance to pause the streaming song track.
+    public void pauseTrack() {
 
-        // AUDIO CLASS INITIALIZATION:
-        ss_music.getInstance().initializeAudio(getApplicationContext());
-
-
+        // Pauses the song if a song is currently playing in the background.
+        if (ss_music.getInstance().isSongPlaying()) {
+            ss_music.getInstance().pauseSong();
+        }
     }
 
-    /** SUBCLASS METHODS **/
+    // playTrack(): Accesses the SSMusicEngine instance to play the streaming song track.
+    public void playTrack(String songUrl, Boolean loop){
+        ss_music.getInstance().playSongUrl(songUrl, loop);
+    }
 
-    /*
+    /** SUBCLASSES _____________________________________________________________________________ **/
 
-    Base class for a remotable object, the core part of a lightweight remote procedure call mechanism
-    defined by IBinder. This class is an implementation of IBinder that provides standard local
-    implementation of such an object. Most developers will not implement this class directly, instead
-    using the aidl tool to describe the desired interface, having it generate the appropriate Binder
-    subclass. You can, however, derive directly from Binder to implement your own custom RPC protocol
-    or simply instantiate a raw Binder object directly to use as a token that can be shared across
-    processes. This class is just a basic IPC primitive; it has no impact on an application's
-    lifecycle, and is valid only as long as the process that created it continues to run. To use this
-    correctly, you must be doing so within the context of a top-level application component (a Service,
-    Activity, or ContentProvider) that lets the system know your process should remain running. You
-    must keep in mind the situations in which your process could go away, and thus require that you
-    later re-create a new Binder and re-attach it when the process starts again. For example, if you
-     are using this within an Activity, your activity's process may be killed any time the activity
-     is not started; if the activity is later re-created you will need to create a new Binder and hand
-     it back to the correct place again; you need to be aware that your process may be started for
-      another reason (for example to receive a broadcast) that will not involve re-creating the activity
-       and thus run its code to create a new Binder.
-
-    http://developer.android.com/reference/android/os/Binder.html
+    /**
+     * --------------------------------------------------------------------------------------------
+     * [SSMusicBinder] CLASS
+     * DESCRIPTION: This is a Binder-type subclass that is used to bind the SSMusicService to an
+     * activity.
+     * --------------------------------------------------------------------------------------------
      */
 
     public class SSMusicBinder extends Binder {
 
+        // getService(): Returns the SSMusicBinder service.
         public SSMusicService getService() {
             return SSMusicService.this;
         }
-    }
-
-    private final IBinder audioBind = new SSMusicBinder();
-
-
-    // playTrack():
-    public void playTrack(String songUrl, Boolean loop){
-
-        ss_music.getInstance().playSongUrl(songUrl, loop); //play a song
-    }
-
-    // pauseTrack():
-    public void pauseTrack() {
-
-        // Pauses the song that is currently playing in the background.
-        if (ss_music.getInstance().isSongPlaying()) {
-            ss_music.getInstance().pauseSong();
-        }
-
     }
 }

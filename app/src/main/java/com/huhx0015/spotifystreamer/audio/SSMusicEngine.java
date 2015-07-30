@@ -5,6 +5,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.PowerManager;
 import android.util.Log;
+import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import java.io.IOException;
 
 /** -----------------------------------------------------------------------------------------------
@@ -183,6 +184,7 @@ public class SSMusicEngine {
                         Log.d(TAG, "MUSIC: Song playback has begun.");
 
                         mediaPlayer.start(); // Begins playing the song.
+                        playbackStatus(true); // Updates SSPlayerFragment on the song playback status.
                     }
                 });
             }
@@ -206,6 +208,8 @@ public class SSMusicEngine {
 
             // Pauses the song only if there is a song is currently playing.
             if (backgroundSong.isPlaying()) { backgroundSong.pause(); } // Pauses the song.
+
+            playbackStatus(false); // Updates SSPlayerFragment on the song playback status.
 
             isPaused = true; // Indicates that the song is currently paused.
             currentSong = "PAUSED";
@@ -243,5 +247,14 @@ public class SSMusicEngine {
         else {
             Log.d(TAG, "ERROR: MediaPlayer object is null and cannot be released.");
         }
+    }
+
+    /** INTERFACE METHODS ______________________________________________________________________ **/
+
+    // playbackStatus(): Signals the SSPlayerFragment on the current playback status of the
+    // streaming Spotify song.
+    private void playbackStatus(Boolean isPlay) {
+        try { ((OnMusicPlayerListener) context).playbackStatus(isPlay); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 }

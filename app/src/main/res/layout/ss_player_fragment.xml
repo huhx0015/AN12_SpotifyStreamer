@@ -36,24 +36,18 @@
                 android:textIsSelectable="false"
                 android:textSize="20sp"
                 android:layout_gravity="center"
-                android:gravity="center" />
+                android:gravity="center"
+                android:textColor="@android:color/darker_gray" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/ss_player_artist_name_text"
+                android:id="@+id/ss_player_artist_album_name_text"
                 android:textSize="16sp"
                 android:gravity="center"
-                android:layout_gravity="center" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/ss_player_album_name_text"
-                android:textSize="16sp"
-                android:textStyle="italic"
                 android:layout_gravity="center"
-                android:gravity="center" />
+                android:textColor="@android:color/darker_gray" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -83,15 +77,8 @@
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/ss_play_button"
+                android:id="@+id/ss_play_pause_button"
                 android:src="@android:drawable/ic_media_play"
-                android:layout_weight="1" />
-
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/ss_pause_button"
-                android:src="@android:drawable/ic_media_pause"
                 android:layout_weight="1" />
 
             <ImageButton
