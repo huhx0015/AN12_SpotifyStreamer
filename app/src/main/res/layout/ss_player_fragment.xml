@@ -14,20 +14,35 @@
         android:padding="16dp" />
 
     <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="25dp"
+        android:id="@+id/ss_player_seekbar_container">
+
+        <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ss_player_seekbar" />
+    </LinearLayout>
+
+    <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="3"
+        android:layout_weight="2"
         android:id="@+id/ss_player_bottom_container">
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="2"
             android:layout_gravity="center"
             android:gravity="center"
-            android:id="@+id/ss_player_song_info_container">
+            android:id="@+id/ss_player_song_info_container"
+            android:layout_weight="1">
 
             <TextView
                 android:layout_width="wrap_content"
