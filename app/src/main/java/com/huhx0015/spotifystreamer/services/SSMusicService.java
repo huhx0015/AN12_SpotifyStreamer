@@ -4,11 +4,14 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
 import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
+import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 
 /** -----------------------------------------------------------------------------------------------
  *  [SSMusicService] CLASS
@@ -27,8 +30,17 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     private Boolean musicOn = true; // Used to determine if music has been enabled or not.
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
 
+    // FRAGMENT VARIABLES
+    private Fragment playerFragment; // References the player fragment attached to this service.
+
+    // LOGGING VARIABLES:
+    private static final String LOG_TAG = SSMusicService.class.getSimpleName(); // Used for logging output to logcat.
+
     // SERVICE VARIABLES
     private final IBinder audioBind = new SSMusicBinder(); // IBinder object that is used to bind this service to an activity.
+
+    // THREADING VARIABLES
+    private Handler seekHandler = new Handler(); // Handler for the seekbar update thread.
 
     /** SERVICE LIFECYCLE METHODS ______________________________________________________________ **/
 
@@ -73,6 +85,7 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
     // attachPlayerFragment(): Attaches the SSPlayerFragment to the SSMusicEngine class.
     public void attachPlayerFragment(Fragment fragment) {
+        this.playerFragment = fragment;
         ss_music.getInstance().attachFragment(fragment);
     }
 
@@ -82,13 +95,27 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         // Pauses the song if a song is currently playing in the background.
         if (ss_music.getInstance().isSongPlaying()) {
             ss_music.getInstance().pauseSong();
+            seekHandler.removeCallbacks(seekbarThread); // Stops the seekbar update thread.
         }
     }
 
     // playTrack(): Accesses the SSMusicEngine instance to play the streaming song track.
     public void playTrack(String songUrl, Boolean loop){
         ss_music.getInstance().playSongUrl(songUrl, loop);
+        seekHandler.postDelayed(seekbarThread, 1000); // Begins the seekbar update thread.
     }
+
+    /** THREADING METHODS ______________________________________________________________________ **/
+
+    // seekbarThread(): A threaded function which updates the player seekbar in the
+    // SSPlayerFragment.
+    private Runnable seekbarThread = new Runnable() {
+
+        public void run() {
+            seekbarStatus(ss_music.getInstance().getSongPosition()); // Retrieves the current song position.
+            seekHandler.postDelayed(this, 1000); // Updates the thread per second.
+        }
+    };
 
     /** SUBCLASSES _____________________________________________________________________________ **/
 
@@ -105,6 +132,18 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         // getService(): Returns the SSMusicBinder service.
         public SSMusicService getService() {
             return SSMusicService.this;
+        }
+    }
+
+    /** INTERFACE METHODS ______________________________________________________________________ **/
+
+    // seekbarStatus(): Signals the SSPlayerFragment on the current song position for updating the
+    // player seekbar.
+    private void seekbarStatus(int position) {
+
+        if (playerFragment != null) {
+            try { ((OnMusicPlayerListener) playerFragment).seekbarStatus(position); }
+            catch (ClassCastException cce) {} // Catch for class cast exception errors.
         }
     }
 }

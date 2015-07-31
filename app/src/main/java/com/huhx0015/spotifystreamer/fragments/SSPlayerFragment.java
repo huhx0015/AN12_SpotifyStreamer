@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
@@ -66,6 +67,7 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
     @Bind(R.id.ss_next_button) ImageButton nextButton;
     @Bind(R.id.ss_previous_button) ImageButton previousButton;
     @Bind(R.id.ss_player_album_image) ImageView albumImage;
+    @Bind(R.id.ss_player_seekbar) SeekBar playerBar;
     @Bind(R.id.ss_player_song_name_text) TextView songNameText;
     @Bind(R.id.ss_player_artist_album_name_text) TextView artistAlbumNameText;
 
@@ -293,6 +295,14 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
         isPlaying = isPlay; // Updates the current playback status of the streaming song.
         updateControlButtons(isPlaying); // Updates the player control buttons.
         Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
+    }
+
+    // seekbarStatus(): An interface method invoked by the SSMusicEngine to update the player
+    // seekbar position.
+    @Override
+    public void seekbarStatus(int position) {
+        playerBar.setProgress(position); // Sets the current position for the player seekbar.
+        Log.d(LOG_TAG, "seekbarStatus(): Setting the seekbar position: " + position);
     }
 
     // pauseTrack(): Signals the attached activity to invoke the SSMusicService to pause playback

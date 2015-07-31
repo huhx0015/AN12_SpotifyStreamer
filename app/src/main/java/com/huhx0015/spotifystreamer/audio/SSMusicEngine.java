@@ -72,6 +72,23 @@ public class SSMusicEngine {
 
     /** MUSIC FUNCTIONALITY ____________________________________________________________________ **/
 
+    // getSongPosition(): Returns the current song position of the current song playing in the
+    // background.
+    public int getSongPosition() {
+
+        int position = 0; // Used to reference the current song position.
+
+        if (backgroundSong != null) {
+
+            // Returns the current song position as long as the song is currently playing.
+            if (backgroundSong.isPlaying()) {
+                position = backgroundSong.getCurrentPosition() / 1000;
+            }
+        }
+
+        return position;
+    }
+
     // playSongUrl(): Plays the music file based on the specified song URL. The song is changed
     // only if the specified song does not match the current song that is playing.
     // Set loop variable to true to enable infinite song looping.
