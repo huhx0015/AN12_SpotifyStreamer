@@ -53,6 +53,9 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
     private String albumImageURL = ""; // Stores the image URL of the album.
     private String streamURL = ""; // Stores the music stream URL of the song.
 
+    // LAYOUT VARIABLES
+    private Boolean isDestroyed = false; // Used to determine if the fragment is being destroyed or not.
+
     // LIST VARIABLES
     private ArrayList<SSSpotifyModel> trackList = new ArrayList<>(); // References the track list.
     private int selectedPosition = 0; // References the selected position in the track list.
@@ -164,6 +167,7 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
     public void onDestroyView() {
         super.onDestroyView();
 
+        isDestroyed = true; // Indicates that the fragment is in the process of being destroyed.
         ButterKnife.unbind(this); // Sets all injected views to null.
 
         Log.d(LOG_TAG, "onDestroyView(): Fragment view destroyed.");
@@ -292,17 +296,34 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
     // status of the song.
     @Override
     public void playbackStatus(Boolean isPlay) {
-        isPlaying = isPlay; // Updates the current playback status of the streaming song.
-        updateControlButtons(isPlaying); // Updates the player control buttons.
-        Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
+
+        if (!isDestroyed) {
+            isPlaying = isPlay; // Updates the current playback status of the streaming song.
+            updateControlButtons(isPlaying); // Updates the player control buttons.
+            Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
+        }
     }
 
     // seekbarStatus(): An interface method invoked by the SSMusicEngine to update the player
     // seekbar position.
     @Override
     public void seekbarStatus(int position) {
-        playerBar.setProgress(position); // Sets the current position for the player seekbar.
-        Log.d(LOG_TAG, "seekbarStatus(): Setting the seekbar position: " + position);
+
+        if (!isDestroyed) {
+            playerBar.setProgress(position); // Sets the current position for the player seekbar.
+            Log.d(LOG_TAG, "seekbarStatus(): Setting the seekbar position: " + position);
+        }
+    }
+
+    // setDuration(): An interface method invoked by the SSMusicEngine to set the player seekbar
+    // max duration.
+    @Override
+    public void setDuration(int duration) {
+
+        if (!isDestroyed) {
+            playerBar.setMax(duration); // Sets the maximum duration of the player seekbar.
+            Log.d(LOG_TAG, "setDuration(): Sets the maximum duration of the player seekbar.");
+        }
     }
 
     // pauseTrack(): Signals the attached activity to invoke the SSMusicService to pause playback

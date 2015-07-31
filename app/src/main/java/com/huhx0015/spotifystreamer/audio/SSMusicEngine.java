@@ -212,6 +212,7 @@ public class SSMusicEngine {
 
                         mediaPlayer.start(); // Begins playing the song.
                         playbackStatus(true); // Updates SSPlayerFragment on the song playback status.
+                        setDuration(mediaPlayer.getDuration() / 1000); // Retrieves the maximum song duration.
                     }
                 });
             }
@@ -284,9 +285,20 @@ public class SSMusicEngine {
 
         if (playerFragment != null) {
 
-            Log.d(TAG, "playbackStatus: Attempting to update the SSPlayerFragment of the song playback status.");
+            Log.d(TAG, "playbackStatus(): Attempting to update the SSPlayerFragment of the song playback status.");
 
             try { ((OnMusicPlayerListener) playerFragment).playbackStatus(isPlay); }
+            catch (ClassCastException cce) {} // Catch for class cast exception errors.
+        }
+    }
+
+    // setDuration(): Signals the SSPlayerFragment to set the max duration for the Spotify song.
+    private void setDuration(int duration) {
+
+        Log.d(TAG, "setDuration(): Duration of the current song: " + duration);
+
+        if (playerFragment != null) {
+            try { ((OnMusicPlayerListener) playerFragment).setDuration(duration); }
             catch (ClassCastException cce) {} // Catch for class cast exception errors.
         }
     }

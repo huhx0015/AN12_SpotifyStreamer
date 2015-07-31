@@ -19,5 +19,9 @@ public interface OnMusicPlayerListener {
     // seekbarStatus(): Interface method that is used to update the seekbar in the SSPlayerFragment
     // based on the current playback status of the Spotify streaming song.
     void seekbarStatus(int position);
+
+    // setDuration(): Interface method that is used to determine the max song duration of the
+    // Spotify streaming song.
+    void setDuration(int duration);
 }
 

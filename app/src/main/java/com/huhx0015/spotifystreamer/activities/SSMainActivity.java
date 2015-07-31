@@ -259,6 +259,10 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // fragment is added.
             if (!playerFragment.isInLayout()) {
                 addFragment(playerFragment, "PLAYER", false); // Adds the fragment without transition.
+
+                // TODO: Currently crashes on rotation.
+                //attachPlayerFragment(playerFragment); // Attaches the SSPlayerFragment to the SSMusicEngine.
+
                 setupActionBar("PLAYER", currentArtist); // Sets up the action bar attributes.
                 Log.d(LOG_TAG, "setupFragment(): Adding SSPlayerFragment to the layout.");
             }
