@@ -6,6 +6,8 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+
 import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
 
 /** -----------------------------------------------------------------------------------------------
@@ -68,6 +70,11 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     }
 
     /** SERVICE METHODS ________________________________________________________________________ **/
+
+    // attachPlayerFragment(): Attaches the SSPlayerFragment to the SSMusicEngine class.
+    public void attachPlayerFragment(Fragment fragment) {
+        ss_music.getInstance().attachFragment(fragment);
+    }
 
     // pauseTrack(): Accesses the SSMusicEngine instance to pause the streaming song track.
     public void pauseTrack() {

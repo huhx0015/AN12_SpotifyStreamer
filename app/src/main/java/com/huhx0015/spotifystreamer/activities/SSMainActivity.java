@@ -532,6 +532,11 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         }
     }
 
+    // attachPlayerFragment(): Attaches a player fragment with
+    private void attachPlayerFragment(Fragment fragment) {
+        musicService.attachPlayerFragment(fragment);
+    }
+
     /** RECYCLE METHODS ________________________________________________________________________ **/
 
     // recycleMemory(): Recycles background services and View objects to clear up resources prior to
@@ -620,6 +625,8 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
             // Removes the previous fragment and adds the new fragment.
             changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true);
+
+            attachPlayerFragment(playerFragment); // Attaches the SSPlayerFragment to the SSMusicEngine.
 
             Log.d(LOG_TAG, "displayPlayerFragment(): SSPlayerFragment now being displayed.");
         }

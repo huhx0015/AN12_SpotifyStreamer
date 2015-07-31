@@ -222,17 +222,12 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
                 // PAUSE: Pauses the song if the song is currently playing.
                 if (isPlaying) {
 
-                    Log.d(LOG_TAG, "PAUSE: Pause button has been pressed.");
-
                     // Signals the activity to signal the SSMusicService to pause the song.
                     pauseTrack();
                 }
 
                 // PLAY: Plays the song if no song is currently playing in the background.
                 else {
-
-                    Log.d(LOG_TAG, "PLAY: Play button has been pressed.");
-                    Log.d(LOG_TAG, "Playing: " + streamURL);
 
                     // Signals the activity to signal the SSMusicService to begin streaming playback of
                     // the current track.
@@ -275,7 +270,7 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
 
             // Loads the image from the image URL into the play/pause ImageView object.
             Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_play)
+                    .load(android.R.drawable.ic_media_pause)
                     .into(playPauseButton);
         }
 
@@ -284,7 +279,7 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
 
             // Loads the image from the image URL into the play/pause ImageView object.
             Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_pause)
+                    .load(android.R.drawable.ic_media_play)
                     .into(playPauseButton);
         }
     }
@@ -297,6 +292,7 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
     public void playbackStatus(Boolean isPlay) {
         isPlaying = isPlay; // Updates the current playback status of the streaming song.
         updateControlButtons(isPlaying); // Updates the player control buttons.
+        Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
     }
 
     // pauseTrack(): Signals the attached activity to invoke the SSMusicService to pause playback

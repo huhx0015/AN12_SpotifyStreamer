@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.PowerManager;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import java.io.IOException;
@@ -27,6 +28,9 @@ public class SSMusicEngine {
     private boolean isPaused; // Used for determining if a song has been paused.
     public int songPosition; // Used for resuming playback on a song that was paused.
     public boolean musicOn; // Used for determining whether music is playing in the background.
+
+    // FRAGMENT VARIABLES:
+    private Fragment playerFragment; // References the SSPlayerFragment for updating the music player interface.
 
     // LOGGING VARIABLES:
     private static final String TAG = SSMusicEngine.class.getSimpleName(); // Used for logging output to logcat.
@@ -58,6 +62,12 @@ public class SSMusicEngine {
         this.songPosition = 0; // Sets the song position to the beginning of the song by default.
 
         Log.d(TAG, "INITIALIZING: Music engine initialization complete.");
+    }
+
+    // attachFragment(): Attaches the player fragment to this class.
+    public void attachFragment(Fragment fragment) {
+        this.playerFragment = fragment; // Sets the player fragment to interact with.
+        Log.d(TAG, "attachFragment: Fragment attached.");
     }
 
     /** MUSIC FUNCTIONALITY ____________________________________________________________________ **/
@@ -254,7 +264,13 @@ public class SSMusicEngine {
     // playbackStatus(): Signals the SSPlayerFragment on the current playback status of the
     // streaming Spotify song.
     private void playbackStatus(Boolean isPlay) {
-        try { ((OnMusicPlayerListener) context).playbackStatus(isPlay); }
-        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+
+        if (playerFragment != null) {
+
+            Log.d(TAG, "playbackStatus: Attempting to update the SSPlayerFragment of the song playback status.");
+
+            try { ((OnMusicPlayerListener) playerFragment).playbackStatus(isPlay); }
+            catch (ClassCastException cce) {} // Catch for class cast exception errors.
+        }
     }
 }
