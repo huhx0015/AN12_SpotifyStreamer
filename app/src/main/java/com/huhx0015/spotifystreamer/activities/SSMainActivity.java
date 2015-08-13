@@ -12,9 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
@@ -25,6 +22,7 @@ import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
+import com.huhx0015.spotifystreamer.ui.views.SSFragmentView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import butterknife.Bind;
@@ -44,7 +42,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
     // ACTIVITY VARIABLES
-    private static WeakReference<SSMainActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
+    private static WeakReference<AppCompatActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
 
     // DATA VARIABLES
     private static final String CURRENT_FRAGMENT = "currentFragment"; // Used for restoring the proper fragment for rotation change events.
@@ -57,6 +55,9 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     private String currentFragment = ""; // Used to determine which fragment is currently active.
     private String currentArtist = ""; // Used to determine the current artist name.
     private String currentInput = ""; // Used to determine the current artist input.
+
+    // LAYOUT VARIABLES
+    private Boolean isTablet = false; // Used to determine if the current device is a mobile or tablet device.
 
     // LIST VARIABLES
     private ArrayList<SSSpotifyModel> artistListResult = new ArrayList<>(); // Stores the artist list result.
@@ -73,6 +74,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
+    @Bind(R.id.ss_main_activity_secondary_fragment_container) FrameLayout fragmentSecondaryContainer;
 
     /** ACTIVITY LIFECYCLE METHODS _____________________________________________________________ **/
 
@@ -83,7 +85,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         super.onCreate(savedInstanceState);
 
         // Creates a weak reference of this activity.
-        weakRefActivity = new WeakReference<SSMainActivity>(this);
+        weakRefActivity = new WeakReference<AppCompatActivity>(this);
 
         // Checks to see if there is a saved instance that was saved prior, from events such as
         // rotation changes.
@@ -112,7 +114,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // Calls recycleMemory() to free up memory allocation.
     @Override
     public void onDestroy() {
-        recycleMemory(); // Recycles all services and View objects to free up memory resources.
+        recycleView(); // Recycles all services and View objects to free up memory resources.
         super.onDestroy();
     }
 
@@ -235,6 +237,9 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // setupLayout(): Sets up the layout for the activity.
     private void setupLayout() {
 
+        // Updates the isTablet value to determine if the device is a mobile or tablet device.
+        isTablet = getResources().getBoolean(R.bool.isTablet);
+
         setContentView(R.layout.ss_main_activity); // Sets the XML layout file for the activity.
         ButterKnife.bind(this); // ButterKnife view injection initialization.
 
@@ -258,7 +263,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // Checks to see if the playerFragment already exists in the layout. If not, the
             // fragment is added.
             if (!playerFragment.isInLayout()) {
-                addFragment(playerFragment, "PLAYER", false); // Adds the fragment without transition.
+                SSFragmentView.addFragment(playerFragment, fragmentContainer, "PLAYER", false, weakRefActivity);
 
                 // TODO: Currently crashes on rotation.
                 //attachPlayerFragment(playerFragment); // Attaches the SSPlayerFragment to the SSMusicEngine.
@@ -279,7 +284,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // Checks to see if the tracksFragment already exists in the layout. If not, the
             // fragment is added.
             if (!tracksFragment.isInLayout()) {
-                addFragment(tracksFragment, "TRACKS", false); // Adds the fragment without transition.
+                SSFragmentView.addFragment(tracksFragment, fragmentContainer, "TRACKS", false, weakRefActivity);
                 setupActionBar("TRACKS", currentArtist); // Sets up the action bar attributes.
                 Log.d(LOG_TAG, "setupFragment(): Adding SSTracksFragment to the layout.");
             }
@@ -301,7 +306,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // Checks to see if the artistFragment already exists in the layout. If not, the
             // fragment is added.
             if (!artistsFragment.isInLayout()) {
-                addFragment(artistsFragment, "ARTISTS", false); // Adds the fragment without transition.
+                SSFragmentView.addFragment(artistsFragment, fragmentContainer, "ARTISTS", false, weakRefActivity);
                 setupActionBar("ARTISTS", null); // Sets up the action bar attributes.
                 Log.d(LOG_TAG, "setupFragment(): Adding the SSArtistsFragment to the layout.");
             }
@@ -350,154 +355,19 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
     /** FRAGMENT METHODS _______________________________________________________________________ **/
 
-    // addFragment(): Sets up the fragment view.
-    private void addFragment(Fragment fragment, final String fragType, Boolean isAnimated) {
-
-        if ((weakRefActivity.get() != null) && (!weakRefActivity.get().isFinishing())) {
-
-            // Initializes the manager and transaction objects for the fragments.
-            android.support.v4.app.FragmentManager fragMan = weakRefActivity.get().getSupportFragmentManager();
-            android.support.v4.app.FragmentTransaction fragTrans = fragMan.beginTransaction();
-            fragTrans.replace(R.id.ss_main_activity_fragment_container, fragment, fragType);
-
-            // Makes the changes to the fragment manager and transaction objects.
-            fragTrans.commitAllowingStateLoss();
-
-            // Sets up the transition animation.
-            if (isAnimated) {
-                setFragmentTransition(fragType, true); // Sets the fragment transition animation.
-            }
-
-            // Displays the fragment view without any transition animations.
-            else {
-                fragmentContainer.setVisibility(View.VISIBLE); // Displays the fragment.
-            }
-        }
-    }
-
     // changeFragment(): Removes the previously existing fragment and adds a new fragment in it's
     // place.
     private void changeFragment(Fragment frag, String fragToAdd, String fragToRemove, String subtitle,
                                 Boolean isAnimated) {
 
-        removeFragment(fragToRemove, false); // Removes the SSArtistsFragment from the stack.
+        // Removes the SSArtistsFragment from the stack.
+        SSFragmentView.removeFragment(fragmentContainer, fragToRemove, false, weakRefActivity);
 
         // Adds the fragment with the transition animation.
-        addFragment(frag, fragToAdd, isAnimated);
+        SSFragmentView.addFragment(frag, fragmentContainer, fragToAdd, isAnimated, weakRefActivity);
 
         setupActionBar(fragToAdd, subtitle); // Sets the name of the action bar.
         currentFragment = fragToAdd; // Sets the current active fragment.
-    }
-
-    // removeFragment(): This method is responsible for removing the fragment view.
-    private void removeFragment(final String fragType, Boolean isAnimated) {
-
-        if ((weakRefActivity.get() != null) && (!weakRefActivity.get().isFinishing())) {
-
-            // Animates the fragment transition.
-            if (isAnimated) {
-                setFragmentTransition(fragType, false); // Sets the fragment transition animation.
-            }
-
-            // The fragment is removed from the view layout.
-            else {
-
-                // Initializes the manager and transaction objects for the fragments.
-                FragmentManager fragMan = getSupportFragmentManager();
-                Fragment currentFragment = getSupportFragmentManager().findFragmentByTag(fragType);
-                fragMan.beginTransaction().remove(currentFragment).commitAllowingStateLoss();
-                fragMan.popBackStack(); // Pops the fragment from the stack.
-                fragmentContainer.removeAllViews(); // Removes all views in the layout.
-                fragmentContainer.setVisibility(View.INVISIBLE); // Hides the fragment.
-
-                Log.d(LOG_TAG, "removeFragment(): Fragment has been removed.");
-            }
-        }
-    }
-
-    // setFragmentTransition(): Sets the fragment transition animation, based on the specified
-    // fragment type.
-    private void setFragmentTransition(final String fragType, final Boolean isAppearing) {
-
-        int animationResource; // References the animation XML resource file.
-
-        // Sets the animation XML resource file, based on the fragment type.
-        // TRACKS:
-        if (fragType.equals("TRACKS")) {
-
-            // FRAGMENT APPEARANCE ANIMATION:
-            if (isAppearing) {
-                animationResource = R.anim.slide_down; // Sets the animation XML resource file.
-            }
-
-            // FRAGMENT REMOVAL ANIMATION:
-            else {
-                animationResource = R.anim.slide_up; // Sets the animation XML resource file.
-            }
-        }
-
-        // PLAYER:
-        else if (fragType.equals("PLAYER")) {
-
-            // FRAGMENT APPEARANCE ANIMATION:
-            if (isAppearing) {
-                animationResource = R.anim.slide_right; // Sets the animation XML resource file.
-            }
-
-            // FRAGMENT REMOVAL ANIMATION:
-            else {
-                animationResource = R.anim.slide_left; // Sets the animation XML resource file.
-            }
-        }
-
-        // ARTISTS:
-        else {
-
-            // FRAGMENT APPEARANCE ANIMATION:
-            if (isAppearing) {
-                animationResource = R.anim.slide_up; // Sets the animation XML resource file.
-            }
-
-            // FRAGMENT REMOVAL ANIMATION:
-            else {
-                animationResource = R.anim.slide_down; // Sets the animation XML resource file.
-            }
-        }
-
-        // Loads the animation from the XML animation resource file.
-        Animation fragmentAnimation = AnimationUtils.loadAnimation(this, animationResource);
-
-        // Sets the AnimationListener for the animation.
-        fragmentAnimation.setAnimationListener(new Animation.AnimationListener() {
-
-            // onAnimationStart(): Runs when the animation is started.
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-                // FRAGMENT APPEARANCE ANIMATION:
-                if (isAppearing) {
-                    fragmentContainer.setVisibility(View.VISIBLE); // Displays the fragment.
-                }
-            }
-
-            // onAnimationEnd(): The fragment is removed after the animation ends.
-            @Override
-            public void onAnimationEnd(Animation animation) {
-
-                Log.d(LOG_TAG, "setFragmentTransition(): Fragment animation has ended.");
-
-                // FRAGMENT REMOVAL ANIMATION:
-                if (!isAppearing) {
-                    removeFragment(fragType, false); // Removes the fragment from the view.
-                }
-            }
-
-            // onAnimationRepeat(): Runs when the animation is repeated.
-            @Override
-            public void onAnimationRepeat(Animation animation) {}
-        });
-
-        fragmentContainer.startAnimation(fragmentAnimation); // Starts the animation.
     }
 
     /** SERVICE METHODS ________________________________________________________________________ **/
@@ -543,9 +413,9 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
     /** RECYCLE METHODS ________________________________________________________________________ **/
 
-    // recycleMemory(): Recycles background services and View objects to clear up resources prior to
+    // recycleView(): Recycles background services and View objects to clear up resources prior to
     // Activity destruction.
-    private void recycleMemory() {
+    private void recycleView() {
 
         try {
 
