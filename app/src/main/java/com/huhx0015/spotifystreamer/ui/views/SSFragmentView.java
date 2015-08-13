@@ -30,15 +30,16 @@ public class SSFragmentView {
     /** FRAGMENT VIEW METHODS __________________________________________________________________ **/
 
     // addFragment(): Sets up the fragment view.
-    public static void addFragment(Fragment fragment, ViewGroup container, final String fragType,
-                             Boolean isAnimated, WeakReference<AppCompatActivity> refActivity) {
+    public static void addFragment(Fragment fragment, ViewGroup container, int containerId,
+                                   final String fragType, Boolean isAnimated,
+                                   WeakReference<AppCompatActivity> refActivity) {
 
         if ((refActivity.get() != null) && (!refActivity.get().isFinishing())) {
 
             // Initializes the manager and transaction objects for the fragments.
             FragmentManager fragMan = refActivity.get().getSupportFragmentManager();
             FragmentTransaction fragTrans = fragMan.beginTransaction();
-            fragTrans.replace(R.id.ss_main_activity_fragment_container, fragment, fragType);
+            fragTrans.replace(containerId, fragment, fragType);
 
             // Makes the changes to the fragment manager and transaction objects.
             fragTrans.commitAllowingStateLoss();

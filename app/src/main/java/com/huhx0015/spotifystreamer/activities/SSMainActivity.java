@@ -239,6 +239,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
         // Updates the isTablet value to determine if the device is a mobile or tablet device.
         isTablet = getResources().getBoolean(R.bool.isTablet);
+        Log.d(LOG_TAG, "setupLayout(): isTablet: " + isTablet);
 
         setContentView(R.layout.ss_main_activity); // Sets the XML layout file for the activity.
         ButterKnife.bind(this); // ButterKnife view injection initialization.
@@ -263,7 +264,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // Checks to see if the playerFragment already exists in the layout. If not, the
             // fragment is added.
             if (!playerFragment.isInLayout()) {
-                SSFragmentView.addFragment(playerFragment, fragmentContainer, "PLAYER", false, weakRefActivity);
+                SSFragmentView.addFragment(playerFragment, fragmentContainer, R.id.ss_main_activity_fragment_container, "PLAYER", false, weakRefActivity);
 
                 // TODO: Currently crashes on rotation.
                 //attachPlayerFragment(playerFragment); // Attaches the SSPlayerFragment to the SSMusicEngine.
@@ -284,7 +285,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // Checks to see if the tracksFragment already exists in the layout. If not, the
             // fragment is added.
             if (!tracksFragment.isInLayout()) {
-                SSFragmentView.addFragment(tracksFragment, fragmentContainer, "TRACKS", false, weakRefActivity);
+                SSFragmentView.addFragment(tracksFragment, fragmentContainer, R.id.ss_main_activity_fragment_container, "TRACKS", false, weakRefActivity);
                 setupActionBar("TRACKS", currentArtist); // Sets up the action bar attributes.
                 Log.d(LOG_TAG, "setupFragment(): Adding SSTracksFragment to the layout.");
             }
@@ -306,7 +307,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // Checks to see if the artistFragment already exists in the layout. If not, the
             // fragment is added.
             if (!artistsFragment.isInLayout()) {
-                SSFragmentView.addFragment(artistsFragment, fragmentContainer, "ARTISTS", false, weakRefActivity);
+                SSFragmentView.addFragment(artistsFragment, fragmentContainer, R.id.ss_main_activity_fragment_container, "ARTISTS", false, weakRefActivity);
                 setupActionBar("ARTISTS", null); // Sets up the action bar attributes.
                 Log.d(LOG_TAG, "setupFragment(): Adding the SSArtistsFragment to the layout.");
             }
@@ -364,7 +365,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         SSFragmentView.removeFragment(fragmentContainer, fragToRemove, false, weakRefActivity);
 
         // Adds the fragment with the transition animation.
-        SSFragmentView.addFragment(frag, fragmentContainer, fragToAdd, isAnimated, weakRefActivity);
+        SSFragmentView.addFragment(frag, fragmentContainer, R.id.ss_main_activity_fragment_container, fragToAdd, isAnimated, weakRefActivity);
 
         setupActionBar(fragToAdd, subtitle); // Sets the name of the action bar.
         currentFragment = fragToAdd; // Sets the current active fragment.
@@ -406,6 +407,15 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         }
     }
 
+    // removeAudioService(): Stops the SSMusicService running in the background.
+    private void removeAudioService() {
+
+        if (audioIntent != null) {
+            stopService(audioIntent); // Stops the service.
+            musicService = null;
+        }
+    }
+
     // attachPlayerFragment(): Attaches a player fragment with
     private void attachPlayerFragment(Fragment fragment) {
         musicService.attachPlayerFragment(fragment);
@@ -419,11 +429,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
         try {
 
-            // Stops the SSMusicService running in the background.
-            if (audioIntent != null) {
-                stopService(audioIntent); // Stops the service.
-                musicService = null;
-            }
+            removeAudioService(); // Stops the SSMusicService running in the background.
 
             // Unbinds all Drawable objects attached to the current layout.
             SSUnbind.unbindDrawables(findViewById(R.id.ss_main_activity_layout));
@@ -498,7 +504,15 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             playerFragment.initializeFragment(list, position);
 
             // Removes the previous fragment and adds the new fragment.
-            changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true);
+            // TABLET:
+            if (isTablet) {
+                SSFragmentView.addFragment(playerFragment, fragmentSecondaryContainer, R.id.ss_main_activity_secondary_fragment_container, "PLAYER", true, weakRefActivity);
+            }
+
+            // MOBILE:
+            else {
+                changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true);
+            }
 
             attachPlayerFragment(playerFragment); // Attaches the SSPlayerFragment to the SSMusicEngine.
 
@@ -514,7 +528,15 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             tracksFragment.initializeFragment(list.get(position).getArtist(), true);
 
             // Removes the previous fragment and adds the new fragment.
-            changeFragment(tracksFragment, "TRACKS", "PLAYER", list.get(position).getArtist(), false);
+            // TABLET:
+            if (isTablet) {
+                SSFragmentView.removeFragment(fragmentSecondaryContainer, "PLAYER", false, weakRefActivity);
+            }
+
+            // MOBILE:
+            else {
+                changeFragment(tracksFragment, "TRACKS", "PLAYER", list.get(position).getArtist(), false);
+            }
 
             Log.d(LOG_TAG, "displayPlayerFragment(): SSTracksFragment now being displayed.");
         }

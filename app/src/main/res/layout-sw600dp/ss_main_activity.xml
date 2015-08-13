@@ -36,8 +36,8 @@
             android:layout_weight="1">
 
             <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
                 android:id="@+id/ss_main_activity_secondary_fragment_container"
                 android:visibility="gone">
 
