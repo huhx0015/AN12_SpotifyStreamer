@@ -17,7 +17,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:id="@+id/ss_main_activity_main_content"
-            android:layout_weight="2">
+            android:layout_weight="3">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -28,12 +28,12 @@
             </FrameLayout>
         </LinearLayout>
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:id="@+id/ss_main_activity_secondary_content"
-            android:layout_weight="1">
+            android:layout_weight="2">
 
             <FrameLayout
                 android:layout_width="fill_parent"
@@ -42,7 +42,15 @@
                 android:visibility="gone">
 
             </FrameLayout>
-        </LinearLayout>
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ss_main_activity_secondary_progress_indicator"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+        </FrameLayout>
 
     </LinearLayout>
 

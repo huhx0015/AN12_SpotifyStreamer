@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
@@ -75,6 +77,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
     @Bind(R.id.ss_main_activity_secondary_fragment_container) FrameLayout fragmentSecondaryContainer;
+    @Bind(R.id.ss_main_activity_secondary_progress_indicator) ProgressBar secondaryProgressBar;
 
     /** ACTIVITY LIFECYCLE METHODS _____________________________________________________________ **/
 
@@ -264,7 +267,16 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // Checks to see if the playerFragment already exists in the layout. If not, the
             // fragment is added.
             if (!playerFragment.isInLayout()) {
-                SSFragmentView.addFragment(playerFragment, fragmentContainer, R.id.ss_main_activity_fragment_container, "PLAYER", false, weakRefActivity);
+
+                // TABLET:
+                if (isTablet) {
+                    SSFragmentView.addFragment(playerFragment, fragmentContainer, R.id.ss_main_activity_fragment_container, "PLAYER", false, weakRefActivity);
+                }
+
+                // MOBILE:
+                else {
+                    SSFragmentView.addFragment(playerFragment, fragmentSecondaryContainer, R.id.ss_main_activity_secondary_fragment_container, "PLAYER", false, weakRefActivity);
+                }
 
                 // TODO: Currently crashes on rotation.
                 //attachPlayerFragment(playerFragment); // Attaches the SSPlayerFragment to the SSMusicEngine.
@@ -371,6 +383,12 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         currentFragment = fragToAdd; // Sets the current active fragment.
     }
 
+    // displayFragmentDialog(): Displays the DialogFragment view for the specified fragment.
+    private void displayFragmentDialog(DialogFragment frag, String fragType) {
+        FragmentManager fragMan = getSupportFragmentManager(); // Sets up the FragmentManager.
+        frag.show(fragMan, fragType); // Displays the DialogFragment.
+    }
+
     /** SERVICE METHODS ________________________________________________________________________ **/
 
     // musicConnection(): A ServiceConnection object for managing the service connection states for
@@ -466,8 +484,15 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
                 tracksFragment.initializeFragment(name, false);
             }
 
-            // Removes the previous fragment and adds the new fragment.
-            changeFragment(tracksFragment, "TRACKS", "ARTISTS", name, true);
+            // TABLET: Loads the SSTracksFragment into the secondary fragment container.
+            if (isTablet) {
+                SSFragmentView.addFragment(tracksFragment, fragmentSecondaryContainer, R.id.ss_main_activity_secondary_fragment_container, "TRACKS", true, weakRefActivity);
+            }
+
+            // MOBILE: Removes the previous fragment and adds the new fragment.
+            else {
+                changeFragment(tracksFragment, "TRACKS", "ARTISTS", name, true);
+            }
 
             Log.d(LOG_TAG, "displayTracksFragment(): SSTracksFragment now being displayed.");
 
@@ -482,8 +507,15 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             SSArtistsFragment artistFragment = new SSArtistsFragment();
             artistFragment.initializeFragment(name, true);
 
-            // Removes the previous fragment and adds the new fragment.
-            changeFragment(artistFragment, "ARTISTS", "TRACKS", name, false);
+            // TABLET: Removes the SSTracksFragment from the secondary fragment container.
+            if (isTablet) {
+                // TODO: Do nothing for now, need to think about the flow for the tablet version.
+            }
+
+            // MOBILE: Removes the previous fragment and adds the new fragment.
+            else {
+                changeFragment(artistFragment, "ARTISTS", "TRACKS", name, false);
+            }
 
             Log.d(LOG_TAG, "displayTracksFragment(): SSArtistsFragment now being displayed.");
         }
@@ -503,13 +535,12 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             SSPlayerFragment playerFragment = new SSPlayerFragment();
             playerFragment.initializeFragment(list, position);
 
-            // Removes the previous fragment and adds the new fragment.
-            // TABLET:
+            // TABLET: Displays the SSPlayerFragment as a DialogFragment.
             if (isTablet) {
-                SSFragmentView.addFragment(playerFragment, fragmentSecondaryContainer, R.id.ss_main_activity_secondary_fragment_container, "PLAYER", true, weakRefActivity);
+                displayFragmentDialog(playerFragment, "PLAYER");
             }
 
-            // MOBILE:
+            // MOBILE: Removes the previous fragment and adds the new fragment.
             else {
                 changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true);
             }
@@ -527,13 +558,12 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             SSTracksFragment tracksFragment = new SSTracksFragment();
             tracksFragment.initializeFragment(list.get(position).getArtist(), true);
 
-            // Removes the previous fragment and adds the new fragment.
             // TABLET:
             if (isTablet) {
-                SSFragmentView.removeFragment(fragmentSecondaryContainer, "PLAYER", false, weakRefActivity);
+                // TODO: Do nothing, need to think about the flow for the tablet version.
             }
 
-            // MOBILE:
+            // MOBILE: Removes the previous fragment and adds the new fragment.
             else {
                 changeFragment(tracksFragment, "TRACKS", "PLAYER", list.get(position).getArtist(), false);
             }

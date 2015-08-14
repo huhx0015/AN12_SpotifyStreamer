@@ -2,7 +2,7 @@ package com.huhx0015.spotifystreamer.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +15,7 @@ import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
+import com.huhx0015.spotifystreamer.ui.graphics.SSImages;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import butterknife.Bind;
@@ -23,12 +24,12 @@ import butterknife.ButterKnife;
 /** -----------------------------------------------------------------------------------------------
  *  [SSPlayerFragment] CLASS
  *  PROGRAMMER: Michael Yoon Huh (Huh X0015)
- *  DESCRIPTION: SSPlayerFragment is a fragment class that is responsible for displaying the music
+ *  DESCRIPTION: SSPlayerFragment is a dialog fragment class that is responsible for displaying the music
  *  player in which a user can interact with to listen to streaming Spotify songs.
  *  -----------------------------------------------------------------------------------------------
  */
 
-public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener {
+public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerListener {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
@@ -55,6 +56,7 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
 
     // LAYOUT VARIABLES
     private Boolean isDestroyed = false; // Used to determine if the fragment is being destroyed or not.
+    private float curDensity; // References the density value of the current device.
 
     // LIST VARIABLES
     private ArrayList<SSSpotifyModel> trackList = new ArrayList<>(); // References the track list.
@@ -208,6 +210,10 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
 
     // setUpLayout(): Sets up the layout for the fragment.
     private void setUpLayout() {
+
+        // Retrieves the device's density attributes.
+        curDensity = getResources().getDisplayMetrics().density;
+
         setUpButtons(); // Sets up the button listeners for the fragment.
         setUpImage(); // Sets up the images for the ImageView objects for the fragment.
         setUpText(); // Sets up the text for the TextView objects for the fragment.
@@ -256,10 +262,30 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
     // setUpImage(): Sets up the images for the ImageView objects in the fragment.
     private void setUpImage() {
 
-        // Loads the image from the image URL into the albumImage ImageView object.
+        // ALBUM COVER: Loads the image from the image URL into the albumImage ImageView object.
         Picasso.with(currentActivity)
                 .load(albumImageURL)
                 .into(albumImage);
+
+        // PREVIOUS BUTTON: Sets a circular icon into the ImageButton object.
+        SSImages.setCircularImage(android.R.drawable.ic_media_previous, previousButton,
+                (int) (48 * curDensity), (int) (48 * curDensity), currentActivity);
+
+        // REWIND BUTTON: Sets a circular icon into the ImageButton object.
+        SSImages.setCircularImage(android.R.drawable.ic_media_rew, rewindButton,
+                (int) (56 * curDensity), (int) (56 * curDensity), currentActivity);
+
+        // PLAY/PAUSE BUTTON: Sets a circular icon into the ImageButton object.
+        SSImages.setCircularImage(android.R.drawable.ic_media_play, playPauseButton,
+                (int) (64 * curDensity), (int) (64 * curDensity), currentActivity);
+
+        // FORWARD BUTTON: Sets a circular icon into the ImageButton object.
+        SSImages.setCircularImage(android.R.drawable.ic_media_ff, forwardButton,
+                (int) (56 * curDensity), (int) (56 * curDensity), currentActivity);
+
+        // NEXT BUTTON: Sets a circular icon into the ImageButton object.
+        SSImages.setCircularImage(android.R.drawable.ic_media_next, nextButton,
+                (int) (48 * curDensity), (int) (48 * curDensity), currentActivity);
     }
 
     // setUpText(): Sets up the texts for the TextView objects in the fragment.
@@ -273,20 +299,14 @@ public class SSPlayerFragment extends Fragment implements OnMusicPlayerListener 
 
         // PLAYING:
         if (isPlay) {
-
-            // Loads the image from the image URL into the play/pause ImageView object.
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_pause)
-                    .into(playPauseButton);
+            SSImages.setCircularImage(android.R.drawable.ic_media_pause, playPauseButton,
+                    (int) (64 * curDensity), (int) (64 * curDensity), currentActivity);
         }
 
         // STOP / PAUSED:
         else {
-
-            // Loads the image from the image URL into the play/pause ImageView object.
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_play)
-                    .into(playPauseButton);
+            SSImages.setCircularImage(android.R.drawable.ic_media_play, playPauseButton,
+                    (int) (64 * curDensity), (int) (64 * curDensity), currentActivity);
         }
     }
 
