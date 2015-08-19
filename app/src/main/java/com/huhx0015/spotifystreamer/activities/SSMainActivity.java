@@ -20,6 +20,7 @@ import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
 import com.huhx0015.spotifystreamer.fragments.SSPlayerFragment;
 import com.huhx0015.spotifystreamer.fragments.SSTracksFragment;
+import com.huhx0015.spotifystreamer.intent.SSShareIntent;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
@@ -186,6 +187,13 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
         // Always calls the superclass, so it can save the view hierarchy state.
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    // onShareAction(): Defines the action to take if the Share menu option is selected.
+    public void onShareAction(MenuItem item) {
+
+        // TODO: Get current track name. Also add in check for selected track.
+        SSShareIntent.shareIntent("TRACK NAME", currentArtist, this);
     }
 
     /** PHYSICAL BUTTON METHODS ________________________________________________________________ **/
