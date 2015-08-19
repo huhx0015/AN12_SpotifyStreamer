@@ -349,7 +349,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // pauseTrack(): Signals the attached activity to invoke the SSMusicService to pause playback
     // of the streamed Spotify track.
     private void pauseTrack() {
-        try { ((OnMusicServiceListener) currentActivity).pauseTrack(); }
+        try { ((OnMusicServiceListener) currentActivity).pauseTrack(false); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 

@@ -14,7 +14,7 @@ public interface OnMusicServiceListener {
 
     // pauseTrack(): Interface method that signals the attached activity to pause the playback of a
     // Spotify track in the SSMusicService class.
-    void pauseTrack();
+    void pauseTrack(Boolean isStop);
 
     // playTrack(): Interface method that signals the attached activity to begin the playback of a
     // Spotify track in the SSMusicService class.

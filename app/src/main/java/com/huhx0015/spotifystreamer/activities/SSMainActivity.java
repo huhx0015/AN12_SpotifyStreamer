@@ -566,6 +566,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // MOBILE: Removes the previous fragment and adds the new fragment.
             else {
                 changeFragment(tracksFragment, "TRACKS", "PLAYER", list.get(position).getArtist(), false);
+                pauseTrack(true); // Stops music playback.
             }
 
             Log.d(LOG_TAG, "displayPlayerFragment(): SSTracksFragment now being displayed.");
@@ -575,8 +576,8 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // pauseTrack(): Invoked by SSPlayerFragment to signal the SSMusicService to pause the song
     // stream.
     @Override
-    public void pauseTrack() {
-        musicService.pauseTrack(); // Signals the SSMusicService to pause the song stream.
+    public void pauseTrack(Boolean isStop) {
+        musicService.pauseTrack(isStop); // Signals the SSMusicService to pause the song stream.
     }
 
     // playTrack(): Invoked by SSPlayerFragment to signal the SSMusicService to play the selected

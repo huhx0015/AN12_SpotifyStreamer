@@ -90,11 +90,20 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     }
 
     // pauseTrack(): Accesses the SSMusicEngine instance to pause the streaming song track.
-    public void pauseTrack() {
+    public void pauseTrack(Boolean isStop) {
 
         // Pauses the song if a song is currently playing in the background.
         if (ss_music.getInstance().isSongPlaying()) {
-            ss_music.getInstance().pauseSong();
+
+            // STOP:
+            if (isStop) {
+                ss_music.getInstance().stopSong();
+            }
+
+            // PAUSE:
+            else {
+                ss_music.getInstance().pauseSong();
+            }
             seekHandler.removeCallbacks(seekbarThread); // Stops the seekbar update thread.
         }
     }
