@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
+import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
@@ -34,7 +35,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
     // ACTIVITY VARIABLES
-    private Activity currentActivity; // Used to determine the activity class this fragment is currently attached to.
+    private SSMainActivity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
     // AUDIO VARIABLES
     private String currentSong = "NONE"; // Sets the default song for the activity.
@@ -106,7 +107,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        this.currentActivity = activity; // Sets the currentActivity to attached activity object.
+        this.currentActivity = (SSMainActivity) activity; // Sets the currentActivity to attached activity object.
     }
 
     // onCreate(): Runs when the fragment is first started.
@@ -180,6 +181,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     public void onDestroy() {
         super.onDestroy();
 
+        pauseTrack(); // Pauses the track, if currently playing in the background.
+
+        // Resets the current track value and the isPlaying value in SSMainActivity is set to false.
+        currentActivity.setCurrentTrack(null, false);
+
         Log.d(LOG_TAG, "onDestroy(): Fragment destroyed.");
     }
 
@@ -213,6 +219,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // Retrieves the device's density attributes.
         curDensity = getResources().getDisplayMetrics().density;
+
+        // Sets the current track name for the SSMainActivity activity.
+        currentActivity.setCurrentTrack(songName, true);
 
         setUpButtons(); // Sets up the button listeners for the fragment.
         setUpImage(); // Sets up the images for the ImageView objects for the fragment.

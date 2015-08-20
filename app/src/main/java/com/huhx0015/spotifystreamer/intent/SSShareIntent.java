@@ -33,10 +33,41 @@ public class SSShareIntent {
 
         Log.d(LOG_TAG, "shareIntent(): Preparing content to share to external activites...");
 
+        // Used for setting the message to display when sharing to external text applications.
+        String shareMessage = "I'm currently checking out ";
+
+        // Generates the appropriate message to display for the share intent.
+        if ( (artistName != null) && !(artistName.equals("")) ) {
+
+            // If an artist and a track has been selected, both the track and artist names are
+            // displayed in the share intent message.
+            if (trackName != null) {
+                shareMessage = "I'm currently listening to " + trackName + " by " + artistName + " on ";
+            }
+
+            // Displays only the artist name in the share intent message.
+            else {
+                shareMessage = "I'm currently checking out " + artistName + " on ";
+            }
+        }
+
+        shareMessage = shareMessage + "SPOTIFY STREAMER.";
+
+        // Sets up an Intent to share the shortcut data with external activities.
+        Intent sendIntent = new Intent(Intent.ACTION_SEND);
+        sendIntent.setType("text/plain"); // Specifies that this is a text type.
+        sendIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+        sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        context.startActivity(Intent.createChooser(sendIntent, "Share my Spotify Streamer experience with: "));
+
+        /*
+        // TODO: Specify file name here.
+        String filename = "";
+
         // References the directory path where the image is stored.
         final String uploadFilePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString() + "/";
         String fullFilePath = uploadFilePath + "" + filename; // Sets the full file path.
-        Bitmap albumBitmap; // References the food bitmap.
+        Bitmap albumBitmap; // References the bitmap.
 
         // Retrieves the bitmap data from the file
         try {
@@ -69,5 +100,6 @@ public class SSShareIntent {
             sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             context.startActivity(Intent.createChooser(sendIntent, "Share my Spotify Streamer experience with: "));
         }
+        */
     }
 }

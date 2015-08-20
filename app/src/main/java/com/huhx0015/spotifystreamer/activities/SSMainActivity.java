@@ -12,6 +12,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
@@ -25,6 +26,7 @@ import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
+import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.huhx0015.spotifystreamer.ui.views.SSFragmentView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -55,9 +57,11 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     private static final String TRACK_LIST = "trackListResult"; // Parcelable key value for the track list.
 
     // FRAGMENT VARIABLES
+    private Boolean isPlaying = false; // Used to determine if there is a song currently playing in the background.
     private String currentFragment = ""; // Used to determine which fragment is currently active.
     private String currentArtist = ""; // Used to determine the current artist name.
     private String currentInput = ""; // Used to determine the current artist input.
+    private String currentTrack = ""; // Used to determine the current track name.
 
     // LAYOUT VARIABLES
     private Boolean isTablet = false; // Used to determine if the current device is a mobile or tablet device.
@@ -124,7 +128,6 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
     /** ACTIVITY EXTENSION METHODS _____________________________________________________________ **/
 
-    /* TODO: Disabled for P1.
     // onCreateOptionsMenu(): Inflates the menu when the menu key is pressed. This adds items to
     // the action bar if it is present.
     @Override
@@ -134,7 +137,6 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         getMenuInflater().inflate(R.menu.ss_main_activity_menu, menu);
         return true;
     }
-    */
 
     // onOptionsItemSelected(): Defines the action to take when the menu options are selected.
     @Override
@@ -191,9 +193,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
     // onShareAction(): Defines the action to take if the Share menu option is selected.
     public void onShareAction(MenuItem item) {
-
-        // TODO: Get current track name. Also add in check for selected track.
-        SSShareIntent.shareIntent("TRACK NAME", currentArtist, this);
+        SSShareIntent.shareIntent(currentTrack, currentArtist, this);
     }
 
     /** PHYSICAL BUTTON METHODS ________________________________________________________________ **/
@@ -241,6 +241,13 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // setTrackResults(): Sets the track list result for this activity.
     public void setTrackResults(ArrayList<SSSpotifyModel> list) {
         this.trackListResult = list;
+    }
+
+    // setCurrentTrack(): Sets the current track playing in the background, as well as setting the
+    // the isPlaying value for determining if a song is currently playing.
+    public void setCurrentTrack(String track, Boolean isPlay) {
+        this.currentTrack = track;
+        this.isPlaying = isPlay;
     }
 
     /** LAYOUT METHODS _________________________________________________________________________ **/

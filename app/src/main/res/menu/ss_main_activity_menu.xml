@@ -2,14 +2,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".SSMainActivity">
 
-    <item
-        android:id="@+id/action_settings"
+    <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:orderInCategory="100"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/ss_share_button"
+        android:id="@+id/miShare"
         android:icon="@drawable/abc_ic_menu_share_mtrl_alpha"
         android:onClick="onShareAction"
         app:showAsAction="ifRoom"
