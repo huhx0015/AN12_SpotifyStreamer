@@ -181,7 +181,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     public void onDestroy() {
         super.onDestroy();
 
-        pauseTrack(); // Pauses the track, if currently playing in the background.
+        // TODO: Crashes on rotation change. Investigate.
+        //pauseTrack(); // Pauses the track, if currently playing in the background.
 
         // Resets the current track value and the isPlaying value in SSMainActivity is set to false.
         currentActivity.setCurrentTrack(null, false);
@@ -234,6 +235,26 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         // PLAYER BUTTONS:
         // -----------------------------------------------------------------------------------------
 
+        // NEXT: Sets up the listener and the actions for the NEXT button.
+        nextButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                updateTrack(selectedPosition + 1); // Sets the song to the next track in the list.
+
+                // If the previous track was playing when the next button was pressed, the new track
+                // is automatically played.
+                if (isPlaying) {
+
+                    // Signals the activity to signal the SSMusicService to begin streaming playback of
+                    // the current track.
+                    playTrack(streamURL, isLoop);
+                    currentSong = streamURL; // Sets the current song playing in the background.
+                }
+            }
+        });
+
         // PLAY / PAUSE: Sets up the listener and the actions for the PLAY / PAUSE button.
         playPauseButton.setOnClickListener(new View.OnClickListener() {
 
@@ -249,6 +270,26 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
                 // PLAY: Plays the song if no song is currently playing in the background.
                 else {
+
+                    // Signals the activity to signal the SSMusicService to begin streaming playback of
+                    // the current track.
+                    playTrack(streamURL, isLoop);
+                    currentSong = streamURL; // Sets the current song playing in the background.
+                }
+            }
+        });
+
+        // PREVIOUS: Sets up the listener and the actions for the PREVIOUS button.
+        previousButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                updateTrack(selectedPosition - 1); // Sets the song to the next track in the list.
+
+                // If the previous track was playing when the next button was pressed, the new track
+                // is automatically played.
+                if (isPlaying) {
 
                     // Signals the activity to signal the SSMusicService to begin streaming playback of
                     // the current track.
@@ -319,7 +360,29 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         }
     }
 
-    /** INTERFACE METHODS __________________________________________________________________ **/
+    // updateTrack(): Updates the song track details based on the set position.
+    private void updateTrack(int position) {
+
+        // Checks to see if the position has not exceeded the size of the trackList array or is a
+        // non-negative value.
+        if ( (position < trackList.size()) && (position >= 0)) {
+
+            // Updates the track details based on the current position.
+            this.selectedPosition = position;
+            this.artistName = trackList.get(position).getArtist();
+            this.songId = trackList.get(position).getSongId();
+            this.songName = trackList.get(position).getSong();
+            this.albumName = trackList.get(position).getAlbum();
+            this.albumImageURL = trackList.get(position).getAlbumImage();
+            this.streamURL = trackList.get(position).getSongURL();
+
+            // Updates the album image and song details.
+            setUpImage();
+            setUpText();
+        }
+    }
+
+    /** INTERFACE METHODS ______________________________________________________________________ **/
 
     // playbackStatus(): An interface method invoked by the SSMusicEngine on the current playback
     // status of the song.

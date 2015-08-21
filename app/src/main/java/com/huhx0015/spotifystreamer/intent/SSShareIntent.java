@@ -41,7 +41,7 @@ public class SSShareIntent {
 
             // If an artist and a track has been selected, both the track and artist names are
             // displayed in the share intent message.
-            if (trackName != null) {
+            if ( (trackName != null) && !(trackName.equals("")) ) {
                 shareMessage = "I'm currently listening to " + trackName + " by " + artistName + " on ";
             }
 
