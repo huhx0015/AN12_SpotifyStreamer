@@ -5,6 +5,11 @@
         <item name="colorPrimary">@color/ss_toolbar_light_color</item>
         <item name="colorPrimaryDark">@color/ss_toolbar_dark_color</item>
         <item name="colorAccent">@color/ss_toolbar_accent_color</item>
+        <item name="android:dialogTheme">@style/DialogTheme</item>
+    </style>
+
+    <!-- Dialog theme. -->
+    <style name="DialogTheme" parent="@android:style/Theme.Holo.Dialog.NoActionBar">
     </style>
 
 </resources>

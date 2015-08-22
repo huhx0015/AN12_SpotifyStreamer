@@ -8,8 +8,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
-
 import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 

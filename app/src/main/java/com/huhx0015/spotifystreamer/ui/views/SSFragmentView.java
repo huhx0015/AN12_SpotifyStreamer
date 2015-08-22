@@ -12,7 +12,6 @@ import android.view.animation.AnimationUtils;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
 import com.huhx0015.spotifystreamer.ui.actionbar.SSActionBar;
-
 import java.lang.ref.WeakReference;
 
 /** -----------------------------------------------------------------------------------------------

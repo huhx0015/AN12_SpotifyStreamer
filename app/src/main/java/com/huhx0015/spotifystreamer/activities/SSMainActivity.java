@@ -8,7 +8,6 @@ import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,7 +26,6 @@ import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
 import com.huhx0015.spotifystreamer.ui.actionbar.SSActionBar;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
-import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.huhx0015.spotifystreamer.ui.views.SSFragmentView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -288,15 +286,13 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         Fragment tracksFragment = fragManager.findFragmentByTag("TRACKS");
         Fragment playerFragment = fragManager.findFragmentByTag("PLAYER");
 
-        Log.d(LOG_TAG, "setupFragment(): Current fragment in focus: " + currentFragment);
-
         // TABLET: Reloads the SSTracksFragment (if it was in focus previously) and the
         // SSArtistsFragment in their respective containers.
         if (isTablet) {
 
             Log.d(LOG_TAG, "setupFragment(): Reloading fragments for tablet view...");
 
-           SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
+            SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
 
             // If a screen orientation event has occurred and the fragment that was in focus was
             // SSTracksFragment, a new SSTracksFragment is created and is made visible in the
@@ -527,13 +523,8 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             SSTracksFragment tracksFragment = new SSTracksFragment();
             tracksFragment.initializeFragment(list.get(position).getArtist(), true);
 
-            // TABLET:
-            if (isTablet) {
-                // TODO: Do nothing, need to think about the flow for the tablet version.
-            }
-
             // MOBILE: Removes the previous fragment and adds the new fragment.
-            else {
+            if (!isTablet) {
                 changeFragment(tracksFragment, "TRACKS", "PLAYER", list.get(position).getArtist(), false);
                 pauseTrack(true); // Stops music playback.
             }
