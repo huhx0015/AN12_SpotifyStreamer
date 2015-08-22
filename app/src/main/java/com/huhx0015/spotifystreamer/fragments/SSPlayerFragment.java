@@ -17,6 +17,7 @@ import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.ui.graphics.SSImages;
+import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import butterknife.Bind;
@@ -305,6 +306,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             @Override
             public void onClick(View v) {
                 // TODO: Rewind action here.
+                //seekbarStatus();
             }
         });
     }
@@ -414,7 +416,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         if (!isDestroyed) {
             playerBar.setMax(duration); // Sets the maximum duration of the player seekbar.
-            Log.d(LOG_TAG, "setDuration(): Sets the maximum duration of the player seekbar.");
+            Log.d(LOG_TAG, "setDuration(): Maximum duration of the seekbar set.");
         }
     }
 

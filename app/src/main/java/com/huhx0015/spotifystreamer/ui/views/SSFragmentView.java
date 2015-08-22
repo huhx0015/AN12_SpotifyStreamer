@@ -10,6 +10,9 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import com.huhx0015.spotifystreamer.R;
+import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
+import com.huhx0015.spotifystreamer.ui.actionbar.SSActionBar;
+
 import java.lang.ref.WeakReference;
 
 /** -----------------------------------------------------------------------------------------------
@@ -39,7 +42,9 @@ public class SSFragmentView {
             // Initializes the manager and transaction objects for the fragments.
             FragmentManager fragMan = refActivity.get().getSupportFragmentManager();
             FragmentTransaction fragTrans = fragMan.beginTransaction();
+            //fragTrans.add(containerId, fragment, fragType);
             fragTrans.replace(containerId, fragment, fragType);
+            fragTrans.addToBackStack(fragType); // Adds fragment to the fragment stack.
 
             // Makes the changes to the fragment manager and transaction objects.
             fragTrans.commitAllowingStateLoss();
@@ -81,6 +86,50 @@ public class SSFragmentView {
                 Log.d(LOG_TAG, "removeFragment(): Fragment has been removed.");
             }
         }
+    }
+
+    // reloadFragment(): Reloads the specified fragment into the specified container. This method is
+    // typically called after a screen orientation change in the SSMainActivity activity class.
+    public static Boolean reloadFragment(Fragment fragment, String curFragment, String fragType,
+                                         ViewGroup container, int containerID, String currentArtist,
+                                         String currentTrack, AppCompatActivity activity,
+                                         WeakReference<AppCompatActivity> refActivity) {
+
+        // SSArtistsFragment: If the fragment is null, it indicates that it is not on the fragment
+        // stack. The fragment is initialized. This is needed to ensure that the SSArtistFragment
+        // is shown when the application is first launched.
+        if (fragType.equals("ARTISTS")) {
+
+            if (fragment == null) {
+                fragment = new SSArtistsFragment(); // Initializes the SSArtistsFragment class.
+            }
+        }
+
+        // Checks to see if the playerFragment already exists in the layout. If not, the fragment is
+        // added.
+        if ( (fragment != null) && (curFragment.equals(fragType)) ) {
+
+            if (!fragment.isInLayout()) {
+
+                addFragment(fragment, container, containerID, fragType, false, refActivity);
+
+                // SSTracksFragment: Sets up the action bar attributes.
+                if (fragType.equals("TRACKS")) {
+                    SSActionBar.setupActionBar(fragType, null, currentArtist, activity);
+                }
+
+                // SSArtistsFragment | SSPlayerFragment: Sets up the action bar attributes.
+                else {
+                    SSActionBar.setupActionBar(fragType, currentArtist, currentTrack, activity);
+                }
+
+                Log.d(LOG_TAG, "reloadFragment(): Reloading " + fragType + " fragment into the container.");
+
+                return true; // Indicates that the fragment was found in the layout and was reloaded.
+            }
+        }
+
+        return false; // Indicates that the fragment was not found and was not reloaded.
     }
 
     // setFragmentTransition(): Sets the fragment transition animation, based on the specified

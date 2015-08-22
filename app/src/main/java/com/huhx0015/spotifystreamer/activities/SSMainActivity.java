@@ -25,6 +25,7 @@ import com.huhx0015.spotifystreamer.intent.SSShareIntent;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
+import com.huhx0015.spotifystreamer.ui.actionbar.SSActionBar;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.huhx0015.spotifystreamer.ui.views.SSFragmentView;
@@ -51,13 +52,16 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
     // DATA VARIABLES
     private static final String CURRENT_FRAGMENT = "currentFragment"; // Used for restoring the proper fragment for rotation change events.
+    private static final String CURRENT_TRACK = "currentTrack"; // Used for restoring the proper track name value for rotation change events.
     private static final String ARTIST_INPUT = "artistInput"; // Used for restoring the artist input value for rotation change events.
     private static final String ARTIST_NAME = "artistName"; // Used for restoring the artist name value for rotation change events.
     private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
+    private static final String ROTATION_CHANGE = "rotationChange"; // Used for restoring the rotationChange value for rotation change events.
     private static final String TRACK_LIST = "trackListResult"; // Parcelable key value for the track list.
 
     // FRAGMENT VARIABLES
     private Boolean isPlaying = false; // Used to determine if the SSPlayerFragment is in focus.
+    private Boolean isRotationEvent = false; // Used to determine if a screen orientation change event has occurred.
     private String currentFragment = ""; // Used to determine which fragment is currently active.
     private String currentArtist = ""; // Used to determine the current artist name.
     private String currentInput = ""; // Used to determine the current artist input.
@@ -100,11 +104,13 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         if (savedInstanceState != null) {
 
             // Restores the saved instance values.
+            isRotationEvent = savedInstanceState.getBoolean(ROTATION_CHANGE);
+            currentArtist = savedInstanceState.getString(ARTIST_NAME);
+            currentInput = savedInstanceState.getString(ARTIST_INPUT);
+            currentTrack = savedInstanceState.getString(CURRENT_TRACK);
             currentFragment = savedInstanceState.getString(CURRENT_FRAGMENT);
             artistListResult = savedInstanceState.getParcelableArrayList(ARTIST_LIST);
             trackListResult = savedInstanceState.getParcelableArrayList(TRACK_LIST);
-            currentArtist = savedInstanceState.getString(ARTIST_NAME);
-            currentInput = savedInstanceState.getString(ARTIST_INPUT);
         }
 
         // LAYOUT SETUP:
@@ -181,11 +187,13 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         // Saves the current fragment state and current artist and track list values into the
         // instance. Used to determine which fragment should be shown when the activity is
         // re-created after the rotation change event.
+        savedInstanceState.putBoolean(ROTATION_CHANGE, true);
         savedInstanceState.putString(CURRENT_FRAGMENT, currentFragment);
-        savedInstanceState.putParcelableArrayList(ARTIST_LIST, artistListResult);
-        savedInstanceState.putParcelableArrayList(TRACK_LIST, trackListResult);
+        savedInstanceState.putString(CURRENT_TRACK, currentTrack);
         savedInstanceState.putString(ARTIST_INPUT, currentInput);
         savedInstanceState.putString(ARTIST_NAME, currentArtist);
+        savedInstanceState.putParcelableArrayList(ARTIST_LIST, artistListResult);
+        savedInstanceState.putParcelableArrayList(TRACK_LIST, trackListResult);
 
         // Always calls the superclass, so it can save the view hierarchy state.
         super.onSaveInstanceState(savedInstanceState);
@@ -263,6 +271,11 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         ButterKnife.bind(this); // ButterKnife view injection initialization.
 
         setupFragment(); // Initializes the fragment view for the layout.
+
+        // If a rotation event occurred, the isRotationEvent value is reset.
+        if (isRotationEvent) {
+            isRotationEvent = false;
+        }
     }
 
     // setupFragment(): Initializes the fragment view for the layout.
@@ -275,105 +288,45 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         Fragment tracksFragment = fragManager.findFragmentByTag("TRACKS");
         Fragment playerFragment = fragManager.findFragmentByTag("PLAYER");
 
-        // SSPLAYERFRAGMENT: If the SSPlayerFragment was in focus before the screen rotation event,
-        // the retained SSPlayerFragment is re-added instead.
-        if ( (playerFragment != null) && (currentFragment.equals("PLAYER"))) {
+        Log.d(LOG_TAG, "setupFragment(): Current fragment in focus: " + currentFragment);
 
-            // Checks to see if the playerFragment already exists in the layout. If not, the
-            // fragment is added.
-            if (!playerFragment.isInLayout()) {
-
-                SSFragmentView.addFragment(playerFragment, fragmentContainer, R.id.ss_main_activity_fragment_container, "PLAYER", false, weakRefActivity);
-
-                // TODO: Currently crashes on rotation.
-                //attachPlayerFragment(playerFragment); // Attaches the SSPlayerFragment to the SSMusicEngine.
-
-                setupActionBar("PLAYER", currentArtist); // Sets up the action bar attributes.
-                Log.d(LOG_TAG, "setupFragment(): Adding SSPlayerFragment to the layout.");
-            }
-        }
-
-        // SSTRACKSFRAGMENT: If the SSTracksFragment was in focus before the screen rotation event,
-        // the retained SSTracksFragment is re-added instead.
-        else if ( (tracksFragment != null) && (currentFragment.equals("TRACKS"))) {
-
-            // Checks to see if the tracksFragment already exists in the layout. If not, the
-            // fragment is added.
-            if (!tracksFragment.isInLayout()) {
-                SSFragmentView.addFragment(tracksFragment, fragmentContainer, R.id.ss_main_activity_fragment_container, "TRACKS", false, weakRefActivity);
-                setupActionBar("TRACKS", currentArtist); // Sets up the action bar attributes.
-                Log.d(LOG_TAG, "setupFragment(): Adding SSTracksFragment to the layout.");
-            }
-        }
-
-        // SSARTISTSFRAGMENT: The SSArtistsFragment is setup as the primary fragment in focus.
-        else {
-
-            // If the fragment is null, it indicates that it is not on the fragment stack. The fragment
-            // is initialized.
-            if (artistsFragment == null) {
-                artistsFragment = new SSArtistsFragment(); // Initializes the SSArtistsFragment class.
-            }
-
-            // Checks to see if the artistFragment already exists in the layout. If not, the
-            // fragment is added.
-            if (!artistsFragment.isInLayout()) {
-                SSFragmentView.addFragment(artistsFragment, fragmentContainer, R.id.ss_main_activity_fragment_container, "ARTISTS", false, weakRefActivity);
-                setupActionBar("ARTISTS", null); // Sets up the action bar attributes.
-                Log.d(LOG_TAG, "setupFragment(): Adding the SSArtistsFragment to the layout.");
-            }
-        }
-
-        // TODO: This needs to be tested.
-        // TABLET: Handles the display of the SSTracksFragment and the SSPlayerFragment for tablet
-        // devices after a screen orientation change.
+        // TABLET: Reloads the SSTracksFragment (if it was in focus previously) and the
+        // SSArtistsFragment in their respective containers.
         if (isTablet) {
 
-            // SSTRACKSFRAGMENT: Re-adds the SSTracksFragment into the secondary fragment container.
-            if (currentFragment.equals("TRACKS")) {
-                displayTracksFragment(true, currentArtist);
-            }
+            Log.d(LOG_TAG, "setupFragment(): Reloading fragments for tablet view...");
 
-            // SSPLAYERFRAGMENT: If the SSPlayerFragment was in focus before the screen orientation
-            // change, the SSPlayerFragment is displayed.
-            if (isPlaying) {
-                displayPlayerFragment(true, trackListResult, listPosition);
-            }
-        }
-    }
+           SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
 
-    // setupActionBar(): Sets up the action bar attributes for the activity.
-    private void setupActionBar(String actionType, String subtitle) {
-
-        ActionBar actionBar = getSupportActionBar(); // References the action bar.
-
-        // TRACKS:
-        if (actionType.equals("TRACKS")) {
-
-            if (actionBar != null) {
-                actionBar.setTitle("Top 10 Tracks"); // Sets the title of the action bar.
-                actionBar.setSubtitle(subtitle); // Sets the name of the current artist as the subtitle.
-                actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
+            // If a screen orientation event has occurred and the fragment that was in focus was
+            // SSTracksFragment, a new SSTracksFragment is created and is made visible in the
+            // view layout.
+            if ( (isRotationEvent) && (currentFragment.equals("TRACKS")) ) {
+                SSTracksFragment newTracksFragment = new SSTracksFragment();
+                newTracksFragment.initializeFragment(currentTrack, true);
+                SSFragmentView.addFragment(newTracksFragment, fragmentSecondaryContainer, R.id.ss_main_activity_secondary_fragment_container, "TRACKS", false, weakRefActivity);
             }
         }
 
-        // PLAYER:
-        else if (actionType.equals("PLAYER")) {
-
-            if (actionBar != null) {
-                actionBar.setTitle("Now Playing"); // Sets the title of the action bar.
-                actionBar.setSubtitle(currentArtist + " - " + subtitle); // Sets the name of the track as the subtitle.
-                actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
-            }
-        }
-
-        // DEFAULT:
+        // MOBILE: Reloads the fragment that was in focus prior to the screen orientation change.
         else {
 
-            if (actionBar != null) {
-                actionBar.setTitle(R.string.app_name); // Sets the title of the action bar.
-                actionBar.setSubtitle(null); // Disables the subtitles of the action bar.
-                actionBar.setDisplayHomeAsUpEnabled(false); // Disables the back button in the action bar.
+            Log.d(LOG_TAG, "setupFragment(): Reloading fragments for mobile view...");
+
+            // SSPlayerFragment: Attempts to reload the SSPlayerFragment, if the SSPlayerFragment
+            // was in prior focus.
+            Boolean isReloaded = SSFragmentView.reloadFragment(playerFragment, currentFragment, "PLAYER", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
+
+            // SSTracksFragment: Attempts to reload the SSTracksFragment, if the SSTracksFragment
+            // was in prior focus.
+            if (!isReloaded) {
+                isReloaded = SSFragmentView.reloadFragment(tracksFragment, currentFragment, "TRACKS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
+            }
+
+            // SSArtistsFragment: Attempts to reload the SSArtistFragment, if the SSTracksFragment
+            // was in prior focus.
+            if (!isReloaded) {
+                SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
             }
         }
     }
@@ -392,7 +345,8 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         // Adds the fragment to the primary fragment container.
         SSFragmentView.addFragment(frag, fragmentContainer, R.id.ss_main_activity_fragment_container, fragToAdd, isAnimated, weakRefActivity);
 
-        setupActionBar(fragToAdd, subtitle); // Sets the name of the action bar.
+        // Sets the name of the action bar.
+        SSActionBar.setupActionBar(fragToAdd, currentArtist, subtitle, this);
         currentFragment = fragToAdd; // Sets the current active fragment.
     }
 
@@ -500,6 +454,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // TABLET: Loads the SSTracksFragment into the secondary fragment container.
             if (isTablet) {
                 SSFragmentView.addFragment(tracksFragment, fragmentSecondaryContainer, R.id.ss_main_activity_secondary_fragment_container, "TRACKS", true, weakRefActivity);
+                currentFragment = "TRACKS"; // Sets the current active fragment.
             }
 
             // MOBILE: Removes the previous fragment and adds the new fragment.
@@ -507,9 +462,8 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
                 changeFragment(tracksFragment, "TRACKS", "ARTISTS", name, true);
             }
 
-            Log.d(LOG_TAG, "displayTracksFragment(): SSTracksFragment now being displayed.");
-
             currentArtist = name; // Sets the name of the current artist.
+            Log.d(LOG_TAG, "displayTracksFragment(): SSTracksFragment now being displayed.");
         }
 
         // Removes the SSTracksFragment in the view layout and replaces it with a SSArtistsFragment.
