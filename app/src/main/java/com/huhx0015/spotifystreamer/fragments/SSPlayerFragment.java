@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -65,6 +66,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     private static final String LOG_TAG = SSPlayerFragment.class.getSimpleName();
 
     // VIEW INJECTION VARIABLES
+    @Bind(R.id.ss_player_fragment_progress_layer) FrameLayout progressLayer;
     @Bind(R.id.ss_player_album_image) ImageView albumImage;
     @Bind(R.id.ss_forward_button) ImageButton forwardButton;
     @Bind(R.id.ss_next_button) ImageButton nextButton;
@@ -116,15 +118,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         setRetainInstance(true); // Retains this fragment during runtime changes.
     }
 
-    // onResume(): This function runs immediately after onCreate() finishes and is always re-run
-    // whenever the fragment is resumed from an onPause() state.
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        Log.d(LOG_TAG, "onResume(): Fragment resumed.");
-    }
-
     // onCreateView(): Creates and returns the view hierarchy associated with the fragment.
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -138,12 +131,16 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         return ss_fragment_view;
     }
 
-    // onPause(): This function is called whenever the fragment is suspended.
+    // onResume(): This function runs immediately after onStart() finishes and is always re-run
+    // whenever the fragment is resumed from an onPause() state.
     @Override
-    public void onPause(){
-        super.onPause();
+    public void onResume() {
+        super.onResume();
 
-        Log.d(LOG_TAG, "onPause(): Fragment paused.");
+        // TODO: Test this.
+        if (!currentActivity.isRotationEvent) {
+            playTrack(streamURL, isLoop); // Music playback is resumed.
+        }
     }
 
     // onDestroyView(): This function runs when the screen is no longer visible and the view is
@@ -169,15 +166,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         currentActivity.setCurrentTrack(null, false);
 
         Log.d(LOG_TAG, "onDestroy(): Fragment destroyed.");
-    }
-
-    // onDetach(): This function is called immediately prior to the fragment no longer being
-    // associated with its activity.
-    @Override
-    public void onDetach() {
-        super.onDetach();
-
-        Log.d(LOG_TAG, "onDetach(): Fragment detached.");
     }
 
     /** FRAGMENT EXTENSION METHOD ______________________________________________________________ **/
@@ -268,6 +256,10 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     // Signals the activity to signal the SSMusicService to begin streaming playback of
                     // the current track.
                     playTrack(streamURL, isLoop);
+
+                    // Displays the progress indicator container. This will be shown until music
+                    // playback is fully ready.
+                    progressLayer.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -402,7 +394,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // onStartTrackingTouch(): Called when a touch event on the Seekbar object has started.
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             // onStopTrackingTouch: Called when a touch event on the Seekbar object has ended.
             @Override
@@ -495,6 +488,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // PLAYING:
             if (isPlay) {
+                progressLayer.setVisibility(View.GONE); // Hides the progress indicator container.
                 playerBar.setVisibility(View.VISIBLE); // Displays the player seek bar.
             }
 

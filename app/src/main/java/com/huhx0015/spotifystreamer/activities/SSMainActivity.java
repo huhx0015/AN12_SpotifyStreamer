@@ -21,6 +21,7 @@ import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
 import com.huhx0015.spotifystreamer.fragments.SSPlayerFragment;
 import com.huhx0015.spotifystreamer.fragments.SSTracksFragment;
 import com.huhx0015.spotifystreamer.intent.SSShareIntent;
+import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
@@ -59,7 +60,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
     // FRAGMENT VARIABLES
     private Boolean isPlaying = false; // Used to determine if the SSPlayerFragment is in focus.
-    private Boolean isRotationEvent = false; // Used to determine if a screen orientation change event has occurred.
+    public Boolean isRotationEvent = false; // Used to determine if a screen orientation change event has occurred.
     private String currentFragment = ""; // Used to determine which fragment is currently active.
     private String currentArtist = ""; // Used to determine the current artist name.
     private String currentInput = ""; // Used to determine the current artist input.
@@ -120,6 +121,18 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     public void onStart() {
         super.onStart();
         setUpAudioService(); // Sets up the background audio service.
+    }
+
+    // onPause(): This function is called whenever the fragment is suspended.
+    @Override
+    public void onPause(){
+        super.onPause();
+
+        // TODO: Test this.
+        // If not a screen orientation change event, music playback is suspended.
+        if (!isRotationEvent) {
+            pauseTrack(false); // Pauses music playback.
+        }
     }
 
     // onDestroy(): This function runs when the activity has terminated and is being destroyed.

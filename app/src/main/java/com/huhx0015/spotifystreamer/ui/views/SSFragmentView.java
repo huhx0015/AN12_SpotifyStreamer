@@ -41,7 +41,6 @@ public class SSFragmentView {
             // Initializes the manager and transaction objects for the fragments.
             FragmentManager fragMan = refActivity.get().getSupportFragmentManager();
             FragmentTransaction fragTrans = fragMan.beginTransaction();
-            //fragTrans.add(containerId, fragment, fragType);
             fragTrans.replace(containerId, fragment, fragType);
             fragTrans.addToBackStack(fragType); // Adds fragment to the fragment stack.
 

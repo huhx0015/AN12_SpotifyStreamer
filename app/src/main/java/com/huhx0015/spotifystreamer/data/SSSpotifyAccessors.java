@@ -46,7 +46,6 @@ public class SSSpotifyAccessors {
                 String songName = currentTrack.name;
                 String songId = currentTrack.id;
                 String songURL = currentTrack.preview_url;
-                //String songURL = currentTrack.uri;
                 String albumURL;
 
                 // Checks to see if there are any valid album images available.
