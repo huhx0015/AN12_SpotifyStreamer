@@ -102,14 +102,20 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
             else {
                 ss_music.getInstance().pauseSong();
             }
-            seekHandler.removeCallbacks(seekbarThread); // Stops the seekbar update thread.
         }
+
+        seekHandler.removeCallbacks(seekbarThread); // Stops the seekbar update thread.
     }
 
     // playTrack(): Accesses the SSMusicEngine instance to play the streaming song track.
     public void playTrack(String songUrl, Boolean loop){
         ss_music.getInstance().playSongUrl(songUrl, loop);
         seekHandler.postDelayed(seekbarThread, 1000); // Begins the seekbar update thread.
+    }
+
+    // setPosition(): Accesses the SSMusicEngine instance to update the song position.
+    public void setPosition(int position){
+        ss_music.getInstance().setSongPosition(position);
     }
 
     /** THREADING METHODS ______________________________________________________________________ **/
@@ -119,8 +125,11 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     private Runnable seekbarThread = new Runnable() {
 
         public void run() {
-            seekbarStatus(ss_music.getInstance().getSongPosition()); // Retrieves the current song position.
-            seekHandler.postDelayed(this, 1000); // Updates the thread per second.
+
+            // Retrieves the current song position.
+            int currentPosition = ss_music.getInstance().getSongPosition();
+            seekbarStatus(currentPosition); // Relays the song position value to SSPlayerFragment.
+            seekHandler.postDelayed(this, 1000);
         }
     };
 

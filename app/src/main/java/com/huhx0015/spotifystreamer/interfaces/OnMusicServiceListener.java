@@ -19,4 +19,8 @@ public interface OnMusicServiceListener {
     // playTrack(): Interface method that signals the attached activity to begin the playback of a
     // Spotify track in the SSMusicService class.
     void playTrack(String url, Boolean loop);
+
+    // setPosition(): Interface method that signals the attached activity to skip to the position of
+    // a Spotify track in the SSMusicService class.
+    void setPosition(int position);
 }

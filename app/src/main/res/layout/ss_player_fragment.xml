@@ -14,24 +14,6 @@
         android:padding="16dp" />
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:id="@+id/ss_player_seekbar_container"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp">
-
-        <SeekBar
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/ss_player_seekbar" />
-    </LinearLayout>
-
-    <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -39,35 +21,55 @@
         android:id="@+id/ss_player_bottom_container"
         android:background="@drawable/ss_dark_transparent_tile">
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:id="@+id/ss_player_song_info_container"
-            android:layout_weight="1">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:id="@+id/ss_player_song_info_parent_container">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/ss_player_song_name_text"
-                android:textIsSelectable="false"
-                android:textSize="20sp"
+            <ImageButton
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:id="@+id/ss_repeat_button"
+                android:layout_gravity="left|center_vertical"
+                android:src="@android:drawable/stat_notify_sync"
+                android:layout_marginLeft="16dp"
+                android:background="@android:color/transparent" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:textColor="@android:color/darker_gray" />
+                android:id="@+id/ss_player_song_info_container">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/ss_player_artist_album_name_text"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:textColor="@android:color/darker_gray" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ss_player_song_name_text"
+                    android:textIsSelectable="false"
+                    android:textSize="20sp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textColor="@android:color/white"
+                    android:typeface="sans"
+                    android:textStyle="bold" />
 
-        </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ss_player_artist_album_name_text"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_gravity="center"
+                    android:textColor="@android:color/darker_gray"
+                    android:typeface="sans"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </FrameLayout>
 
         <LinearLayout
             android:orientation="horizontal"
@@ -85,7 +87,7 @@
                 android:id="@+id/ss_previous_button"
                 android:src="@android:drawable/ic_media_previous"
                 android:layout_weight="1"
-                android:background="@android:color/background_dark" />
+                android:background="@android:color/transparent" />
 
             <ImageButton
                 android:layout_width="56dp"
@@ -93,7 +95,7 @@
                 android:id="@+id/ss_rewind_button"
                 android:src="@android:drawable/ic_media_rew"
                 android:layout_weight="1"
-                android:background="@android:color/background_dark" />
+                android:background="@android:color/transparent" />
 
             <ImageButton
                 android:layout_width="64dp"
@@ -101,7 +103,7 @@
                 android:id="@+id/ss_play_pause_button"
                 android:src="@android:drawable/ic_media_play"
                 android:layout_weight="1"
-                android:background="@android:color/background_dark" />
+                android:background="@android:color/transparent" />
 
             <ImageButton
                 android:layout_width="56dp"
@@ -109,7 +111,7 @@
                 android:id="@+id/ss_forward_button"
                 android:src="@android:drawable/ic_media_next"
                 android:layout_weight="1"
-                android:background="@android:color/background_dark" />
+                android:background="@android:color/transparent" />
 
             <ImageButton
                 android:layout_width="48dp"
@@ -117,8 +119,27 @@
                 android:id="@+id/ss_next_button"
                 android:src="@android:drawable/ic_media_ff"
                 android:layout_weight="1"
-                android:background="@android:color/background_dark" />
+                android:background="@android:color/transparent" />
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:id="@+id/ss_player_seekbar_container"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
+
+            <SeekBar
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/ss_player_seekbar"
+                android:visibility="invisible" />
         </LinearLayout>
     </LinearLayout>
 

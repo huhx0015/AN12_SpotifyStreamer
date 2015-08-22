@@ -16,7 +16,6 @@ import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
-import com.huhx0015.spotifystreamer.ui.graphics.SSImages;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
@@ -39,16 +38,14 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     private SSMainActivity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
     // AUDIO VARIABLES
-    private String currentSong = "NONE"; // Sets the default song for the activity.
-    private Boolean musicOn = true; // Used to determine if music has been enabled or not.
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
-    private Boolean isLoop = true; // Indicates the song will be looped infinitely.
+    private Boolean isLoop = false; // Indicates the song will be looped infinitely.
+    private int currentDuration = 0; // Used to determine the max duration of the current selected track.
 
     // DATA VARIABLES
     private static final String PLAYER_STATE = "playerState"; // Parcelable key value for the SSMusicEngine state.
 
     // FRAGMENT VARIABLES
-    private Boolean isRotationEvent = false; // Used to determine if a rotation event is going on.
     private String artistName = ""; // Stores the name of the artist.
     private String songId = ""; // Stores the song ID value.
     private String songName = ""; // Stores the name of the song.
@@ -68,12 +65,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     private static final String LOG_TAG = SSPlayerFragment.class.getSimpleName();
 
     // VIEW INJECTION VARIABLES
-    @Bind(R.id.ss_play_pause_button) ImageButton playPauseButton;
-    @Bind(R.id.ss_rewind_button) ImageButton rewindButton;
+    @Bind(R.id.ss_player_album_image) ImageView albumImage;
     @Bind(R.id.ss_forward_button) ImageButton forwardButton;
     @Bind(R.id.ss_next_button) ImageButton nextButton;
+    @Bind(R.id.ss_play_pause_button) ImageButton playPauseButton;
     @Bind(R.id.ss_previous_button) ImageButton previousButton;
-    @Bind(R.id.ss_player_album_image) ImageView albumImage;
+    @Bind(R.id.ss_repeat_button) ImageButton repeatButton;
+    @Bind(R.id.ss_rewind_button) ImageButton rewindButton;
     @Bind(R.id.ss_player_seekbar) SeekBar playerBar;
     @Bind(R.id.ss_player_song_name_text) TextView songNameText;
     @Bind(R.id.ss_player_artist_album_name_text) TextView artistAlbumNameText;
@@ -124,13 +122,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     public void onResume() {
         super.onResume();
 
-        // Indicates that a rotation change event is no longer occurring.
-        if (isRotationEvent) {
-
-            // TODO: Re-set up the layout.
-            isRotationEvent = false;
-        }
-
         Log.d(LOG_TAG, "onResume(): Fragment resumed.");
     }
 
@@ -152,16 +143,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     public void onPause(){
         super.onPause();
 
-        // Sets the isPlaying variable to determine if the song is currently playing.
-        //isPlaying = ss_music.getInstance().isSongPlaying();
-
-        /*
-        // Pauses any song that is playing in the background.
-        if (!isRotationEvent) {
-            ss_music.getInstance().pauseSong();
-        }
-        */
-
         Log.d(LOG_TAG, "onPause(): Fragment paused.");
     }
 
@@ -182,8 +163,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     public void onDestroy() {
         super.onDestroy();
 
-        // TODO: Crashes on rotation change. Investigate.
-        //pauseTrack(); // Pauses the track, if currently playing in the background.
+        pauseTrack(true); // Stops the track, if currently playing in the background.
 
         // Resets the current track value and the isPlaying value in SSMainActivity is set to false.
         currentActivity.setCurrentTrack(null, false);
@@ -207,8 +187,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
-        isRotationEvent = true; // Indicates that the rotation event has occurred.
-
         Log.d(LOG_TAG, "onSaveInstanceState(): The Parcelable data has been saved.");
 
         super.onSaveInstanceState(savedInstanceState);
@@ -226,6 +204,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         currentActivity.setCurrentTrack(songName, true);
 
         setUpButtons(); // Sets up the button listeners for the fragment.
+        setUpSeekbar(); // Sets up the seekbar listener for the player bar.
         setUpImage(); // Sets up the images for the ImageView objects for the fragment.
         setUpText(); // Sets up the text for the TextView objects for the fragment.
     }
@@ -235,6 +214,21 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // PLAYER BUTTONS:
         // -----------------------------------------------------------------------------------------
+
+        // FORWARD: Sets up the listener and the actions for the FORWARD button.
+        forwardButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                // Retrieves the current seekbar progress and sets the new seekbar position value.
+                if (isPlaying) {
+                    int newPosition = playerBar.getProgress() + 6;
+                    playerBar.setProgress(newPosition); // Sets the new seekbar position.
+                    setPosition(newPosition); // Sets the new position of the song.
+                }
+            }
+        });
 
         // NEXT: Sets up the listener and the actions for the NEXT button.
         nextButton.setOnClickListener(new View.OnClickListener() {
@@ -251,7 +245,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     // Signals the activity to signal the SSMusicService to begin streaming playback of
                     // the current track.
                     playTrack(streamURL, isLoop);
-                    currentSong = streamURL; // Sets the current song playing in the background.
                 }
             }
         });
@@ -266,7 +259,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                 if (isPlaying) {
 
                     // Signals the activity to signal the SSMusicService to pause the song.
-                    pauseTrack();
+                    pauseTrack(false);
                 }
 
                 // PLAY: Plays the song if no song is currently playing in the background.
@@ -275,7 +268,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     // Signals the activity to signal the SSMusicService to begin streaming playback of
                     // the current track.
                     playTrack(streamURL, isLoop);
-                    currentSong = streamURL; // Sets the current song playing in the background.
                 }
             }
         });
@@ -295,7 +287,26 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     // Signals the activity to signal the SSMusicService to begin streaming playback of
                     // the current track.
                     playTrack(streamURL, isLoop);
-                    currentSong = streamURL; // Sets the current song playing in the background.
+                }
+            }
+        });
+
+        // REPEAT: Sets up the listener and the actions for the REPEAT button.
+        repeatButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                // REPEAT OFF: Turns off song looping.
+                if (isLoop) {
+                    isLoop = false;
+                    SSToast.toastyPopUp("LOOPING disabled.", currentActivity);
+                }
+
+                // REPEAT ON: Turns on infinite looping of the song.
+                else {
+                    isLoop = true;
+                    SSToast.toastyPopUp("LOOPING enabled.", currentActivity);
                 }
             }
         });
@@ -305,8 +316,20 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             @Override
             public void onClick(View v) {
-                // TODO: Rewind action here.
-                //seekbarStatus();
+
+                // Retrieves the current seekbar progress and sets the new seekbar position value.
+                if (isPlaying) {
+
+                    int newPosition = playerBar.getProgress() - 6;
+
+                    // If the new position is less than 0, the value is set at 0.
+                    if (newPosition < 0) {
+                        newPosition = 0;
+                    }
+
+                    playerBar.setProgress(newPosition); // Sets the new seekbar position.
+                    setPosition(newPosition); // Sets the new position of the song.
+                }
             }
         });
     }
@@ -319,25 +342,72 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                 .load(albumImageURL)
                 .into(albumImage);
 
-        // PREVIOUS BUTTON: Sets a circular icon into the ImageButton object.
-        SSImages.setCircularImage(android.R.drawable.ic_media_previous, previousButton,
-                (int) (48 * curDensity), (int) (48 * curDensity), currentActivity);
+        // FORWARD BUTTON:
+        Picasso.with(currentActivity)
+                .load(android.R.drawable.ic_media_ff)
+                .resize((int) (56 * curDensity), (int) (56 * curDensity))
+                .into(forwardButton);
 
-        // REWIND BUTTON: Sets a circular icon into the ImageButton object.
-        SSImages.setCircularImage(android.R.drawable.ic_media_rew, rewindButton,
-                (int) (56 * curDensity), (int) (56 * curDensity), currentActivity);
+        // NEXT BUTTON:
+        Picasso.with(currentActivity)
+                .load(android.R.drawable.ic_media_next)
+                .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                .into(nextButton);
 
-        // PLAY/PAUSE BUTTON: Sets a circular icon into the ImageButton object.
-        SSImages.setCircularImage(android.R.drawable.ic_media_play, playPauseButton,
-                (int) (64 * curDensity), (int) (64 * curDensity), currentActivity);
+        // PLAY/PAUSE BUTTON:
+        Picasso.with(currentActivity)
+                .load(android.R.drawable.ic_media_play)
+                .resize((int) (64 * curDensity), (int) (64 * curDensity))
+                .into(playPauseButton);
 
-        // FORWARD BUTTON: Sets a circular icon into the ImageButton object.
-        SSImages.setCircularImage(android.R.drawable.ic_media_ff, forwardButton,
-                (int) (56 * curDensity), (int) (56 * curDensity), currentActivity);
+        // PREVIOUS BUTTON:
+        Picasso.with(currentActivity)
+                .load(android.R.drawable.ic_media_previous)
+                .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                .into(previousButton);
 
-        // NEXT BUTTON: Sets a circular icon into the ImageButton object.
-        SSImages.setCircularImage(android.R.drawable.ic_media_next, nextButton,
-                (int) (48 * curDensity), (int) (48 * curDensity), currentActivity);
+        // NEXT BUTTON:
+        Picasso.with(currentActivity)
+                .load(android.R.drawable.ic_media_next)
+                .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                .into(nextButton);
+
+        // REPEAT BUTTON:
+        Picasso.with(currentActivity)
+                .load(android.R.drawable.stat_notify_sync)
+                .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                .into(repeatButton);
+
+        // REWIND BUTTON:
+        Picasso.with(currentActivity)
+                .load(android.R.drawable.ic_media_rew)
+                .resize((int) (56 * curDensity), (int) (56 * curDensity))
+                .into(rewindButton);
+    }
+
+    // setUpSeekbar(): Sets up a listener for the Seekbar object.
+    private void setUpSeekbar() {
+
+        playerBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            // onProgressChanged(): Called when the seekbar progress has changed.
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                // If the progress change is from user input, the position of the song is changed.
+                if (fromUser) {
+                    setPosition(progress); // Sets the new position of the song.
+                }
+            }
+
+            // onStartTrackingTouch(): Called when a touch event on the Seekbar object has started.
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            // onStopTrackingTouch: Called when a touch event on the Seekbar object has ended.
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
 
     // setUpText(): Sets up the texts for the TextView objects in the fragment.
@@ -351,14 +421,20 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // PLAYING:
         if (isPlay) {
-            SSImages.setCircularImage(android.R.drawable.ic_media_pause, playPauseButton,
-                    (int) (64 * curDensity), (int) (64 * curDensity), currentActivity);
+
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.ic_media_pause)
+                    .resize((int) (64 * curDensity), (int) (64 * curDensity))
+                    .into(playPauseButton);
         }
 
         // STOP / PAUSED:
         else {
-            SSImages.setCircularImage(android.R.drawable.ic_media_play, playPauseButton,
-                    (int) (64 * curDensity), (int) (64 * curDensity), currentActivity);
+
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.ic_media_play)
+                    .resize((int) (64 * curDensity), (int) (64 * curDensity))
+                    .into(playPauseButton);
         }
     }
 
@@ -381,6 +457,28 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // Updates the album image and song details.
             setUpImage();
             setUpText();
+
+            /*
+            // If the track list position is at the beginning, the previous button is greyed out and
+            // the next button is set to normal color.
+            if (position == 0) {
+                SSImages.setGrayScale(previousButton, true); // Sets the greyscale color.
+                SSImages.setGrayScale(nextButton, false); // Sets the normal color.
+            }
+
+            // If the track list position is at the end, the next button is greyed out and the
+            // previous button is set to normal color.
+            else if (position == trackList.size() - 1) {
+                SSImages.setGrayScale(nextButton, true); // Sets the greyscale color.
+                SSImages.setGrayScale(previousButton, false); // Sets the normal color.
+            }
+
+            // The standard colors are set for both the next and previous buttons.
+            else {
+                SSImages.setGrayScale(nextButton, false); // Sets the normal color.
+                SSImages.setGrayScale(previousButton, false); // Sets the normal color.
+            }
+            */
         }
     }
 
@@ -394,6 +492,17 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         if (!isDestroyed) {
             isPlaying = isPlay; // Updates the current playback status of the streaming song.
             updateControlButtons(isPlaying); // Updates the player control buttons.
+
+            // PLAYING:
+            if (isPlay) {
+                playerBar.setVisibility(View.VISIBLE); // Displays the player seek bar.
+            }
+
+            // STOPPED:
+            else {
+                playerBar.setVisibility(View.INVISIBLE); // Hides the player seek bar.
+            }
+
             Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
         }
     }
@@ -404,8 +513,25 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     public void seekbarStatus(int position) {
 
         if (!isDestroyed) {
-            playerBar.setProgress(position); // Sets the current position for the player seekbar.
-            Log.d(LOG_TAG, "seekbarStatus(): Setting the seekbar position: " + position);
+
+            // Updates the seekbar as long as the song is playing.
+            if (position != -1) {
+                playerBar.setProgress(position); // Sets the current position for the player seekbar.
+                Log.d(LOG_TAG, "seekbarStatus(): Setting the seekbar position: " + position);
+            }
+
+            // Updates the player control button states to reflect that the song is no longer playing.
+            else {
+
+                Log.d(LOG_TAG, "seekbarStatus(): Song is no longer playing.");
+
+                pauseTrack(true); // Indicates that the song has stopped playback.
+                setPosition(0); // Resets the song track position.
+                playerBar.setProgress(0); // Resets the player seek bar.
+                isPlaying = false; // Indicates that the song is no longer being played.
+                updateControlButtons(isPlaying); // Updates the player control buttons.
+                playerBar.setVisibility(View.INVISIBLE); // Hides the player seek bar.
+            }
         }
     }
 
@@ -416,14 +542,15 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         if (!isDestroyed) {
             playerBar.setMax(duration); // Sets the maximum duration of the player seekbar.
+            currentDuration = duration; // Sets the maximum duration of the current song.
             Log.d(LOG_TAG, "setDuration(): Maximum duration of the seekbar set.");
         }
     }
 
     // pauseTrack(): Signals the attached activity to invoke the SSMusicService to pause playback
     // of the streamed Spotify track.
-    private void pauseTrack() {
-        try { ((OnMusicServiceListener) currentActivity).pauseTrack(false); }
+    private void pauseTrack(Boolean isStop) {
+        try { ((OnMusicServiceListener) currentActivity).pauseTrack(isStop); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
@@ -431,6 +558,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // of the streamed Spotify track.
     private void playTrack(String url, Boolean loop) {
         try { ((OnMusicServiceListener) currentActivity).playTrack(url, loop); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // setPosition(): Signals the attached activity to invoke the SSMusicService to update the song
+    // position.
+    private void setPosition(int position) {
+        try { ((OnMusicServiceListener) currentActivity).setPosition(position); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 }

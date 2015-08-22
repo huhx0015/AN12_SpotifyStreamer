@@ -25,15 +25,15 @@ public class SSMusicEngine {
     // AUDIO VARIABLES:
     private MediaPlayer backgroundSong; // MediaPlayer variable for background song.
     private String currentSong; // Used for determining what song is playing in the background.
-    private boolean isPaused; // Used for determining if a song has been paused.
+    private Boolean isPaused; // Used for determining if a song has been paused.
     public int songPosition; // Used for resuming playback on a song that was paused.
-    public boolean musicOn; // Used for determining whether music is playing in the background.
+    public Boolean musicOn; // Used for determining whether music is playing in the background.
 
     // FRAGMENT VARIABLES:
     private Fragment playerFragment; // References the SSPlayerFragment for updating the music player interface.
 
     // LOGGING VARIABLES:
-    private static final String TAG = SSMusicEngine.class.getSimpleName(); // Used for logging output to logcat.
+    private static final String LOG_TAG = SSMusicEngine.class.getSimpleName(); // Used for logging output to logcat.
 
     // SYSTEM VARIABLES:
     private Context context; // References the application context.
@@ -52,7 +52,7 @@ public class SSMusicEngine {
     // initializeAudio(): Initializes the SSMusicEngine class variables.
     public void initializeAudio(Context con) {
 
-        Log.d(TAG, "INITIALIZING: Initializing music engine.");
+        Log.d(LOG_TAG, "INITIALIZING: Initializing music engine.");
 
         this.context = con; // Sets the application Context reference.
         this.backgroundSong = new MediaPlayer(); // Instantiates the main MediaPlayer object.
@@ -61,13 +61,13 @@ public class SSMusicEngine {
         this.currentSong = "STOPPED"; // Sets the "STOPPED" condition for the song name string.
         this.songPosition = 0; // Sets the song position to the beginning of the song by default.
 
-        Log.d(TAG, "INITIALIZING: Music engine initialization complete.");
+        Log.d(LOG_TAG, "INITIALIZING: Music engine initialization complete.");
     }
 
     // attachFragment(): Attaches the player fragment to this class.
     public void attachFragment(Fragment fragment) {
         this.playerFragment = fragment; // Sets the player fragment to interact with.
-        Log.d(TAG, "attachFragment: Fragment attached.");
+        Log.d(LOG_TAG, "attachFragment: Fragment attached.");
     }
 
     /** MUSIC FUNCTIONALITY ____________________________________________________________________ **/
@@ -84,9 +84,29 @@ public class SSMusicEngine {
             if (backgroundSong.isPlaying()) {
                 position = backgroundSong.getCurrentPosition() / 1000;
             }
+
+            // If the song has stopped playing, a value of -1 is returned to indicate that the song
+            // is no longer playing.
+            else {
+                return -1;
+            }
         }
 
         return position;
+    }
+
+    // setSongPosition(): Sets the song position of the current song playing in the background.
+    public void setSongPosition(int position) {
+
+        Log.d(LOG_TAG, "setSongPosition(): Updating song position at: " + position);
+
+        if (backgroundSong != null) {
+
+            // Sets the song position as long as the song is currently playing in the background.
+            if (backgroundSong.isPlaying()) {
+                backgroundSong.seekTo(position * 1000); // Sets the new song position.
+            }
+        }
     }
 
     // playSongUrl(): Plays the music file based on the specified song URL. The song is changed
@@ -105,7 +125,7 @@ public class SSMusicEngine {
                 // Checks to see if the songUrl is valid or not.
                 if (songUrl == null) {
 
-                    Log.d(TAG, "ERROR: Invalid song track URL was found.");
+                    Log.d(LOG_TAG, "ERROR: Invalid song track URL was found.");
                     return;
                 }
 
@@ -118,19 +138,19 @@ public class SSMusicEngine {
             // Indicates that the specified song is already playing and the operation is
             // cancelled.
             else {
-                Log.d(TAG, "ERROR: Specified song is already playing!");
+                Log.d(LOG_TAG, "ERROR: Specified song is already playing!");
                 return;
             }
 
             // If the song is not already playing, calls playSong to create a MediaPlayer object and
             // play the song.
-            Log.d(TAG, "PREPARING: Preparing song for playback.");
+            Log.d(LOG_TAG, "PREPARING: Preparing song for playback.");
             playSong(songUrl, loop);
         }
 
         // Outputs a message to logcat indicating that the song cannot be played.
         else {
-            Log.d(TAG, "ERROR: Song cannot be played. Music engine is currently disabled.");
+            Log.d(LOG_TAG, "ERROR: Song cannot be played. Music engine is currently disabled.");
         }
     }
 
@@ -143,7 +163,7 @@ public class SSMusicEngine {
         // This is to prevent a rare null pointer exception bug.
         if (backgroundSong == null) {
 
-            Log.d(TAG, "WARNING: MediaPlayer object was null. Re-initializing MediaPlayer object.");
+            Log.d(LOG_TAG, "WARNING: MediaPlayer object was null. Re-initializing MediaPlayer object.");
             backgroundSong = new MediaPlayer();
         }
 
@@ -151,7 +171,7 @@ public class SSMusicEngine {
 
             // Stops any songs currently playing in the background.
             if (backgroundSong.isPlaying()) {
-                Log.d(TAG, "PREPARING: Song currently playing in the background. Stopping playback before switching to a new song.");
+                Log.d(LOG_TAG, "PREPARING: Song currently playing in the background. Stopping playback before switching to a new song.");
                 backgroundSong.stop();
             }
 
@@ -161,7 +181,7 @@ public class SSMusicEngine {
             backgroundSong.setWakeMode(context.getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK); // Sets the wake lock mode.
             backgroundSong.setAudioStreamType(AudioManager.STREAM_MUSIC); // Sets the audio type for the MediaPlayer object.
 
-            Log.d(TAG, "PREPARING: MediaPlayer stream type set to STREAM_MUSIC.");
+            Log.d(LOG_TAG, "PREPARING: MediaPlayer stream type set to STREAM_MUSIC.");
 
             // Attempts to set the data source for the MediaPlayer object.
             try {
@@ -172,14 +192,14 @@ public class SSMusicEngine {
             // IO exception handler.
             catch (IOException e) {
                 e.printStackTrace();
-                Log.e(TAG, "ERROR: playSong(): I/O exception occurred.");
+                Log.e(LOG_TAG, "ERROR: playSong(): I/O exception occurred.");
                 return;
             }
 
             // Null pointer exception handlers.
             catch (NullPointerException e) {
                 e.printStackTrace();
-                Log.e(TAG, "ERROR: playSong(): Null pointer exception occurred.");
+                Log.e(LOG_TAG, "ERROR: playSong(): Null pointer exception occurred.");
                 return;
             }
 
@@ -189,7 +209,7 @@ public class SSMusicEngine {
                 backgroundSong.prepareAsync(); // Prepares the stream asynchronously.
                 backgroundSong.setLooping(loop); // Enables infinite looping of music.
 
-                Log.d(TAG, "PREPARING: Loop condition has been set to " + loop + ".");
+                Log.d(LOG_TAG, "PREPARING: Loop condition has been set to " + loop + ".");
 
                 // Sets up the listener for the MediaPlayer object. Song playback begins immediately
                 // once the MediaPlayer object is ready.
@@ -201,14 +221,14 @@ public class SSMusicEngine {
                         // If the song was previously paused, resume the song at it's previous location.
                         if (isPaused) {
 
-                            Log.d(TAG, "PREPARING: Song was previously paused, resuming song playback.");
+                            Log.d(LOG_TAG, "PREPARING: Song was previously paused, resuming song playback.");
 
                             mediaPlayer.seekTo(songPosition); // Jumps to the position where the song left off.
                             songPosition = 0; // Resets songPosition variable after song's position has been set.
                             isPaused = false; // Indicates that the song is no longer paused.
                         }
 
-                        Log.d(TAG, "MUSIC: Song playback has begun.");
+                        Log.d(LOG_TAG, "MUSIC: Song playback has begun.");
 
                         mediaPlayer.start(); // Begins playing the song.
                         playbackStatus(true); // Updates SSPlayerFragment on the song playback status.
@@ -227,7 +247,7 @@ public class SSMusicEngine {
     // pauseSong(): Pauses any songs playing in the background and returns it's position.
     public void pauseSong() {
 
-        Log.d(TAG, "MUSIC: Music playback has been paused.");
+        Log.d(LOG_TAG, "MUSIC: Music playback has been paused.");
 
         // Checks to see if mapSong has been initialized first before saving the song position and pausing the song.
         if (backgroundSong != null) {
@@ -251,11 +271,11 @@ public class SSMusicEngine {
         if ( (backgroundSong != null) && (musicOn) ) {
             backgroundSong.stop(); // Stops any songs currently playing in the background.
             currentSong = "STOPPED";
-            Log.d(TAG, "MUSIC: Song playback has been stopped.");
+            Log.d(LOG_TAG, "MUSIC: Song playback has been stopped.");
         }
 
         else {
-            Log.d(TAG, "ERROR: Cannot stop song, as MediaPlayer object is already null.");
+            Log.d(LOG_TAG, "ERROR: Cannot stop song, as MediaPlayer object is already null.");
         }
     }
 
@@ -269,11 +289,11 @@ public class SSMusicEngine {
             backgroundSong.release();
             backgroundSong = null;
 
-            Log.d(TAG, "RELEASE: MediaPlayer object has been released.");
+            Log.d(LOG_TAG, "RELEASE: MediaPlayer object has been released.");
         }
 
         else {
-            Log.d(TAG, "ERROR: MediaPlayer object is null and cannot be released.");
+            Log.d(LOG_TAG, "ERROR: MediaPlayer object is null and cannot be released.");
         }
     }
 
@@ -285,7 +305,7 @@ public class SSMusicEngine {
 
         if (playerFragment != null) {
 
-            Log.d(TAG, "playbackStatus(): Attempting to update the SSPlayerFragment of the song playback status.");
+            Log.d(LOG_TAG, "playbackStatus(): Attempting to update the SSPlayerFragment of the song playback status.");
 
             try { ((OnMusicPlayerListener) playerFragment).playbackStatus(isPlay); }
             catch (ClassCastException cce) {} // Catch for class cast exception errors.
@@ -295,7 +315,7 @@ public class SSMusicEngine {
     // setDuration(): Signals the SSPlayerFragment to set the max duration for the Spotify song.
     private void setDuration(int duration) {
 
-        Log.d(TAG, "setDuration(): Duration of the current song: " + duration);
+        Log.d(LOG_TAG, "setDuration(): Duration of the current song: " + duration);
 
         if (playerFragment != null) {
             try { ((OnMusicPlayerListener) playerFragment).setDuration(duration); }

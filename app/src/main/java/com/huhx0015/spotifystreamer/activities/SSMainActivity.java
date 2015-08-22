@@ -547,6 +547,13 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         musicService.playTrack(url, loop); // Signals the SSMusicService to play the song stream.
     }
 
+    // setPosition(): Invoked by SSPlayerFragment to signal the SSMusicService to skip to the
+    // selected position in the song.
+    @Override
+    public void setPosition(int position) {
+        musicService.setPosition(position); // Signals the SSMusicService to set the song position.
+    }
+
     // updateArtistInput(): Invoked by SSArtistsFragment to keep an update of the user's artist
     // input.
     @Override
