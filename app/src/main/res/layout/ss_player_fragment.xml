@@ -130,7 +130,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -145,7 +145,33 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/ss_player_seekbar"
-                    android:visibility="invisible" />
+                    android:layout_marginBottom="2dp" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/ss_player_seekbar_duration_container"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0:00"
+                        android:id="@+id/ss_player_seekbar_min_duration_text"
+                        android:layout_gravity="left"
+                        android:textColor="@android:color/white"
+                        android:typeface="sans" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0:30"
+                        android:id="@+id/ss_player_seekbar_max_duration_text"
+                        android:layout_gravity="right"
+                        android:textColor="@android:color/white" />
+                </FrameLayout>
+
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -154,7 +180,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/ss_light_transparent_tile"
-        android:id="@+id/ss_player_fragment_progress_layer">
+        android:id="@+id/ss_player_fragment_progress_layer"
+        android:visibility="gone">
 
         <ProgressBar
             style="?android:attr/progressBarStyleLarge"

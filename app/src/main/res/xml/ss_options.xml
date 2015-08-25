@@ -1,0 +1,11 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="SETTINGS"
+        android:key="ss_options">
+        <ListPreference
+            android:key="ss_country_code"
+            android:title="Country"
+            android:entries="@array/ss_country_list"
+            android:entryValues="@array/ss_country_code_list"/>
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="ss_country_code_list">
+        <item>en-US</item>
+    </string-array>
+</resources>

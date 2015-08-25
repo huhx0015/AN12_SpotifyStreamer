@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
@@ -41,7 +42,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // AUDIO VARIABLES
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
     private Boolean isLoop = false; // Indicates the song will be looped infinitely.
-    private int currentDuration = 0; // Used to determine the max duration of the current selected track.
+    private int maxDuration = 0; // Used to determine the max duration of the current selected track.
 
     // DATA VARIABLES
     private static final String PLAYER_STATE = "playerState"; // Parcelable key value for the SSMusicEngine state.
@@ -74,9 +75,12 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     @Bind(R.id.ss_previous_button) ImageButton previousButton;
     @Bind(R.id.ss_repeat_button) ImageButton repeatButton;
     @Bind(R.id.ss_rewind_button) ImageButton rewindButton;
+    @Bind(R.id.ss_player_seekbar_container) LinearLayout playerBarContainer;
     @Bind(R.id.ss_player_seekbar) SeekBar playerBar;
-    @Bind(R.id.ss_player_song_name_text) TextView songNameText;
     @Bind(R.id.ss_player_artist_album_name_text) TextView artistAlbumNameText;
+    @Bind(R.id.ss_player_seekbar_min_duration_text) TextView minDurationText;
+    @Bind(R.id.ss_player_seekbar_max_duration_text) TextView maxDurationText;
+    @Bind(R.id.ss_player_song_name_text) TextView songNameText;
 
     /** INITIALIZATION METHODS _________________________________________________________________ **/
 
@@ -224,15 +228,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             @Override
             public void onClick(View v) {
 
-                updateTrack(selectedPosition + 1); // Sets the song to the next track in the list.
+                // Sets the song to the next track in the list.
+                Boolean isUpdate = updateTrack(selectedPosition + 1);
 
                 // If the previous track was playing when the next button was pressed, the new track
                 // is automatically played.
-                if (isPlaying) {
-
-                    // Signals the activity to signal the SSMusicService to begin streaming playback of
-                    // the current track.
-                    playTrack(streamURL, isLoop);
+                if (isUpdate && isPlaying) {
+                    initializeSongPlay();
                 }
             }
         });
@@ -252,14 +254,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
                 // PLAY: Plays the song if no song is currently playing in the background.
                 else {
-
-                    // Signals the activity to signal the SSMusicService to begin streaming playback of
-                    // the current track.
-                    playTrack(streamURL, isLoop);
-
-                    // Displays the progress indicator container. This will be shown until music
-                    // playback is fully ready.
-                    progressLayer.setVisibility(View.VISIBLE);
+                    initializeSongPlay();
                 }
             }
         });
@@ -270,15 +265,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             @Override
             public void onClick(View v) {
 
-                updateTrack(selectedPosition - 1); // Sets the song to the next track in the list.
+                // Sets the song to the next track in the list.
+                Boolean isUpdate = updateTrack(selectedPosition - 1);
 
                 // If the previous track was playing when the next button was pressed, the new track
                 // is automatically played.
-                if (isPlaying) {
-
-                    // Signals the activity to signal the SSMusicService to begin streaming playback of
-                    // the current track.
-                    playTrack(streamURL, isLoop);
+                if (isUpdate && isPlaying) {
+                    initializeSongPlay();
                 }
             }
         });
@@ -394,8 +387,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // onStartTrackingTouch(): Called when a touch event on the Seekbar object has started.
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             // onStopTrackingTouch: Called when a touch event on the Seekbar object has ended.
             @Override
@@ -405,8 +397,28 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
     // setUpText(): Sets up the texts for the TextView objects in the fragment.
     private void setUpText() {
-        artistAlbumNameText.setText(artistName + " - " + albumName); // Sets the artist and album name for the TextView object.
-        songNameText.setText(songName); // Sets the song name for the TextView object.
+
+        // Sets the artist and album name for the TextView object.
+        artistAlbumNameText.setText(artistName + " - " + albumName);
+        artistAlbumNameText.setShadowLayer(8, 0, 0, 0); // Sets the shadow layer font.
+
+        // Sets the song name for the TextView object.
+        songNameText.setText(songName);
+        songNameText.setShadowLayer(8, 0, 0, 0); // Sets the shadow layer font.
+    }
+
+    /** MUSIC PLAYER METHODS ___________________________________________________________________ **/
+
+    // initializeSongPlay(): Prepares the selected track for music playback.
+    private void initializeSongPlay() {
+
+        // Signals the activity to signal the SSMusicService to begin streaming playback of
+        // the current track.
+        playTrack(streamURL, isLoop);
+
+        // Displays the progress indicator container. This will be shown until music
+        // playback is fully ready.
+        progressLayer.setVisibility(View.VISIBLE);
     }
 
     // updateControlButtons(): Updates the graphics of the playback control buttons.
@@ -432,7 +444,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     }
 
     // updateTrack(): Updates the song track details based on the set position.
-    private void updateTrack(int position) {
+    private Boolean updateTrack(int position) {
 
         // Checks to see if the position has not exceeded the size of the trackList array or is a
         // non-negative value.
@@ -472,6 +484,26 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                 SSImages.setGrayScale(previousButton, false); // Sets the normal color.
             }
             */
+
+            return true; // Indicates that the track has changed.
+        }
+
+        // Displays a Toast informing the user that the beginning of the tracklist has been reached.
+        else if (position < 0){
+            SSToast.toastyPopUp("Reached the beginning of the tracklist.", currentActivity);
+            return false; // Indicates that the track has not changed.
+        }
+
+        // Displays a Toast informing the user that the end of the tracklist has been reached.
+        else if (position >= trackList.size()) {
+            SSToast.toastyPopUp("Reached the end of the tracklist.", currentActivity);
+            return false; // Indicates that the track has not changed.
+        }
+
+        // Returns false, as it should never reach this point.
+        else {
+            Log.e(LOG_TAG, "updateTrack(): An unknown error has occurred while attempting to update the track.");
+            return false; // Indicates that the track has not changed.
         }
     }
 
@@ -489,12 +521,12 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // PLAYING:
             if (isPlay) {
                 progressLayer.setVisibility(View.GONE); // Hides the progress indicator container.
-                playerBar.setVisibility(View.VISIBLE); // Displays the player seek bar.
+                playerBarContainer.setVisibility(View.VISIBLE); // Displays the player seek bar.
             }
 
             // STOPPED:
             else {
-                playerBar.setVisibility(View.INVISIBLE); // Hides the player seek bar.
+                playerBarContainer.setVisibility(View.INVISIBLE); // Hides the player seek bar.
             }
 
             Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
@@ -510,8 +542,23 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // Updates the seekbar as long as the song is playing.
             if (position != -1) {
-                playerBar.setProgress(position); // Sets the current position for the player seekbar.
+
                 Log.d(LOG_TAG, "seekbarStatus(): Setting the seekbar position: " + position);
+
+                playerBar.setProgress(position); // Sets the current position for the player seekbar.
+
+                // Prepares the formatting of the text to set for the minimum duration TextView.
+                String curDuration;
+                if (position < 10) {
+                    curDuration = "0:0" + position;
+                }
+
+                else {
+                    curDuration = "0:" + position;
+                }
+
+                // Sets the current position into the minimum duration TextView object.
+                minDurationText.setText(curDuration);
             }
 
             // Updates the player control button states to reflect that the song is no longer playing.
@@ -524,7 +571,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                 playerBar.setProgress(0); // Resets the player seek bar.
                 isPlaying = false; // Indicates that the song is no longer being played.
                 updateControlButtons(isPlaying); // Updates the player control buttons.
-                playerBar.setVisibility(View.INVISIBLE); // Hides the player seek bar.
+                playerBarContainer.setVisibility(View.INVISIBLE); // Hides the player seek bar.
             }
         }
     }
@@ -536,7 +583,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         if (!isDestroyed) {
             playerBar.setMax(duration); // Sets the maximum duration of the player seekbar.
-            currentDuration = duration; // Sets the maximum duration of the current song.
+            maxDuration = duration; // Sets the maximum duration of the current song.
+            maxDurationText.setText("0:" + duration);
             Log.d(LOG_TAG, "setDuration(): Maximum duration of the seekbar set.");
         }
     }

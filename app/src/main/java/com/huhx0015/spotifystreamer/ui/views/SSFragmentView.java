@@ -139,47 +139,15 @@ public class SSFragmentView {
 
         int animationResource; // References the animation XML resource file.
 
-        // Sets the animation XML resource file, based on the fragment type.
-        // TRACKS:
-        if (fragType.equals("TRACKS")) {
-
-            // FRAGMENT APPEARANCE ANIMATION:
-            if (isAppearing) {
-                animationResource = R.anim.slide_down; // Sets the animation XML resource file.
-            }
-
-            // FRAGMENT REMOVAL ANIMATION:
-            else {
-                animationResource = R.anim.slide_up; // Sets the animation XML resource file.
-            }
+        // Sets the animation XML resource file.
+        // FRAGMENT APPEARANCE ANIMATION:
+        if (isAppearing) {
+            animationResource = R.anim.slide_down; // Sets the animation XML resource file.
         }
 
-        // PLAYER:
-        else if (fragType.equals("PLAYER")) {
-
-            // FRAGMENT APPEARANCE ANIMATION:
-            if (isAppearing) {
-                animationResource = R.anim.slide_right; // Sets the animation XML resource file.
-            }
-
-            // FRAGMENT REMOVAL ANIMATION:
-            else {
-                animationResource = R.anim.slide_left; // Sets the animation XML resource file.
-            }
-        }
-
-        // ARTISTS:
+        // FRAGMENT REMOVAL ANIMATION:
         else {
-
-            // FRAGMENT APPEARANCE ANIMATION:
-            if (isAppearing) {
-                animationResource = R.anim.slide_up; // Sets the animation XML resource file.
-            }
-
-            // FRAGMENT REMOVAL ANIMATION:
-            else {
-                animationResource = R.anim.slide_down; // Sets the animation XML resource file.
-            }
+            animationResource = R.anim.slide_up; // Sets the animation XML resource file.
         }
 
         // Loads the animation from the XML animation resource file.
