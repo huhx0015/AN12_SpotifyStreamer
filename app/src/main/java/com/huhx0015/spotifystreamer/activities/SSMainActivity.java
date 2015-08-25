@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -195,11 +196,31 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
                             R.id.ss_main_activity_settings_fragment_container, "SETTINGS", true, weakRefActivity);
                 }
 
+                /* //TODO: Not working correctly.
                 // Hides the SSSettingsFragment view.
                 else {
+
                     SSFragmentView.removeFragment(fragmentContainer, "SETTINGS", false, weakRefActivity);
                     isSettings = false; // Indicates that the SSSettingsFragment is not active.
+
+                    // PLAYER:
+                    if (currentFragment.equals("PLAYER")) {
+                        displayPlayerFragment(true, trackListResult, listPosition);
+                    }
+
+                    // TRACKS:
+                    else if (currentFragment.equals("TRACKS")) {
+                        displayTracksFragment(true, currentInput);
+                    }
+
+                    // ARTIST:
+                    else {
+                        FragmentManager fragManager = getSupportFragmentManager();
+                        Fragment artistsFragment = fragManager.findFragmentByTag("ARTISTS");
+                        SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
+                    }
                 }
+                */
 
                 return true;
 
@@ -240,6 +261,33 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // onBackPressed(): Defines the action to take when the physical back button key is pressed.
     @Override
     public void onBackPressed() {
+
+        /* TODO: Not working correctly.
+        // If the SSSettingsFragment is currently being displayed, the fragment is removed and
+        // switched with the previous fragment in focus.
+        if (isSettings) {
+
+            SSFragmentView.removeFragment(fragmentContainer, "SETTINGS", false, weakRefActivity);
+            isSettings = false; // Indicates that the SSSettingsFragment is not active.
+
+            // PLAYER:
+            if (currentFragment.equals("PLAYER")) {
+                displayPlayerFragment(true, trackListResult, listPosition);
+            }
+
+            // TRACKS:
+            else if (currentFragment.equals("TRACKS")) {
+                displayTracksFragment(true, currentInput);
+            }
+
+            // ARTIST:
+            else {
+                FragmentManager fragManager = getSupportFragmentManager();
+                Fragment artistsFragment = fragManager.findFragmentByTag("ARTISTS");
+                SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
+            }
+        }
+        */
 
         // If the SSPlayerFragment is currently being displayed, the fragment is removed and
         // switched with the SSTracksFragmentView.
@@ -344,6 +392,13 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // SSPlayerFragment: Attempts to reload the SSPlayerFragment, if the SSPlayerFragment
             // was in prior focus.
             Boolean isReloaded = SSFragmentView.reloadFragment(playerFragment, currentFragment, "PLAYER", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
+
+            // TODO: Currently crashes.
+            /*
+            if (isReloaded) {
+                attachPlayerFragment(playerFragment);
+            }
+            */
 
             // SSTracksFragment: Attempts to reload the SSTracksFragment, if the SSTracksFragment
             // was in prior focus.
@@ -575,8 +630,8 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // playTrack(): Invoked by SSPlayerFragment to signal the SSMusicService to play the selected
     // stream.
     @Override
-    public void playTrack(String url, Boolean loop) {
-        musicService.playTrack(url, loop); // Signals the SSMusicService to play the song stream.
+    public void playTrack(String url, Boolean loop, Bitmap albumImage, Boolean notiOn, String artist, String track) {
+        musicService.playTrack(url, loop, albumImage, notiOn, artist, track);
     }
 
     // setPosition(): Invoked by SSPlayerFragment to signal the SSMusicService to skip to the

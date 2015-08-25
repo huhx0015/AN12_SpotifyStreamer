@@ -1,5 +1,7 @@
 package com.huhx0015.spotifystreamer.interfaces;
 
+import android.graphics.Bitmap;
+
 /**
  * -------------------------------------------------------------------------------------------------
  * [OnMusicServiceListener] INTERFACE
@@ -18,7 +20,7 @@ public interface OnMusicServiceListener {
 
     // playTrack(): Interface method that signals the attached activity to begin the playback of a
     // Spotify track in the SSMusicService class.
-    void playTrack(String url, Boolean loop);
+    void playTrack(String url, Boolean loop, Bitmap albumImage, Boolean notiOn, String artist, String track);
 
     // setPosition(): Interface method that signals the attached activity to skip to the position of
     // a Spotify track in the SSMusicService class.

@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.media.session.MediaController;
@@ -47,24 +48,23 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     // LOGGING VARIABLES:
     private static final String LOG_TAG = SSMusicService.class.getSimpleName(); // Used for logging output to logcat.
 
+    // MEDIA ACTION VARIABLES:
+    public static final String ACTION_PLAY = "action_play";
+    public static final String ACTION_PAUSE = "action_pause";
+    public static final String ACTION_NEXT = "action_next";
+    public static final String ACTION_PREVIOUS = "action_previous";
+
+    // MEDIA SESSION VARIABLES:
+    private MediaController streamerMediaController;
+    private MediaSession streamerMediaSession;
+    private MediaSessionManager streamerMediaSessionManager;
+
     // SERVICE VARIABLES
     private final IBinder audioBind = new SSMusicBinder(); // IBinder object that is used to bind this service to an activity.
 
     // THREADING VARIABLES
     private Handler seekHandler = new Handler(); // Handler for the seekbar update thread.
 
-    public static final String ACTION_PLAY = "action_play";
-    public static final String ACTION_PAUSE = "action_pause";
-    public static final String ACTION_REWIND = "action_rewind";
-    public static final String ACTION_FAST_FORWARD = "action_fast_foward";
-    public static final String ACTION_NEXT = "action_next";
-    public static final String ACTION_PREVIOUS = "action_previous";
-    public static final String ACTION_STOP = "action_stop";
-
-    private MediaSessionManager streamerMediaSessionManager;
-    private MediaSession streamerMediaSession;
-    private MediaController streamerMediaController;
-    
     /** SERVICE LIFECYCLE METHODS ______________________________________________________________ **/
 
     // onCreate(): The system calls this method when the service is first created, to perform
@@ -77,23 +77,22 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         ss_music.getInstance().initializeAudio(getApplicationContext());
     }
 
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if( streamerMediaSessionManager == null ) {
-           initializeMediaSession();
-            //initMediaSessions();
-        }
-
-        handleIntent( intent );
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-
     /** SERVICE EXTENSION METHODS ______________________________________________________________ **/
 
+    // onStartCommand(): Runs when this service is directly invoked.
     @Override
-    public void onPrepared(MediaPlayer mp) {}
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        if (streamerMediaSessionManager != null) {
+            processIntent(intent);
+        }
+
+        if( streamerMediaSessionManager == null ) {
+            //initializeMediaSession();
+        }
+
+        return super.onStartCommand(intent, flags, startId);
+    }
 
     // onBind(): Runs when this service is successfully bound to the application.
     @Nullable
@@ -116,6 +115,10 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
         return false;
     }
+
+    // onPrepared(): Runs when the MediaPlayer object is ready for audio playback.
+    @Override
+    public void onPrepared(MediaPlayer mp) {}
 
     /** SERVICE METHODS ________________________________________________________________________ **/
 
@@ -146,13 +149,18 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     }
 
     // playTrack(): Accesses the SSMusicEngine instance to play the streaming song track.
-    public void playTrack(String songUrl, Boolean loop) {
+    public void playTrack(String songUrl, Boolean loop, Bitmap albumImage, Boolean notiOn,
+                          String albumArtist, String albumTrack) {
 
         // Initiates music playback in SSMusicEngine.
         ss_music.getInstance().playSongUrl(songUrl, loop);
         this.songURL = songUrl;
 
-        initializeMediaSession(); // TODO: TEST!
+        // If notification playback has been enabled, the notification media player is built and
+        // displayed.
+        if (notiOn) {
+            initializeMediaSession(albumImage, albumArtist, albumTrack);
+        }
 
         seekHandler.postDelayed(seekbarThread, 1000); // Begins the seekbar update thread.
     }
@@ -162,81 +170,91 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         ss_music.getInstance().setSongPosition(position);
     }
 
-    /** MEDIA SESSION METHODS __________________________________________________________________ **/
+    /** MEDIA PLAYER NOTIFICATION METHODS ______________________________________________________ **/
 
+    // processIntent(): If this service is invoked by external audio controls in the notification
+    // menu, the audio player state is changed accordingly.
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void handleIntent( Intent intent ) {
-        if( intent == null || intent.getAction() == null )
+    private void processIntent(Intent intent) {
+
+        // If the intent or the associated action is null, the method is terminated early.
+        if( intent == null || intent.getAction() == null ) {
             return;
+        }
 
-        String action = intent.getAction();
+        // Determines the defined action from the intent.
+        String trigger = intent.getAction();
 
-        if( action.equalsIgnoreCase(ACTION_PLAY) ) {
+        // PLAY:
+        if (trigger.equalsIgnoreCase(ACTION_PLAY) ) {
             streamerMediaController.getTransportControls().play();
-        } else if( action.equalsIgnoreCase( ACTION_PAUSE ) ) {
+        }
+
+        // PAUSE:
+        else if (trigger.equalsIgnoreCase(ACTION_PAUSE)) {
             streamerMediaController.getTransportControls().pause();
-        } else if( action.equalsIgnoreCase( ACTION_FAST_FORWARD ) ) {
-            streamerMediaController.getTransportControls().fastForward();
-        } else if( action.equalsIgnoreCase( ACTION_REWIND ) ) {
-            streamerMediaController.getTransportControls().rewind();
-        } else if( action.equalsIgnoreCase( ACTION_PREVIOUS ) ) {
+        }
+
+        // PREVIOUS:
+        else if (trigger.equalsIgnoreCase(ACTION_PREVIOUS)) {
             streamerMediaController.getTransportControls().skipToPrevious();
-        } else if( action.equalsIgnoreCase(ACTION_NEXT ) ) {
+        }
+
+        // NEXT:
+        else if (trigger.equalsIgnoreCase(ACTION_NEXT)) {
             streamerMediaController.getTransportControls().skipToNext();
-        } else if( action.equalsIgnoreCase( ACTION_STOP ) ) {
-            streamerMediaController.getTransportControls().stop();
         }
     }
 
+    // triggerPlaybackAction():
     private PendingIntent triggerPlaybackAction(int which) {
         Intent action;
         PendingIntent pendingIntent;
         final ComponentName serviceName = new ComponentName(this, SSMusicService.class);
         switch (which) {
+
             case 0:
+
                 // Play
                 action = new Intent(ACTION_PLAY);
                 action.setComponent(serviceName);
                 pendingIntent = PendingIntent.getService(this, 0, action, 0);
                 return pendingIntent;
+
             case 1:
+
                 // Pause
                 action = new Intent(ACTION_PAUSE);
                 action.setComponent(serviceName);
                 pendingIntent = PendingIntent.getService(this, 1, action, 0);
                 return pendingIntent;
+
             case 2:
+
                 // Skip tracks
                 action = new Intent(ACTION_NEXT);
                 action.setComponent(serviceName);
                 pendingIntent = PendingIntent.getService(this, 2, action, 0);
                 return pendingIntent;
+
             case 3:
+
                 // Previous tracks
                 action = new Intent(ACTION_PREVIOUS);
                 action.setComponent(serviceName);
                 pendingIntent = PendingIntent.getService(this, 3, action, 0);
                 return pendingIntent;
-            case 4:
-                //fast forward tracks
-                action = new Intent(ACTION_FAST_FORWARD);
-                action.setComponent(serviceName);
-                pendingIntent = PendingIntent.getService(this, 4, action, 0);
-                return pendingIntent;
-            case 5:
-                //rewind tracks
-                action = new Intent(ACTION_REWIND);
-                action.setComponent(serviceName);
-                pendingIntent = PendingIntent.getService(this, 5, action, 0);
-                return pendingIntent;
+
             default:
                 break;
         }
         return null;
     }
 
+    // intializeMediaSession(): Builds a new MediaSession for displaying a notification that users
+    // can interact with and be able to control audio playback.
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void initializeMediaSession() {
+    private void initializeMediaSession(final Bitmap albumImage, final String albumArtist, final String albumTrack) {
 
         // Creates a new MediaSession.
         streamerMediaSession = new MediaSession(getApplicationContext(), "SPOTIFY STREAMER");
@@ -245,7 +263,7 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
         // Updates the current metadata for the track currently playing.
         streamerMediaSession.setMetadata(new MediaMetadata.Builder()
-                //.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, artwork)
+                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, albumImage)
                 .putString(MediaMetadata.METADATA_KEY_ARTIST, "Pink Floyd")
                 .putString(MediaMetadata.METADATA_KEY_ALBUM, "Dark Side of the Moon")
                 .putString(MediaMetadata.METADATA_KEY_TITLE, "SPOTIFY STREAMER")
@@ -256,78 +274,72 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         // Attaches a new Callback to receive the MediaSession updates.
         streamerMediaSession.setCallback(new MediaSession.Callback() {
 
+            // PLAY: Runs when the play action has been initiated.
             @Override
             public void onPlay() {
                 super.onPlay();
-                playTrack(songURL, false);
+                playTrack(songURL, false, albumImage, true, albumArtist, albumTrack);
             }
 
+            // PAUSE: Runs when the pause action has been initiated.
             @Override
             public void onPause() {
                 super.onPause();
-                pauseTrack(false);
+                pauseTrack(false); // Pauses the currently playing song track.
             }
 
+            // NEXT: Runs when the next action has been initiated.
             @Override
             public void onSkipToNext() {
                 super.onSkipToNext();
-                playNextSong(true);
+                playNextSong(true); // Signals SSPlayerFragment to play the next song in the tracklist.
             }
 
+            // PREVIOUS: Runs when the previous action has been initiated.
             @Override
             public void onSkipToPrevious() {
                 super.onSkipToPrevious();
-                playNextSong(false);
-            }
-
-            @Override
-            public void onStop() {
-                super.onStop();
-                //Log.e(Constants.LOG_TAG, "onStop");
-                NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.cancel(1);
-                Intent intent = new Intent(getApplicationContext(), SSMusicService.class);
-                stopService(intent);
+                playNextSong(false); // Signals SSPlayerFragment to play the previous song in the tracklist.
             }
         });
 
         // Enables the ability to receive transport controls via the MediaSession Callback.
         streamerMediaSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
-        createNotificationPlayer(streamerMediaSession);
+        // Creates the notification with the media player controls.
+        createNotificationPlayer(streamerMediaSession, albumImage, albumArtist, albumTrack);
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void createNotificationPlayer(MediaSession streamerMediaSession, Bitmap albumImage,
+                                          String artist, String track) {
 
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void createNotificationPlayer(MediaSession streamerMediaSession) {
-
-        // Create a new Notification
+        // Creates a new Notification with audio controls.
         final Notification noti = new Notification.Builder(this)
-                // Hide the timestamp
-                .setShowWhen(false)
-                        // Set the Notification style
-                .setStyle(new Notification.MediaStyle()
-                        // Attach our MediaSession token
-                        .setMediaSession(streamerMediaSession.getSessionToken())
-                                // Show our playback controls in the compat view
-                        .setShowActionsInCompactView(0, 1, 2))
-                        // Set the Notification color
-                .setColor(0xFFDB4437)
-                        // Set the large and small icons
-                //.setLargeIcon(artwork)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                        // Set Notification content information
-                .setContentText("Coldplay")
-                .setContentInfo("A Sky Full of Stars")
+
+                .setShowWhen(false) // Disables timestamp display.
+                .setStyle(new Notification.MediaStyle() // Sets the notification style to media style.
+
+                        // Attaches the current MediaSession token.
+                        .setMediaSession(streamerMediaSession.getSessionToken()))
+
+                //.setColor(0xFFFFFF) // Sets the notification color.
+                .setLargeIcon(albumImage) // Sets the album bitmap image.
+                .setSmallIcon(R.mipmap.ic_launcher) // Sets the application icon image.
+
+                 // Sets the Notification content information.
+                .setContentText(artist)
+                .setContentInfo(track)
                 .setContentTitle("Spotify Streamer")
-                        // Add some playback controls
+
+                 // Add some playback controls.
                 .addAction(android.R.drawable.ic_media_previous, "Previous", triggerPlaybackAction(3))
                 .addAction(android.R.drawable.ic_media_play, "Play", triggerPlaybackAction(0))
                 .addAction(android.R.drawable.ic_media_pause, "Pause", triggerPlaybackAction(1))
                 .addAction(android.R.drawable.ic_media_next, "Next", triggerPlaybackAction(2))
                 .build();
 
-        // Do something with your TransportControls
+        // Do something with your TransportControls.
         final MediaController.TransportControls controls = streamerMediaSession.getController().getTransportControls();
 
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(1, noti);
@@ -378,13 +390,13 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         }
     }
 
-    //
+    // playNextSong(): Signals the SSPlayerFragment to play the previous or next song in the
+    // tracklist.
     private void playNextSong(Boolean isNext) {
 
         if (playerFragment != null) {
             try { ((OnMusicPlayerListener) playerFragment).playNextSong(isNext); }
             catch (ClassCastException cce) {} // Catch for class cast exception errors.
         }
-
     }
 }

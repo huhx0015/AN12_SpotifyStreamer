@@ -2,6 +2,8 @@ package com.huhx0015.spotifystreamer.fragments;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -21,6 +23,8 @@ import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.preferences.SSPreferences;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
 import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -39,6 +43,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
     // ACTIVITY VARIABLES
     private SSMainActivity currentActivity; // Used to determine the activity class this fragment is currently attached to.
+
+    // ALBUM VARIABLES
+    private Bitmap albumBitmap; // Stores the Bitmap for the album image.
 
     // AUDIO VARIABLES
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
@@ -135,6 +142,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         View ss_fragment_view = (ViewGroup) inflater.inflate(R.layout.ss_player_fragment, container, false);
         ButterKnife.bind(this, ss_fragment_view); // ButterKnife view injection initialization.
 
+        loadPreferences(); // Loads values from SharedPreferences.
         setUpLayout(); // Sets up the layout for the fragment.
 
         return ss_fragment_view;
@@ -234,13 +242,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             public void onClick(View v) {
 
                 // Sets the song to the next track in the list.
-                Boolean isUpdate = updateTrack(selectedPosition + 1);
-
-                // If the previous track was playing when the next button was pressed, the new track
-                // is automatically played.
-                if (isUpdate && isPlaying) {
-                    initializeSongPlay();
-                }
+                playNextSong(true);
             }
         });
 
@@ -270,14 +272,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             @Override
             public void onClick(View v) {
 
-                // Sets the song to the next track in the list.
-                Boolean isUpdate = updateTrack(selectedPosition - 1);
-
-                // If the previous track was playing when the next button was pressed, the new track
-                // is automatically played.
-                if (isUpdate && isPlaying) {
-                    initializeSongPlay();
-                }
+                // Sets the song to the previous track in the list.
+                playNextSong(false);
             }
         });
 
@@ -327,10 +323,32 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // setUpImage(): Sets up the images for the ImageView objects in the fragment.
     private void setUpImage() {
 
-        // ALBUM COVER: Loads the image from the image URL into the albumImage ImageView object.
+        // ALBUM COVER: Loads the image from the image URL into the albumImage ImageView object and
+        // stores a reference to the loaded bitmap.
+        Target target = new Target() {
+
+            // onBitmapLoaded(): Runs when the bitmap is loaded.
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                albumImage.setImageBitmap(bitmap); // Sets the album image bitmap.
+                albumBitmap = bitmap; // Stores the reference to the album bitmap.
+            }
+
+            // onBitmapFailed(): Runs when the bitmap failed to load.
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+                Log.e(LOG_TAG, "setUpImage(): ERROR: Bitmap failed to load.");
+            }
+
+            // onPrepareLoad(): Runs prior to loading the bitmap.
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {}
+        };
+
+        // Loads the album image from the URL into the target.
         Picasso.with(currentActivity)
                 .load(albumImageURL)
-                .into(albumImage);
+                .into(target);
 
         // FORWARD BUTTON:
         Picasso.with(currentActivity)
@@ -392,7 +410,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // onStartTrackingTouch(): Called when a touch event on the Seekbar object has started.
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             // onStopTrackingTouch: Called when a touch event on the Seekbar object has ended.
             @Override
@@ -419,7 +438,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // Signals the activity to signal the SSMusicService to begin streaming playback of
         // the current track.
-        playTrack(streamURL, isLoop);
+        playTrack(streamURL, isLoop, albumBitmap, notificationsOn, artistName, songName);
 
         // Displays the progress indicator container. This will be shown until music
         // playback is fully ready.
@@ -467,28 +486,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // Updates the album image and song details.
             setUpImage();
             setUpText();
-
-            /*
-            // If the track list position is at the beginning, the previous button is greyed out and
-            // the next button is set to normal color.
-            if (position == 0) {
-                SSImages.setGrayScale(previousButton, true); // Sets the greyscale color.
-                SSImages.setGrayScale(nextButton, false); // Sets the normal color.
-            }
-
-            // If the track list position is at the end, the next button is greyed out and the
-            // previous button is set to normal color.
-            else if (position == trackList.size() - 1) {
-                SSImages.setGrayScale(nextButton, true); // Sets the greyscale color.
-                SSImages.setGrayScale(previousButton, false); // Sets the normal color.
-            }
-
-            // The standard colors are set for both the next and previous buttons.
-            else {
-                SSImages.setGrayScale(nextButton, false); // Sets the normal color.
-                SSImages.setGrayScale(previousButton, false); // Sets the normal color.
-            }
-            */
 
             return true; // Indicates that the track has changed.
         }
@@ -550,6 +547,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         }
     }
 
+    // playNextSong(): An interface method invoked by the SSMusicEngine to play the next or previous
+    // song in the tracklist.
     @Override
     public void playNextSong(Boolean isNext) {
 
@@ -640,8 +639,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
     // playTrack(): Signals the attached activity to invoke the SSMusicService to begin playback
     // of the streamed Spotify track.
-    private void playTrack(String url, Boolean loop) {
-        try { ((OnMusicServiceListener) currentActivity).playTrack(url, loop); }
+    private void playTrack(String url, Boolean loop, Bitmap albumImage, Boolean notiOn, String artist, String track) {
+        try { ((OnMusicServiceListener) currentActivity).playTrack(url, loop, albumImage, notiOn, artist, track); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 

@@ -40,7 +40,8 @@
                     android:layout_gravity="left|center_vertical"
                     android:src="@android:drawable/stat_notify_sync"
                     android:layout_marginLeft="16dp"
-                    android:background="@android:color/transparent" />
+                    android:background="@android:color/transparent"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:orientation="vertical"
