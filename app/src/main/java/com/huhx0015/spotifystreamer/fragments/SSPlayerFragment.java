@@ -24,7 +24,6 @@ import com.huhx0015.spotifystreamer.preferences.SSPreferences;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
-
 import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -535,12 +534,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // PLAYING:
             if (isPlay) {
                 progressLayer.setVisibility(View.GONE); // Hides the progress indicator container.
-                //playerBar.setVisibility(View.VISIBLE); // Displays the player seek bar.
-            }
-
-            // STOPPED:
-            else {
-                //playerBar.setVisibility(View.INVISIBLE); // Hides the player seek bar.
             }
 
             Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
@@ -612,7 +605,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                 playerBar.setProgress(0); // Resets the player seek bar.
                 isPlaying = false; // Indicates that the song is no longer being played.
                 updateControlButtons(isPlaying); // Updates the player control buttons.
-                //playerBar.setVisibility(View.INVISIBLE); // Hides the player seek bar.
             }
         }
     }

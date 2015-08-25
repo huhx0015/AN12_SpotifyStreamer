@@ -87,10 +87,6 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
             processIntent(intent);
         }
 
-        if( streamerMediaSessionManager == null ) {
-            //initializeMediaSession();
-        }
-
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -248,6 +244,7 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
             default:
                 break;
         }
+
         return null;
     }
 

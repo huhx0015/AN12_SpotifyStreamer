@@ -221,6 +221,15 @@ public class SSFragmentView {
                     // Removes the fragment from the view.
                     removeFragment(container, fragType, false, refActivity);
                 }
+
+                else {
+
+                    // SETTINGS: Sets the proper action bar title when the SSSettingsFragment is
+                    // active.
+                    if (fragType.equals("SETTINGS")) {
+                        SSActionBar.setupActionBar(fragType, null, null, refActivity.get());
+                    }
+                }
             }
 
             // onAnimationRepeat(): Runs when the animation is repeated.

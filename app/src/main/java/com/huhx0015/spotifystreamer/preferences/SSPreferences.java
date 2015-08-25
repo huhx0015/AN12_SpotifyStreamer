@@ -17,7 +17,7 @@ public class SSPreferences {
     /** SHARED PREFERENCES FUNCTIONALITY _______________________________________________________ **/
 
     // getPreferenceResource(): Selects the appropriate resource based on the shared preference type.
-    private static int getPreferenceResource(String prefType) {
+    private static int getPreferenceResource() {
 
         // Main preferences resource file.
         return R.xml.ss_options;
@@ -32,7 +32,7 @@ public class SSPreferences {
     public static void setDefaultPreferences(String prefType, Boolean isReset, Context context) {
 
         // Determines the appropriate resource file to use.
-        int prefResource = getPreferenceResource(prefType);
+        int prefResource = getPreferenceResource();
 
         // Resets the preference values to default values.
         if (isReset) {
@@ -55,7 +55,6 @@ public class SSPreferences {
     public static Boolean getNotifications(SharedPreferences preferences) {
         return preferences.getBoolean("ss_notifications", true); // Retrieves the ss_notifications launch value.
     }
-
 
     /** SET PREFERENCES FUNCTIONALITY __________________________________________________________ **/
 

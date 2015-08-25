@@ -16,6 +16,8 @@ public interface OnMusicPlayerListener {
     // (whether it is currently playing in the background or not).
     void playbackStatus(Boolean isPlay);
 
+    // playNextSong(): Interface method that is used to signal the SSPlayerFragment to play the
+    // next or previous song in the tracklist.
     void playNextSong(Boolean isNext);
 
     // seekbarStatus(): Interface method that is used to update the seekbar in the SSPlayerFragment

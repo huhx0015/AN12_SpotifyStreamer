@@ -19,30 +19,31 @@ public class SSActionBar {
 
         ActionBar actionBar = activity.getSupportActionBar(); // References the action bar.
 
-        // TRACKS:
-        if (actionType.equals("TRACKS")) {
+        if (actionBar != null) {
 
-            if (actionBar != null) {
+            // TRACKS:
+            if (actionType.equals("TRACKS")) {
                 actionBar.setTitle("Top 10 Tracks"); // Sets the title of the action bar.
                 actionBar.setSubtitle(subtitle); // Sets the name of the current artist as the subtitle.
                 actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
             }
-        }
 
-        // PLAYER:
-        else if (actionType.equals("PLAYER")) {
-
-            if (actionBar != null) {
+            // PLAYER:
+            else if (actionType.equals("PLAYER")) {
                 actionBar.setTitle("Now Playing"); // Sets the title of the action bar.
                 actionBar.setSubtitle(currentArtist + " - " + subtitle); // Sets the name of the track as the subtitle.
                 actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
             }
-        }
 
-        // DEFAULT:
-        else {
+            // SETTINGS:
+            else if (actionType.equals("SETTINGS")) {
+                actionBar.setTitle("Settings"); // Sets the title of the action bar.
+                actionBar.setSubtitle(null); // Disables the subtitles of the action bar.
+                actionBar.setDisplayHomeAsUpEnabled(true); // Disables the back button in the action bar.
+            }
 
-            if (actionBar != null) {
+            // DEFAULT:
+            else {
                 actionBar.setTitle(R.string.app_name); // Sets the title of the action bar.
                 actionBar.setSubtitle(null); // Disables the subtitles of the action bar.
                 actionBar.setDisplayHomeAsUpEnabled(false); // Disables the back button in the action bar.
