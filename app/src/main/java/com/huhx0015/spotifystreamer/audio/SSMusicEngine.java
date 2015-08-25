@@ -1,8 +1,15 @@
 package com.huhx0015.spotifystreamer.audio;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
+import android.media.MediaMetadata;
 import android.media.MediaPlayer;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
+import android.os.Build;
 import android.os.PowerManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;

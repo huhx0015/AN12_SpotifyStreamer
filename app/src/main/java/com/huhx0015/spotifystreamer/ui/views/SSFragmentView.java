@@ -31,7 +31,7 @@ public class SSFragmentView {
 
     /** FRAGMENT VIEW METHODS __________________________________________________________________ **/
 
-    // addFragment(): Sets up the fragment view.
+    // addFragment(): Sets up the fragment view for standard fragments.
     public static void addFragment(Fragment fragment, ViewGroup container, int containerId,
                                    final String fragType, Boolean isAnimated,
                                    WeakReference<AppCompatActivity> refActivity) {
@@ -42,6 +42,34 @@ public class SSFragmentView {
             FragmentManager fragMan = refActivity.get().getSupportFragmentManager();
             FragmentTransaction fragTrans = fragMan.beginTransaction();
             fragTrans.replace(containerId, fragment, fragType);
+            fragTrans.addToBackStack(fragType); // Adds fragment to the fragment stack.
+
+            // Makes the changes to the fragment manager and transaction objects.
+            fragTrans.commitAllowingStateLoss();
+
+            // Sets up the transition animation.
+            if (isAnimated) {
+                setFragmentTransition(fragType, container, true, refActivity);
+            }
+
+            // Displays the fragment view without any transition animations.
+            else {
+                container.setVisibility(View.VISIBLE); // Displays the fragment.
+            }
+        }
+    }
+
+    // addFragment(): Sets up the fragment view for PreferenceFragments.
+    public static void addFragment(android.app.Fragment fragment, ViewGroup container, int containerId,
+                                   final String fragType, Boolean isAnimated,
+                                   WeakReference<AppCompatActivity> refActivity) {
+
+        if ((refActivity.get() != null) && (!refActivity.get().isFinishing())) {
+
+            // Initializes the manager and transaction objects for the fragments.
+            android.app.FragmentManager fragMan = refActivity.get().getFragmentManager();
+            android.app.FragmentTransaction fragTrans = fragMan.beginTransaction();
+            fragTrans.add(containerId, fragment, fragType);
             fragTrans.addToBackStack(fragType); // Adds fragment to the fragment stack.
 
             // Makes the changes to the fragment manager and transaction objects.
@@ -73,11 +101,26 @@ public class SSFragmentView {
             // The fragment is removed from the view layout.
             else {
 
-                // Initializes the manager and transaction objects for the fragments.
-                FragmentManager fragMan = refActivity.get().getSupportFragmentManager();
-                Fragment currentFragment = refActivity.get().getSupportFragmentManager().findFragmentByTag(fragType);
-                fragMan.beginTransaction().remove(currentFragment).commitAllowingStateLoss();
-                fragMan.popBackStack(); // Pops the fragment from the stack.
+                // SETTINGS: If the fragment to remove is a PreferenceFragment, the standard fragment
+                // classes are utilized.
+                if (fragType.equals("SETTINGS")) {
+
+                    // Initializes the manager and transaction objects for the fragments.
+                    android.app.FragmentManager fragMan = refActivity.get().getFragmentManager();
+                    android.app.Fragment currentFragment = refActivity.get().getFragmentManager().findFragmentByTag(fragType);
+                    fragMan.beginTransaction().remove(currentFragment).commitAllowingStateLoss();
+                    fragMan.popBackStack(); // Pops the fragment from the stack.
+                }
+
+                else {
+
+                    // Initializes the manager and transaction objects for the fragments.
+                    FragmentManager fragMan = refActivity.get().getSupportFragmentManager();
+                    Fragment currentFragment = refActivity.get().getSupportFragmentManager().findFragmentByTag(fragType);
+                    fragMan.beginTransaction().remove(currentFragment).commitAllowingStateLoss();
+                    fragMan.popBackStack(); // Pops the fragment from the stack.
+                }
+
                 container.removeAllViews(); // Removes all views in the layout.
                 container.setVisibility(View.INVISIBLE); // Hides the fragment.
 

@@ -157,12 +157,14 @@ public class SSSpotifyAccessors {
 
     // retrieveArtistTopTracks(): Retrieves the artist's top tracks data from the Spotify background
     // service.
-    public static Tracks retrieveArtistTopTracks(String id, SpotifyService service) {
+    public static Tracks retrieveArtistTopTracks(String id, String country, SpotifyService service) {
+
+        Log.d(LOG_TAG, "retrieveArtistTopTracks(): Current country code: " + country);
 
         // Creates a new HashMap object containing Spotify identifiers needed for querying for the
         // artist's top song tracks.
         Map<String, Object> artistInfo = new HashMap<>();
-        artistInfo.put("country", "US"); // Sets the country identifier.
+        artistInfo.put("country", country); // Sets the country identifier.
 
         // Retrieves the artist's top tracks from the Spotify background service.
         return service.getArtistTopTrack(id, artistInfo);

@@ -16,6 +16,8 @@ public interface OnMusicPlayerListener {
     // (whether it is currently playing in the background or not).
     void playbackStatus(Boolean isPlay);
 
+    void playNextSong(Boolean isNext);
+
     // seekbarStatus(): Interface method that is used to update the seekbar in the SSPlayerFragment
     // based on the current playback status of the Spotify streaming song.
     void seekbarStatus(int position);

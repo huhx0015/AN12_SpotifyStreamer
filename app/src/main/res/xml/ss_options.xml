@@ -1,11 +1,25 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
     <PreferenceCategory
-        android:title="SETTINGS"
-        android:key="ss_options">
+        android:title="COUNTRY CODE"
+        android:key="ss_country_code_category">
         <ListPreference
             android:key="ss_country_code"
-            android:title="Country"
+            android:title="Current country code: US"
+            android:summary="Changes the current country setting."
+            android:defaultValue="US"
             android:entries="@array/ss_country_list"
             android:entryValues="@array/ss_country_code_list"/>
     </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="NOTIFICATIONS"
+        android:key="ss_notifications_category">
+        <CheckBoxPreference
+            android:key="ss_notifications"
+            android:title="Display Notifications: ON"
+            android:summary="Controls whether notifications should be enabled or not."
+            android:defaultValue="true" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

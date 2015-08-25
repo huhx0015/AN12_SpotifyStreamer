@@ -20,7 +20,7 @@ public class SSNotifications {
     /** NOTIFICATION FUNCTIONALITY _____________________________________________________________ **/
 
     // createNotification(): Creates the notification to display.
-    public void createNotification(Context con, Class<?> activity, String notiText) {
+    public static void createNotification(Context con, Class<?> activity, String notiText) {
 
         int notificationId = 001; // Sets the notification ID tag.
 

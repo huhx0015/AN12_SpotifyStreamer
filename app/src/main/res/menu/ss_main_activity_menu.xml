@@ -8,9 +8,8 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/miShare"
+        android:id="@+id/ss_action_share_button"
         android:icon="@drawable/abc_ic_menu_share_mtrl_alpha"
-        android:onClick="onShareAction"
         app:showAsAction="ifRoom"
         android:title="Share">
     </item>

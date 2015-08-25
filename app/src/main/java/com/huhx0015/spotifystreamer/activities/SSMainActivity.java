@@ -13,15 +13,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
 import com.huhx0015.spotifystreamer.fragments.SSPlayerFragment;
+import com.huhx0015.spotifystreamer.fragments.SSSettingsFragment;
 import com.huhx0015.spotifystreamer.fragments.SSTracksFragment;
 import com.huhx0015.spotifystreamer.intent.SSShareIntent;
-import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
@@ -59,8 +60,9 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     private static final String TRACK_LIST = "trackListResult"; // Parcelable key value for the track list.
 
     // FRAGMENT VARIABLES
-    private Boolean isPlaying = false; // Used to determine if the SSPlayerFragment is in focus.
     public Boolean isRotationEvent = false; // Used to determine if a screen orientation change event has occurred.
+    private Boolean isPlaying = false; // Used to determine if the SSPlayerFragment is in focus.
+    private Boolean isSettings = false; // Used to determine if the SSSettingsFragment is in focus.
     private String currentFragment = ""; // Used to determine which fragment is currently active.
     private String currentArtist = ""; // Used to determine the current artist name.
     private String currentInput = ""; // Used to determine the current artist input.
@@ -85,6 +87,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
     @Bind(R.id.ss_main_activity_secondary_fragment_container) FrameLayout fragmentSecondaryContainer;
+    @Bind(R.id.ss_main_activity_settings_fragment_container) FrameLayout settingsFragmentContainer;
     @Bind(R.id.ss_main_activity_secondary_progress_indicator) ProgressBar secondaryProgressBar;
 
     /** ACTIVITY LIFECYCLE METHODS _____________________________________________________________ **/
@@ -128,10 +131,10 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     public void onPause(){
         super.onPause();
 
-        // TODO: Test this.
+        // TODO: Test this. DOESN'T WORK.
         // If not a screen orientation change event, music playback is suspended.
         if (!isRotationEvent) {
-            pauseTrack(false); // Pauses music playback.
+        //    pauseTrack(false); // Pauses music playback.
         }
     }
 
@@ -180,8 +183,29 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
                 return true;
 
-            // OPTIONS:
+            // SETTINGS:
             case R.id.action_settings:
+
+                // Displays the SSSettingsFragment view.
+                if (!isSettings) {
+                    isSettings = true; // Indicates that the SSSettingsFragment is active.
+                    settingsFragmentContainer.setVisibility(View.VISIBLE);
+                    SSSettingsFragment settingsFragment = new SSSettingsFragment();
+                    SSFragmentView.addFragment(settingsFragment, settingsFragmentContainer,
+                            R.id.ss_main_activity_settings_fragment_container, "SETTINGS", true, weakRefActivity);
+                }
+
+                // Hides the SSSettingsFragment view.
+                else {
+                    SSFragmentView.removeFragment(fragmentContainer, "SETTINGS", false, weakRefActivity);
+                    isSettings = false; // Indicates that the SSSettingsFragment is not active.
+                }
+
+                return true;
+
+            // SHARE:
+            case R.id.ss_action_share_button:
+                SSShareIntent.shareIntent(currentTrack, currentArtist, this);
                 return true;
 
             // DEFAULT:
@@ -208,11 +232,6 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
         // Always calls the superclass, so it can save the view hierarchy state.
         super.onSaveInstanceState(savedInstanceState);
-    }
-
-    // onShareAction(): Defines the action to take if the Share menu option is selected.
-    public void onShareAction(MenuItem item) {
-        SSShareIntent.shareIntent(currentTrack, currentArtist, this);
     }
 
     /** PHYSICAL BUTTON METHODS ________________________________________________________________ **/

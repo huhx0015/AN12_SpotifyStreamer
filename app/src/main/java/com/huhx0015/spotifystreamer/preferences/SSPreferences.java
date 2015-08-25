@@ -48,7 +48,7 @@ public class SSPreferences {
 
     // getCountryCode(): Retrieves the current country code value from preferences.
     public static String getCountryCode(SharedPreferences preferences) {
-        return preferences.getString("ss_country_code", ""); // Retrieves the country code setting.
+        return preferences.getString("ss_country_code", "US"); // Retrieves the country code setting.
     }
 
     // getNotifications(): Retrieves the "ss_notifications" value from preferences.

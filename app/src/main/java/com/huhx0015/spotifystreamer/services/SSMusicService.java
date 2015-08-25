@@ -1,13 +1,25 @@
 package com.huhx0015.spotifystreamer.services;
 
+import android.annotation.TargetApi;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.media.MediaMetadata;
 import android.media.MediaPlayer;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 
@@ -24,7 +36,8 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
     // AUDIO VARIABLES
     private SSMusicEngine ss_music; // SSMusicEngine class object that is used for music functionality.
-    private String currentSong = "NONE"; // Sets the default song for the activity.
+    private String currentSong = ""; // Sets the default song title.
+    private String songURL = ""; // References the song URL.
     private Boolean musicOn = true; // Used to determine if music has been enabled or not.
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
 
@@ -40,6 +53,18 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     // THREADING VARIABLES
     private Handler seekHandler = new Handler(); // Handler for the seekbar update thread.
 
+    public static final String ACTION_PLAY = "action_play";
+    public static final String ACTION_PAUSE = "action_pause";
+    public static final String ACTION_REWIND = "action_rewind";
+    public static final String ACTION_FAST_FORWARD = "action_fast_foward";
+    public static final String ACTION_NEXT = "action_next";
+    public static final String ACTION_PREVIOUS = "action_previous";
+    public static final String ACTION_STOP = "action_stop";
+
+    private MediaSessionManager streamerMediaSessionManager;
+    private MediaSession streamerMediaSession;
+    private MediaController streamerMediaController;
+    
     /** SERVICE LIFECYCLE METHODS ______________________________________________________________ **/
 
     // onCreate(): The system calls this method when the service is first created, to perform
@@ -51,6 +76,19 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         // AUDIO CLASS INITIALIZATION:
         ss_music.getInstance().initializeAudio(getApplicationContext());
     }
+
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if( streamerMediaSessionManager == null ) {
+           initializeMediaSession();
+            //initMediaSessions();
+        }
+
+        handleIntent( intent );
+        return super.onStartCommand(intent, flags, startId);
+    }
+
 
     /** SERVICE EXTENSION METHODS ______________________________________________________________ **/
 
@@ -108,14 +146,191 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     }
 
     // playTrack(): Accesses the SSMusicEngine instance to play the streaming song track.
-    public void playTrack(String songUrl, Boolean loop){
+    public void playTrack(String songUrl, Boolean loop) {
+
+        // Initiates music playback in SSMusicEngine.
         ss_music.getInstance().playSongUrl(songUrl, loop);
+        this.songURL = songUrl;
+
+        initializeMediaSession(); // TODO: TEST!
+
         seekHandler.postDelayed(seekbarThread, 1000); // Begins the seekbar update thread.
     }
 
     // setPosition(): Accesses the SSMusicEngine instance to update the song position.
     public void setPosition(int position){
         ss_music.getInstance().setSongPosition(position);
+    }
+
+    /** MEDIA SESSION METHODS __________________________________________________________________ **/
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void handleIntent( Intent intent ) {
+        if( intent == null || intent.getAction() == null )
+            return;
+
+        String action = intent.getAction();
+
+        if( action.equalsIgnoreCase(ACTION_PLAY) ) {
+            streamerMediaController.getTransportControls().play();
+        } else if( action.equalsIgnoreCase( ACTION_PAUSE ) ) {
+            streamerMediaController.getTransportControls().pause();
+        } else if( action.equalsIgnoreCase( ACTION_FAST_FORWARD ) ) {
+            streamerMediaController.getTransportControls().fastForward();
+        } else if( action.equalsIgnoreCase( ACTION_REWIND ) ) {
+            streamerMediaController.getTransportControls().rewind();
+        } else if( action.equalsIgnoreCase( ACTION_PREVIOUS ) ) {
+            streamerMediaController.getTransportControls().skipToPrevious();
+        } else if( action.equalsIgnoreCase(ACTION_NEXT ) ) {
+            streamerMediaController.getTransportControls().skipToNext();
+        } else if( action.equalsIgnoreCase( ACTION_STOP ) ) {
+            streamerMediaController.getTransportControls().stop();
+        }
+    }
+
+    private PendingIntent triggerPlaybackAction(int which) {
+        Intent action;
+        PendingIntent pendingIntent;
+        final ComponentName serviceName = new ComponentName(this, SSMusicService.class);
+        switch (which) {
+            case 0:
+                // Play
+                action = new Intent(ACTION_PLAY);
+                action.setComponent(serviceName);
+                pendingIntent = PendingIntent.getService(this, 0, action, 0);
+                return pendingIntent;
+            case 1:
+                // Pause
+                action = new Intent(ACTION_PAUSE);
+                action.setComponent(serviceName);
+                pendingIntent = PendingIntent.getService(this, 1, action, 0);
+                return pendingIntent;
+            case 2:
+                // Skip tracks
+                action = new Intent(ACTION_NEXT);
+                action.setComponent(serviceName);
+                pendingIntent = PendingIntent.getService(this, 2, action, 0);
+                return pendingIntent;
+            case 3:
+                // Previous tracks
+                action = new Intent(ACTION_PREVIOUS);
+                action.setComponent(serviceName);
+                pendingIntent = PendingIntent.getService(this, 3, action, 0);
+                return pendingIntent;
+            case 4:
+                //fast forward tracks
+                action = new Intent(ACTION_FAST_FORWARD);
+                action.setComponent(serviceName);
+                pendingIntent = PendingIntent.getService(this, 4, action, 0);
+                return pendingIntent;
+            case 5:
+                //rewind tracks
+                action = new Intent(ACTION_REWIND);
+                action.setComponent(serviceName);
+                pendingIntent = PendingIntent.getService(this, 5, action, 0);
+                return pendingIntent;
+            default:
+                break;
+        }
+        return null;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void initializeMediaSession() {
+
+        // Creates a new MediaSession.
+        streamerMediaSession = new MediaSession(getApplicationContext(), "SPOTIFY STREAMER");
+        streamerMediaSessionManager = (MediaSessionManager) getSystemService(Context.MEDIA_SESSION_SERVICE);
+        streamerMediaController = new MediaController(getApplicationContext(), streamerMediaSession.getSessionToken());
+
+        // Updates the current metadata for the track currently playing.
+        streamerMediaSession.setMetadata(new MediaMetadata.Builder()
+                //.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, artwork)
+                .putString(MediaMetadata.METADATA_KEY_ARTIST, "Pink Floyd")
+                .putString(MediaMetadata.METADATA_KEY_ALBUM, "Dark Side of the Moon")
+                .putString(MediaMetadata.METADATA_KEY_TITLE, "SPOTIFY STREAMER")
+                .build());
+
+        streamerMediaSession.setActive(true); // Indicates that media commands can be received.
+
+        // Attaches a new Callback to receive the MediaSession updates.
+        streamerMediaSession.setCallback(new MediaSession.Callback() {
+
+            @Override
+            public void onPlay() {
+                super.onPlay();
+                playTrack(songURL, false);
+            }
+
+            @Override
+            public void onPause() {
+                super.onPause();
+                pauseTrack(false);
+            }
+
+            @Override
+            public void onSkipToNext() {
+                super.onSkipToNext();
+                playNextSong(true);
+            }
+
+            @Override
+            public void onSkipToPrevious() {
+                super.onSkipToPrevious();
+                playNextSong(false);
+            }
+
+            @Override
+            public void onStop() {
+                super.onStop();
+                //Log.e(Constants.LOG_TAG, "onStop");
+                NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.cancel(1);
+                Intent intent = new Intent(getApplicationContext(), SSMusicService.class);
+                stopService(intent);
+            }
+        });
+
+        // Enables the ability to receive transport controls via the MediaSession Callback.
+        streamerMediaSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        createNotificationPlayer(streamerMediaSession);
+    }
+
+
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void createNotificationPlayer(MediaSession streamerMediaSession) {
+
+        // Create a new Notification
+        final Notification noti = new Notification.Builder(this)
+                // Hide the timestamp
+                .setShowWhen(false)
+                        // Set the Notification style
+                .setStyle(new Notification.MediaStyle()
+                        // Attach our MediaSession token
+                        .setMediaSession(streamerMediaSession.getSessionToken())
+                                // Show our playback controls in the compat view
+                        .setShowActionsInCompactView(0, 1, 2))
+                        // Set the Notification color
+                .setColor(0xFFDB4437)
+                        // Set the large and small icons
+                //.setLargeIcon(artwork)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                        // Set Notification content information
+                .setContentText("Coldplay")
+                .setContentInfo("A Sky Full of Stars")
+                .setContentTitle("Spotify Streamer")
+                        // Add some playback controls
+                .addAction(android.R.drawable.ic_media_previous, "Previous", triggerPlaybackAction(3))
+                .addAction(android.R.drawable.ic_media_play, "Play", triggerPlaybackAction(0))
+                .addAction(android.R.drawable.ic_media_pause, "Pause", triggerPlaybackAction(1))
+                .addAction(android.R.drawable.ic_media_next, "Next", triggerPlaybackAction(2))
+                .build();
+
+        // Do something with your TransportControls
+        final MediaController.TransportControls controls = streamerMediaSession.getController().getTransportControls();
+
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(1, noti);
     }
 
     /** THREADING METHODS ______________________________________________________________________ **/
@@ -161,5 +376,15 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
             try { ((OnMusicPlayerListener) playerFragment).seekbarStatus(position); }
             catch (ClassCastException cce) {} // Catch for class cast exception errors.
         }
+    }
+
+    //
+    private void playNextSong(Boolean isNext) {
+
+        if (playerFragment != null) {
+            try { ((OnMusicPlayerListener) playerFragment).playNextSong(isNext); }
+            catch (ClassCastException cce) {} // Catch for class cast exception errors.
+        }
+
     }
 }

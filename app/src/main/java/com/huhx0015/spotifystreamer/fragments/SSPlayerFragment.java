@@ -1,6 +1,7 @@
 package com.huhx0015.spotifystreamer.fragments;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -10,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
@@ -18,6 +18,7 @@ import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
+import com.huhx0015.spotifystreamer.preferences.SSPreferences;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
@@ -66,6 +67,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSPlayerFragment.class.getSimpleName();
 
+    // SHARED PREFERENCE VARIABLES
+    private SharedPreferences SS_prefs; // Main SharedPreferences objects that store settings for the application.
+    private Boolean notificationsOn = true; // Used to determine if notification display is enabled or not.
+    private static final String SS_OPTIONS = "ss_options"; // Used to reference the name of the preference XML file.
+
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_player_fragment_progress_layer) FrameLayout progressLayer;
     @Bind(R.id.ss_player_album_image) ImageView albumImage;
@@ -75,7 +81,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     @Bind(R.id.ss_previous_button) ImageButton previousButton;
     @Bind(R.id.ss_repeat_button) ImageButton repeatButton;
     @Bind(R.id.ss_rewind_button) ImageButton rewindButton;
-    @Bind(R.id.ss_player_seekbar_container) LinearLayout playerBarContainer;
     @Bind(R.id.ss_player_seekbar) SeekBar playerBar;
     @Bind(R.id.ss_player_artist_album_name_text) TextView artistAlbumNameText;
     @Bind(R.id.ss_player_seekbar_min_duration_text) TextView minDurationText;
@@ -141,10 +146,10 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     public void onResume() {
         super.onResume();
 
-        // TODO: Test this.
-        if (!currentActivity.isRotationEvent) {
-            playTrack(streamURL, isLoop); // Music playback is resumed.
-        }
+        // TODO: Test this. DOESN'T WORK.
+        //if (!currentActivity.isRotationEvent) {
+            //playTrack(streamURL, isLoop); // Music playback is resumed.
+        //}
     }
 
     // onDestroyView(): This function runs when the screen is no longer visible and the view is
@@ -164,10 +169,10 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     public void onDestroy() {
         super.onDestroy();
 
-        pauseTrack(true); // Stops the track, if currently playing in the background.
+        //pauseTrack(true); // Stops the track, if currently playing in the background.
 
         // Resets the current track value and the isPlaying value in SSMainActivity is set to false.
-        currentActivity.setCurrentTrack(null, false);
+        //currentActivity.setCurrentTrack(null, false);
 
         Log.d(LOG_TAG, "onDestroy(): Fragment destroyed.");
     }
@@ -507,6 +512,18 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         }
     }
 
+    /** PREFERENCE METHODS _____________________________________________________________________ **/
+
+    // loadPreferences(): Loads the SharedPreference values from the stored SharedPreferences object.
+    private void loadPreferences() {
+
+        // Initializes the SharedPreferences object.
+        SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
+
+        // Retrieves the current country code setting.
+        notificationsOn = SSPreferences.getNotifications(SS_prefs);
+    }
+
     /** INTERFACE METHODS ______________________________________________________________________ **/
 
     // playbackStatus(): An interface method invoked by the SSMusicEngine on the current playback
@@ -521,15 +538,40 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // PLAYING:
             if (isPlay) {
                 progressLayer.setVisibility(View.GONE); // Hides the progress indicator container.
-                playerBarContainer.setVisibility(View.VISIBLE); // Displays the player seek bar.
+                //playerBar.setVisibility(View.VISIBLE); // Displays the player seek bar.
             }
 
             // STOPPED:
             else {
-                playerBarContainer.setVisibility(View.INVISIBLE); // Hides the player seek bar.
+                //playerBar.setVisibility(View.INVISIBLE); // Hides the player seek bar.
             }
 
             Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
+        }
+    }
+
+    @Override
+    public void playNextSong(Boolean isNext) {
+
+        int newPosition = selectedPosition;
+
+        // NEXT TRACK:
+        if (isNext) {
+            newPosition++;
+        }
+
+        // PREVIOUS TRACK:
+        else {
+            newPosition--;
+        }
+
+        // Sets the song to the next track in the list.
+        Boolean isUpdate = updateTrack(newPosition);
+
+        // If the previous track was playing when the next button was pressed, the new track
+        // is automatically played.
+        if (isUpdate && isPlaying) {
+            initializeSongPlay();
         }
     }
 
@@ -571,7 +613,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                 playerBar.setProgress(0); // Resets the player seek bar.
                 isPlaying = false; // Indicates that the song is no longer being played.
                 updateControlButtons(isPlaying); // Updates the player control buttons.
-                playerBarContainer.setVisibility(View.INVISIBLE); // Hides the player seek bar.
+                //playerBar.setVisibility(View.INVISIBLE); // Hides the player seek bar.
             }
         }
     }

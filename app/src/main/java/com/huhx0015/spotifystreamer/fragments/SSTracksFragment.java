@@ -1,6 +1,7 @@
 package com.huhx0015.spotifystreamer.fragments;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,6 +18,7 @@ import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.data.SSSpotifyAccessors;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.network.SSConnectivity;
+import com.huhx0015.spotifystreamer.preferences.SSPreferences;
 import com.huhx0015.spotifystreamer.ui.adapters.SSResultsAdapter;
 import java.util.ArrayList;
 import butterknife.Bind;
@@ -57,6 +59,11 @@ public class SSTracksFragment extends Fragment {
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSTracksFragment.class.getSimpleName();
+
+    // SHARED PREFERENCE VARIABLES
+    private SharedPreferences SS_prefs; // Main SharedPreferences objects that store settings for the application.
+    private String countryCode; // Stores the String value of the country code that is currently set.
+    private static final String SS_OPTIONS = "ss_options"; // Used to reference the name of the preference XML file.
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_tracks_progress_indicator) ProgressBar progressIndicator;
@@ -236,6 +243,18 @@ public class SSTracksFragment extends Fragment {
         }
     }
 
+    /** PREFERENCE METHODS _____________________________________________________________________ **/
+
+    // loadPreferences(): Loads the SharedPreference values from the stored SharedPreferences object.
+    private void loadPreferences() {
+
+        // Initializes the SharedPreferences object.
+        SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
+
+        // Retrieves the current country code setting.
+        countryCode = SSPreferences.getCountryCode(SS_prefs);
+    }
+
     /** RECYCLERVIEW METHODS ___________________________________________________________________ **/
 
     // setListAdapter(): Sets the recycler list adapter based on the songList.
@@ -277,6 +296,8 @@ public class SSTracksFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
 
+            loadPreferences(); // Loads the current SharedPreference values.
+
             statusText.setVisibility(View.GONE); // Hides the status result TextView object.
             resultsList.setVisibility(View.GONE); // Hides the RecyclerView object.
 
@@ -310,7 +331,7 @@ public class SSTracksFragment extends Fragment {
                     if (artistId != null) {
 
                         // Retrieves the artist's top tracks data from the Spotify background service.
-                        Tracks topTracks = SSSpotifyAccessors.retrieveArtistTopTracks(artistId, service);
+                        Tracks topTracks = SSSpotifyAccessors.retrieveArtistTopTracks(artistId, countryCode, service);
 
                         // If the track size is not empty, the top tracks are added into the songListResult
                         // List object.
