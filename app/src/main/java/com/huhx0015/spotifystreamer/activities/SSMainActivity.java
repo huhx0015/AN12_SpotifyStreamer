@@ -51,6 +51,9 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // ACTIVITY VARIABLES
     private static WeakReference<AppCompatActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
 
+    // BITMAP VARIABLES
+    private Bitmap currentBitmap; // Used to reference the current bitmap artist or album image.
+
     // DATA VARIABLES
     private static final String CURRENT_FRAGMENT = "currentFragment"; // Used for restoring the proper fragment for rotation change events.
     private static final String CURRENT_TRACK = "currentTrack"; // Used for restoring the proper track name value for rotation change events.
@@ -226,7 +229,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
             // SHARE:
             case R.id.ss_action_share_button:
-                SSShareIntent.shareIntent(currentTrack, currentArtist, this);
+                SSShareIntent.shareIntent(currentTrack, currentArtist, currentBitmap, this);
                 return true;
 
             // DEFAULT:
@@ -631,7 +634,12 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // stream.
     @Override
     public void playTrack(String url, Boolean loop, Bitmap albumImage, Boolean notiOn, String artist, String track) {
+
+        // Signals the SSMusicService to begin music playback of the selected track.
         musicService.playTrack(url, loop, albumImage, notiOn, artist, track);
+
+        // Sets the current bitmap to the album associated with the playing track.
+        this.currentBitmap = albumImage;
     }
 
     // setPosition(): Invoked by SSPlayerFragment to signal the SSMusicService to skip to the

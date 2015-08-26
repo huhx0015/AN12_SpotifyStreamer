@@ -3,12 +3,10 @@ package com.huhx0015.spotifystreamer.intent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.Html;
 import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 
 /** -----------------------------------------------------------------------------------------------
@@ -28,8 +26,8 @@ public class SSShareIntent {
 
     /** INTENT FUNCTIONALITY ___________________________________________________________________ **/
 
-    // shareIntent(): Prepares an Intent to share image data with external activities.
-    public static void shareIntent(String trackName, String artistName, Context context) {
+    // shareIntent(): Prepares an Intent to share text data with external activities.
+    public static void shareIntent(String trackName, String artistName, Bitmap currentBitmap, Context context) {
 
         Log.d(LOG_TAG, "shareIntent(): Preparing content to share to external activites...");
 
@@ -42,7 +40,10 @@ public class SSShareIntent {
             // If an artist and a track has been selected, both the track and artist names are
             // displayed in the share intent message.
             if ( (trackName != null) && !(trackName.equals("")) ) {
-                shareMessage = "I'm currently listening to " + trackName + " by " + artistName + " on ";
+
+                // Creates an Intent to share the current album image with external activities.
+                shareBitmapIntent(trackName, artistName, currentBitmap, context);
+                return;
             }
 
             // Displays only the artist name in the share intent message.
@@ -59,37 +60,19 @@ public class SSShareIntent {
         sendIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
         sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         context.startActivity(Intent.createChooser(sendIntent, "Share my Spotify Streamer experience with: "));
+    }
 
-        /*
-        // TODO: Specify file name here.
-        String filename = "";
+    // shareBitmapIntent(): Creates an Intent to share image data with external activities.
+    public static void shareBitmapIntent(String trackName, String artistName, Bitmap imageBitmap, Context context) {
 
-        // References the directory path where the image is stored.
-        final String uploadFilePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString() + "/";
-        String fullFilePath = uploadFilePath + "" + filename; // Sets the full file path.
-        Bitmap albumBitmap; // References the bitmap.
+        // Checks to see if the imageBitmap is null first.
+        if (imageBitmap != null) {
 
-        // Retrieves the bitmap data from the file
-        try {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.RGB_565;
-            albumBitmap = BitmapFactory.decodeFile(fullFilePath, options);
-        }
-
-        // Exception handler.
-        catch (Exception e) {
-            Log.e(LOG_TAG, "shareIntent(): ERROR: File could not be found.");
-            return;
-        }
-
-        // Checks to see if the albumBitmap is null first.
-        if (albumBitmap != null) {
-
-            // Prepares the album bitmap to be shared via an Intent.
+            // Prepares the image bitmap to be shared via an Intent.
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            albumBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
             String path = MediaStore.Images.Media.insertImage(context.getContentResolver(),
-                    albumBitmap, "SpotifyStreamer", null);
+                    imageBitmap, "SpotifyStreamer", null);
             Uri imageUri = Uri.parse(path);
 
             // Sets up an Intent to share the shortcut data with external activities.
@@ -100,6 +83,13 @@ public class SSShareIntent {
             sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             context.startActivity(Intent.createChooser(sendIntent, "Share my Spotify Streamer experience with: "));
         }
-        */
+    }
+
+    public static void shareUrlIntent(Context context) {
+
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+        sharingIntent.setType("text/html");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml("<p>This is the text shared.</p>"));
+        context.startActivity(Intent.createChooser(sharingIntent,"Share using"));
     }
 }

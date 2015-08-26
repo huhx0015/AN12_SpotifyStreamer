@@ -43,13 +43,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // ACTIVITY VARIABLES
     private SSMainActivity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
-    // ALBUM VARIABLES
-    private Bitmap albumBitmap; // Stores the Bitmap for the album image.
-
     // AUDIO VARIABLES
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
     private Boolean isLoop = false; // Indicates the song will be looped infinitely.
     private int maxDuration = 0; // Used to determine the max duration of the current selected track.
+
+    // BITMAP VARIABLES
+    private Bitmap albumBitmap; // Stores the Bitmap for the album image.
 
     // DATA VARIABLES
     private static final String PLAYER_STATE = "playerState"; // Parcelable key value for the SSMusicEngine state.
@@ -605,6 +605,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                 playerBar.setProgress(0); // Resets the player seek bar.
                 isPlaying = false; // Indicates that the song is no longer being played.
                 updateControlButtons(isPlaying); // Updates the player control buttons.
+                minDurationText.setText("0:00"); // Resets the minimum duration TextView object.
             }
         }
     }
