@@ -109,8 +109,7 @@ public class SSMusicEngine {
         }
     }
 
-    // playSongUrl(): Plays the music file based on the specified song URL. The song is changed
-    // only if the specified song does not match the current song that is playing.
+    // playSongUrl(): Plays the music file based on the specified song URL.
     // Set loop variable to true to enable infinite song looping.
     // TRUE: Loops the song infinitely.
     // FALSE: Disables song looping.
@@ -119,31 +118,7 @@ public class SSMusicEngine {
         // If the music option has been enabled, a song is selected based on the passed in songUrl string.
         if (musicOn) {
 
-            // Checks to see if the specified song is already playing.
-            if (!currentSong.equals(songUrl)) {
-
-                // Checks to see if the songUrl is valid or not.
-                if (songUrl == null) {
-
-                    Log.d(LOG_TAG, "ERROR: Invalid song track URL was found.");
-                    return;
-                }
-
-                // Sets the currentSong to be the name of the specified song.
-                else {
-                    currentSong = songUrl;
-                }
-            }
-
-            // Indicates that the specified song is already playing and the operation is
-            // cancelled.
-            else {
-                Log.d(LOG_TAG, "ERROR: Specified song is already playing!");
-                return;
-            }
-
-            // If the song is not already playing, calls playSong to create a MediaPlayer object and
-            // play the song.
+            // Calls playSong to create a MediaPlayer object and play the song.
             Log.d(LOG_TAG, "PREPARING: Preparing song for playback.");
             playSong(songUrl, loop);
         }

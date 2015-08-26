@@ -437,7 +437,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // Signals the activity to signal the SSMusicService to begin streaming playback of
         // the current track.
-        playTrack(streamURL, isLoop, albumBitmap, notificationsOn, artistName, songName);
+        playTrack(streamURL, false, albumBitmap, notificationsOn, artistName, songName);
 
         // Displays the progress indicator container. This will be shown until music
         // playback is fully ready.
