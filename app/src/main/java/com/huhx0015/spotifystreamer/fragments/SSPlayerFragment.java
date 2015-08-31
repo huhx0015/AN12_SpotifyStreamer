@@ -76,9 +76,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     private static final String LOG_TAG = SSPlayerFragment.class.getSimpleName();
 
     // SHARED PREFERENCE VARIABLES
-    private SharedPreferences SS_prefs; // Main SharedPreferences objects that store settings for the application.
-    private Boolean notificationsOn = true; // Used to determine if notification display is enabled or not.
     private static final String SS_OPTIONS = "ss_options"; // Used to reference the name of the preference XML file.
+    private Boolean notificationsOn = true; // Used to determine if notification display is enabled or not.
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_player_fragment_progress_layer) FrameLayout progressLayer;
@@ -514,7 +513,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     private void loadPreferences() {
 
         // Initializes the SharedPreferences object.
-        SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
+        SharedPreferences SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
 
         // Retrieves the current country code setting.
         notificationsOn = SSPreferences.getNotifications(SS_prefs);

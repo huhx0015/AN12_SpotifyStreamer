@@ -27,6 +27,7 @@
                 android:layout_height="64dp"
                 android:id="@+id/ss_album_image"
                 android:layout_marginRight="16dp"
+                android:layout_marginEnd="16dp"
                 android:layout_gravity="center" />
 
             <LinearLayout

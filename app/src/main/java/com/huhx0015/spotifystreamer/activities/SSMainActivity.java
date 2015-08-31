@@ -76,7 +76,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private static final String LOG_TAG = SSMainActivity.class.getSimpleName();
 
     // SHARE VARIABLES
-    private Bitmap currentBitmap; // Used to reference the current bitmap artist or album image.
     private String spotifyUrl = ""; // Used to reference the Spotify track URL of the current track.
 
     // VIEW INJECTION VARIABLES
@@ -269,7 +268,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // The activity is finished if the SSArtistsFragment is in focus.
         else {
-            removeAudioService(); // Stops the SSMusicService running in the background.
+            pauseTrack(true);
+            //removeAudioService(); // Stops the SSMusicService running in the background.
             finish(); // Finishes the activity.
         }
     }
@@ -620,7 +620,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // track name, the Spotify URL of the selected music track, and the current list position.
     @Override
     public void setCurrentTrack(Bitmap albumImage, String songName, String trackUrl, int position) {
-        this.currentBitmap = albumImage;
         this.currentTrack = songName;
         this.spotifyUrl = trackUrl;
         this.listPosition = position;

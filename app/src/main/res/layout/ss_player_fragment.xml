@@ -37,9 +37,10 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:id="@+id/ss_repeat_button"
-                    android:layout_gravity="left|center_vertical"
+                    android:layout_gravity="start|center_vertical"
                     android:src="@android:drawable/stat_notify_sync"
                     android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
                     android:background="@android:color/transparent"
                     android:visibility="gone" />
 
@@ -158,9 +159,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0:00"
+                        android:text="@string/player_min_duration"
                         android:id="@+id/ss_player_seekbar_min_duration_text"
-                        android:layout_gravity="left"
+                        android:layout_gravity="start"
                         android:textColor="@android:color/white"
                         android:typeface="sans"
                         android:textSize="14sp" />
@@ -168,9 +169,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0:30"
+                        android:text="@string/player_max_duration"
                         android:id="@+id/ss_player_seekbar_max_duration_text"
-                        android:layout_gravity="right"
+                        android:layout_gravity="end"
                         android:textColor="@android:color/white"
                         android:textSize="14sp"
                         android:typeface="sans" />

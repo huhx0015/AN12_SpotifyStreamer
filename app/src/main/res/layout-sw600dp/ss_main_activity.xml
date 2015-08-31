@@ -15,7 +15,8 @@
             android:id="@+id/ss_main_activity_subparent_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
             <LinearLayout
                 android:layout_width="match_parent"

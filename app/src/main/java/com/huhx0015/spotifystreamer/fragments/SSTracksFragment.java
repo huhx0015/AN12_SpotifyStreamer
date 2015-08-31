@@ -61,7 +61,6 @@ public class SSTracksFragment extends Fragment {
     private static final String LOG_TAG = SSTracksFragment.class.getSimpleName();
 
     // SHARED PREFERENCE VARIABLES
-    private SharedPreferences SS_prefs; // Main SharedPreferences objects that store settings for the application.
     private String countryCode; // Stores the String value of the country code that is currently set.
     private static final String SS_OPTIONS = "ss_options"; // Used to reference the name of the preference XML file.
 
@@ -249,7 +248,7 @@ public class SSTracksFragment extends Fragment {
     private void loadPreferences() {
 
         // Initializes the SharedPreferences object.
-        SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
+        SharedPreferences SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
 
         // Retrieves the current country code setting.
         countryCode = SSPreferences.getCountryCode(SS_prefs);

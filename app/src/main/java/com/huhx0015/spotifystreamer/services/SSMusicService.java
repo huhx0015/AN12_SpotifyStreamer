@@ -18,8 +18,13 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
@@ -53,8 +58,8 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     public static final String ACTION_PREVIOUS = "action_previous";
 
     // MEDIA SESSION VARIABLES:
-    private MediaController streamerMediaController;
-    private MediaSession streamerMediaSession;
+    private MediaControllerCompat streamerMediaController;
+    public MediaSessionCompat streamerMediaSession;
     private MediaSessionManager streamerMediaSessionManager;
 
     // SERVICE VARIABLES
@@ -195,7 +200,7 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
     // processIntent(): If this service is invoked by external audio controls in the notification
     // menu, the audio player state is changed accordingly.
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    //@TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void processIntent(Intent intent) {
 
         // If the intent or the associated action is null, the method is terminated early.
@@ -275,26 +280,32 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
     // intializeMediaSession(): Builds a new MediaSession for displaying a notification that users
     // can interact with and be able to control audio playback.
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    //@TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void initializeMediaSession(final Bitmap albumImage, final String albumArtist, final String albumTrack) {
 
         // Creates a new MediaSession.
-        streamerMediaSession = new MediaSession(getApplicationContext(), "SPOTIFY STREAMER");
+        streamerMediaSession = new MediaSessionCompat(getApplicationContext(), "SPOTIFY STREAMER", null, null);
+        //streamerMediaSession = new MediaSessionCompat(getApplicationContext(), "SPOTIFY STREAMER");
         streamerMediaSessionManager = (MediaSessionManager) getSystemService(Context.MEDIA_SESSION_SERVICE);
-        streamerMediaController = new MediaController(getApplicationContext(), streamerMediaSession.getSessionToken());
+
+        try {
+            streamerMediaController = new MediaControllerCompat(getApplicationContext(), streamerMediaSession.getSessionToken());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
         // Updates the current metadata for the track currently playing.
-        streamerMediaSession.setMetadata(new MediaMetadata.Builder()
-                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, albumImage)
-                .putString(MediaMetadata.METADATA_KEY_ARTIST, albumArtist)
-                .putString(MediaMetadata.METADATA_KEY_ALBUM, albumTrack)
-                .putString(MediaMetadata.METADATA_KEY_TITLE, "SPOTIFY STREAMER")
+        streamerMediaSession.setMetadata(new MediaMetadataCompat.Builder()
+                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumImage)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, albumArtist)
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, albumTrack)
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "SPOTIFY STREAMER")
                 .build());
 
         streamerMediaSession.setActive(true); // Indicates that media commands can be received.
 
         // Attaches a new Callback to receive the MediaSession updates.
-        streamerMediaSession.setCallback(new MediaSession.Callback() {
+        streamerMediaSession.setCallback(new MediaSessionCompat.Callback() {
 
             // PLAY: Runs when the play action has been initiated.
             @Override
@@ -332,20 +343,26 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         createNotificationPlayer(streamerMediaSession, albumImage, albumArtist, albumTrack);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void createNotificationPlayer(MediaSession streamerMediaSession, Bitmap albumImage,
+    //@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void createNotificationPlayer(MediaSessionCompat streamerMediaSession, Bitmap albumImage,
                                           String artist, String track) {
 
         // Creates a new Notification with audio controls.
-        final Notification noti = new Notification.Builder(this)
+        final Notification noti = new NotificationCompat.Builder(this)
 
                 .setShowWhen(false) // Disables timestamp display.
+                .setStyle(new NotificationCompat.BigPictureStyle())
+
+
+
+                /*
                 .setStyle(new Notification.MediaStyle() // Sets the notification style to media style.
 
                         // Attaches the current MediaSession token.
                         .setMediaSession(streamerMediaSession.getSessionToken()))
+                        */
 
-                //.setColor(0xFFFFFF) // Sets the notification color.
+                .setColor(0xFFFFFF) // Sets the notification color.
                 .setLargeIcon(albumImage) // Sets the album bitmap image.
                 .setSmallIcon(R.mipmap.ic_launcher) // Sets the application icon image.
 
@@ -362,7 +379,7 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
                 .build();
 
         // Do something with your TransportControls.
-        final MediaController.TransportControls controls = streamerMediaSession.getController().getTransportControls();
+        final MediaControllerCompat.TransportControls controls = streamerMediaSession.getController().getTransportControls();
 
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(1, noti);
     }
