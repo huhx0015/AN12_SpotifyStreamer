@@ -123,7 +123,7 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
 
     // displayPlayer(): Signals attached activity to display the SSPlayerFragment view.
     private void displayPlayer(ArrayList<SSSpotifyModel> list, int position) {
-        try { ((OnSpotifySelectedListener) currentActivity).displayPlayerFragment(true, list, position); }
+        try { ((OnSpotifySelectedListener) currentActivity).displayPlayerFragment(true, list, position, true); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 

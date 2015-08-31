@@ -21,7 +21,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.audio.SSMusicEngine;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
@@ -39,10 +38,7 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
     // AUDIO VARIABLES
     private SSMusicEngine ss_music; // SSMusicEngine class object that is used for music functionality.
-    private String currentSong = ""; // Sets the default song title.
     private String songURL = ""; // References the song URL.
-    private Boolean musicOn = true; // Used to determine if music has been enabled or not.
-    private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
 
     // FRAGMENT VARIABLES
     private Fragment playerFragment; // References the player fragment attached to this service.
@@ -153,7 +149,6 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
             }
         }
 
-        isPlaying = false; // Indicates that the song is no longer playing.
         seekHandler.removeCallbacks(seekbarThread); // Stops the seekbar update thread.
     }
 
@@ -163,7 +158,6 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
         // Initiates music playback in SSMusicEngine.
         ss_music.getInstance().playSongUrl(songUrl, loop);
-        isPlaying = true; // Indicates that the song is playing.
         this.songURL = songUrl; // Sets the current song URL.
 
         // If notification playback has been enabled, the notification media player is built and

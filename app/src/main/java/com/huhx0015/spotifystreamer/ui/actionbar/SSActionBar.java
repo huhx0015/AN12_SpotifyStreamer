@@ -15,7 +15,7 @@ public class SSActionBar {
 
     // setupActionBar(): Sets up the action bar attributes for the activity.
     public static void setupActionBar(String actionType, String currentArtist, String subtitle,
-                                      AppCompatActivity activity) {
+                                      Boolean isBack, AppCompatActivity activity) {
 
         ActionBar actionBar = activity.getSupportActionBar(); // References the action bar.
 
@@ -25,21 +25,21 @@ public class SSActionBar {
             if (actionType.equals("TRACKS")) {
                 actionBar.setTitle("Top 10 Tracks"); // Sets the title of the action bar.
                 actionBar.setSubtitle(subtitle); // Sets the name of the current artist as the subtitle.
-                actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
+                actionBar.setDisplayHomeAsUpEnabled(isBack); // Enables the back button in the action bar.
             }
 
             // PLAYER:
             else if (actionType.equals("PLAYER")) {
                 actionBar.setTitle("Now Playing"); // Sets the title of the action bar.
                 actionBar.setSubtitle(currentArtist + " - " + subtitle); // Sets the name of the track as the subtitle.
-                actionBar.setDisplayHomeAsUpEnabled(true); // Enables the back button in the action bar.
+                actionBar.setDisplayHomeAsUpEnabled(isBack); // Enables the back button in the action bar.
             }
 
             // SETTINGS:
             else if (actionType.equals("SETTINGS")) {
                 actionBar.setTitle("Settings"); // Sets the title of the action bar.
                 actionBar.setSubtitle(null); // Disables the subtitles of the action bar.
-                actionBar.setDisplayHomeAsUpEnabled(true); // Disables the back button in the action bar.
+                actionBar.setDisplayHomeAsUpEnabled(isBack); // Disables the back button in the action bar.
             }
 
             // DEFAULT:

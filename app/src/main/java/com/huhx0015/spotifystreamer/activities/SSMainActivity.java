@@ -23,6 +23,7 @@ import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
 import com.huhx0015.spotifystreamer.ui.actionbar.SSActionBar;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
+import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.huhx0015.spotifystreamer.ui.views.SSFragmentView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // LIST VARIABLES
     private ArrayList<SSSpotifyModel> artistListResult = new ArrayList<>(); // Stores the artist list result.
     private ArrayList<SSSpotifyModel> trackListResult = new ArrayList<>(); // Stores the track list result.
-    private int listPosition; // Used to determine the current position in the top tracks list.
+    private int listPosition = -1; // Used to determine the current position in the top tracks list.
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSMainActivity.class.getSimpleName();
@@ -162,10 +163,15 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // BACK BUTTON:
             case android.R.id.home:
 
+                // SSSettingsFragment: Hides the SSSettingsFragment view.
+                if (isSettings) {
+                    displaySettingsFragment(false); // Hides the SSSettingsFragment.
+                }
+
                 // SSPlayerFragment: Removes the SSPlayerFragment and displays the main
                 // SSTracksFragment view.
-                if (currentFragment.equals("PLAYER")) {
-                    displayPlayerFragment(false, trackListResult, listPosition);
+                else if (currentFragment.equals("PLAYER")) {
+                    displayPlayerFragment(false, trackListResult, listPosition, false);
                 }
 
                 // SSTracksFragment: Removes the SSTracksFragment and displays the main
@@ -176,49 +182,39 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
                 return true;
 
+            // PLAY BUTTON:
+            case R.id.ss_action_play_button:
+
+                // Displays the last selected song that was played.
+                if ( (trackListResult != null) && (listPosition != -1) ) {
+                    displayPlayerFragment(true, trackListResult, listPosition, false);
+                }
+
+                // Displays a Toast message, indicating that no track has been selected.
+                else {
+                    SSToast.toastyPopUp("No previous track has been selected.", this);
+                }
+
+                return true;
+
+            // SHARE BUTTON:
+            case R.id.ss_action_share_button:
+                SSShareIntent.shareIntent(currentTrack, currentArtist, spotifyUrl, this);
+                return true;
+
             // SETTINGS:
             case R.id.action_settings:
 
                 // Displays the SSSettingsFragment view.
                 if (!isSettings) {
-                    isSettings = true; // Indicates that the SSSettingsFragment is active.
-                    settingsFragmentContainer.setVisibility(View.VISIBLE);
-                    SSSettingsFragment settingsFragment = new SSSettingsFragment();
-                    SSFragmentView.addFragment(settingsFragment, settingsFragmentContainer,
-                            R.id.ss_main_activity_settings_fragment_container, "SETTINGS", true, weakRefActivity);
+                    displaySettingsFragment(true); // Displays the SSSettingsFragment.
                 }
 
-                /* //TODO: Not working correctly.
                 // Hides the SSSettingsFragment view.
                 else {
-
-                    SSFragmentView.removeFragment(fragmentContainer, "SETTINGS", false, weakRefActivity);
-                    isSettings = false; // Indicates that the SSSettingsFragment is not active.
-
-                    // PLAYER:
-                    if (currentFragment.equals("PLAYER")) {
-                        displayPlayerFragment(true, trackListResult, listPosition);
-                    }
-
-                    // TRACKS:
-                    else if (currentFragment.equals("TRACKS")) {
-                        displayTracksFragment(true, currentInput);
-                    }
-
-                    // ARTIST:
-                    else {
-                        FragmentManager fragManager = getSupportFragmentManager();
-                        Fragment artistsFragment = fragManager.findFragmentByTag("ARTISTS");
-                        SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
-                    }
+                    displaySettingsFragment(false); // Hides the SSSettingsFragment.
                 }
-                */
 
-                return true;
-
-            // SHARE:
-            case R.id.ss_action_share_button:
-                SSShareIntent.shareIntent(currentTrack, currentArtist, spotifyUrl, this);
                 return true;
 
             // DEFAULT:
@@ -254,37 +250,15 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Override
     public void onBackPressed() {
 
-        /* TODO: Not working correctly.
-        // If the SSSettingsFragment is currently being displayed, the fragment is removed and
-        // switched with the previous fragment in focus.
+        // SSSettingsFragment: Hides the SSSettingsFragment view.
         if (isSettings) {
-
-            SSFragmentView.removeFragment(fragmentContainer, "SETTINGS", false, weakRefActivity);
-            isSettings = false; // Indicates that the SSSettingsFragment is not active.
-
-            // PLAYER:
-            if (currentFragment.equals("PLAYER")) {
-                displayPlayerFragment(true, trackListResult, listPosition);
-            }
-
-            // TRACKS:
-            else if (currentFragment.equals("TRACKS")) {
-                displayTracksFragment(true, currentInput);
-            }
-
-            // ARTIST:
-            else {
-                FragmentManager fragManager = getSupportFragmentManager();
-                Fragment artistsFragment = fragManager.findFragmentByTag("ARTISTS");
-                SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
-            }
+            displaySettingsFragment(false); // Removes the SSSettingsFragment from view.
         }
-        */
 
         // If the SSPlayerFragment is currently being displayed, the fragment is removed and
         // switched with the SSTracksFragmentView.
-        if ( (currentFragment.equals("PLAYER")) && !(isTablet) ) {
-            displayPlayerFragment(false, trackListResult, listPosition);
+        else if ( (currentFragment.equals("PLAYER")) && !(isTablet) ) {
+            displayPlayerFragment(false, trackListResult, listPosition, false);
         }
 
         // If the SSTracksFragment is currently being displayed, the fragment is removed and
@@ -369,6 +343,9 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 newTracksFragment.initializeFragment(currentTrack, true);
                 SSFragmentView.addFragment(newTracksFragment, fragmentSecondaryContainer,
                         R.id.ss_main_activity_secondary_fragment_container, "TRACKS", false, weakRefActivity);
+
+                // Sets up the action bar.
+                SSActionBar.setupActionBar("TRACKS", currentArtist, currentArtist, false, this);
             }
 
             // SSPlayerFragment: If a screen orientation event has occurred and the SSPlayerFragment
@@ -376,7 +353,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             if ( (isRotationEvent) && (playerFragment != null)) {
 
                 try {
-                    displayPlayerFragment(true, trackListResult, listPosition);
+                    displayPlayerFragment(true, trackListResult, listPosition, false);
                 }
 
                 // Null pointer exception handler.
@@ -396,7 +373,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             if ( (isRotationEvent) && (playerFragment != null) ) {
 
                 try {
-                    displayPlayerFragment(true, trackListResult, listPosition);
+                    displayPlayerFragment(true, trackListResult, listPosition, false);
                 }
 
                 // Null pointer exception handler.
@@ -446,7 +423,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 fragToAdd, isAnimated, weakRefActivity);
 
         // Sets the name of the action bar.
-        SSActionBar.setupActionBar(fragToAdd, currentArtist, subtitle, this);
+        SSActionBar.setupActionBar(fragToAdd, currentArtist, subtitle, true, this);
         currentFragment = fragToAdd; // Sets the current active fragment.
 
         Log.d(LOG_TAG, "changeFragment(): Fragment changed.");
@@ -456,6 +433,37 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private void displayFragmentDialog(DialogFragment frag, String fragType) {
         FragmentManager fragMan = getSupportFragmentManager(); // Sets up the FragmentManager.
         frag.show(fragMan, fragType); // Displays the DialogFragment.
+    }
+
+    // displaySettingsFragment(): Displays or hides the SSSettingsFragment view.
+    private void displaySettingsFragment(Boolean isShow) {
+
+        // Displays the SSSettingsFragment view.
+        if (isShow) {
+            isSettings = true; // Indicates that the SSSettingsFragment is active.
+            settingsFragmentContainer.setVisibility(View.VISIBLE);
+            SSSettingsFragment settingsFragment = new SSSettingsFragment();
+            SSFragmentView.addFragment(settingsFragment, settingsFragmentContainer,
+                    R.id.ss_main_activity_settings_fragment_container, "SETTINGS", true, weakRefActivity);
+        }
+
+        // Hides the SSSettingsFragment view.
+        else {
+
+            SSFragmentView.removeFragment(settingsFragmentContainer, "SETTINGS", true, weakRefActivity);
+
+            // SSTracksFragment: Sets up the action bar attributes.
+            if (currentFragment.equals("TRACKS")) {
+                SSActionBar.setupActionBar("TRACKS", currentArtist, currentArtist, false, this);
+            }
+
+            // SSArtistsFragment | SSPlayerFragment: Sets up the action bar attributes.
+            else {
+                SSActionBar.setupActionBar(currentFragment, currentArtist, currentTrack, true, this);
+            }
+
+            isSettings = false; // Indicates that the SSSettingsFragment is inactive.
+        }
     }
 
     /** RECYCLE METHODS ________________________________________________________________________ **/
@@ -502,7 +510,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // TABLET: Loads the SSTracksFragment into the secondary fragment container.
             if (isTablet) {
+
                 SSFragmentView.addFragment(tracksFragment, fragmentSecondaryContainer, R.id.ss_main_activity_secondary_fragment_container, "TRACKS", true, weakRefActivity);
+
+                // Sets the name of the action bar.
+                SSActionBar.setupActionBar("TRACKS", currentArtist, name, false, this);
+
                 currentFragment = "TRACKS"; // Sets the current active fragment.
             }
 
@@ -534,7 +547,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
     // displayPlayerFragment(): Displays or removes the SSPlayerFragment from the view layout.
     @Override
-    public void displayPlayerFragment(Boolean isShow, ArrayList<SSSpotifyModel> list, int position) {
+    public void displayPlayerFragment(Boolean isShow, ArrayList<SSSpotifyModel> list, int position, Boolean isReset) {
 
         // Displays the SSPlayerFragment in the view layout.
         if (isShow) {
@@ -556,8 +569,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true);
             }
 
-            // If not currently a screen rotation event, all currently playing songs are stopped.
-            if (!isRotationEvent) {
+            // Stops any track playing in the background and resets the track position.
+            if (isReset) {
                 pauseTrack(true); // Stops any song playing in the background.
                 setPosition(0); // Resets the position of the track to the beginning.
             }

@@ -2,6 +2,8 @@
     <string name="app_name">Spotify Streamer</string>
     <string name="drawer_open">open</string>
     <string name="drawer_close">close</string>
+    <string name="action_play">Play</string>
+    <string name="action_share">Share</string>
     <string name="action_settings">Settings</string>
     <string name="type_artist">Type in an artist…</string>
     <string name="no_results_artists">No artists found by that name.</string>

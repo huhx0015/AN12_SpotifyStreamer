@@ -158,12 +158,12 @@ public class SSFragmentView {
 
                 // SSTracksFragment: Sets up the action bar attributes.
                 if (fragType.equals("TRACKS")) {
-                    SSActionBar.setupActionBar(fragType, null, currentArtist, refActivity.get());
+                    SSActionBar.setupActionBar(fragType, null, currentArtist, true, refActivity.get());
                 }
 
                 // SSArtistsFragment | SSPlayerFragment: Sets up the action bar attributes.
                 else {
-                    SSActionBar.setupActionBar(fragType, currentArtist, currentTrack, refActivity.get());
+                    SSActionBar.setupActionBar(fragType, currentArtist, currentTrack, true, refActivity.get());
                 }
 
                 Log.d(LOG_TAG, "reloadFragment(): Reloading " + fragType + " fragment into the container.");
@@ -229,7 +229,7 @@ public class SSFragmentView {
                     // SETTINGS: Sets the proper action bar title when the SSSettingsFragment is
                     // active.
                     if (fragType.equals("SETTINGS")) {
-                        SSActionBar.setupActionBar(fragType, null, null, refActivity.get());
+                        SSActionBar.setupActionBar(fragType, null, null, true, refActivity.get());
                     }
                 }
             }

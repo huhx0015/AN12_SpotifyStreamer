@@ -428,6 +428,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // initializeSongPlay(): Prepares the selected track for music playback.
     private void initializeSongPlay() {
 
+        loadPreferences(); // Loads values from SharedPreferences.
+
         isPaused = false; // Indicates that the song is not paused.
 
         // Signals the activity to signal the SSMusicService to begin streaming playback of

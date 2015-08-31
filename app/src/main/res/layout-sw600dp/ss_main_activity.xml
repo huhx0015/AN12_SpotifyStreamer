@@ -6,58 +6,67 @@
     tools:context=".SSMainActivity"
     android:id="@+id/ss_main_activity_layout">
 
-    <LinearLayout
-        android:id="@+id/ss_main_activity_parent_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/ss_main_activity_parent_container">
 
         <LinearLayout
+            android:id="@+id/ss_main_activity_subparent_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:id="@+id/ss_main_activity_main_content"
-            android:layout_weight="3">
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:id="@+id/ss_main_activity_main_content"
+                android:layout_weight="3">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/ss_main_activity_fragment_container"
+                    android:visibility="gone">
+
+                </FrameLayout>
+            </LinearLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/ss_main_activity_fragment_container"
-                android:visibility="gone">
+                android:orientation="vertical"
+                android:id="@+id/ss_main_activity_secondary_content"
+                android:layout_weight="2">
 
+                <FrameLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:id="@+id/ss_main_activity_secondary_fragment_container"
+                    android:visibility="gone">
+
+                </FrameLayout>
+
+                <ProgressBar
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ss_main_activity_secondary_progress_indicator"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
             </FrameLayout>
+
         </LinearLayout>
 
         <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:id="@+id/ss_main_activity_secondary_content"
-            android:layout_weight="2">
-
-            <FrameLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:id="@+id/ss_main_activity_secondary_fragment_container"
-                android:visibility="gone">
-
-            </FrameLayout>
-
-            <ProgressBar
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/ss_main_activity_secondary_progress_indicator"
-                android:layout_gravity="center"
-                android:visibility="gone" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:id="@+id/ss_main_activity_settings_fragment_container"
-            android:visibility="gone"></FrameLayout>
+            android:visibility="gone"
+            android:background="@android:color/white"
+            android:padding="16dp"></FrameLayout>
 
-    </LinearLayout>
+    </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>
