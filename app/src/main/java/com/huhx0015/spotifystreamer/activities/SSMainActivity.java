@@ -460,7 +460,16 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // SSTracksFragment: Sets up the action bar attributes.
             if (currentFragment.equals("TRACKS")) {
-                SSActionBar.setupActionBar("TRACKS", currentArtist, currentArtist, false, this);
+
+                // TABLET: Updates the action bar without the BACK button.
+                if (isTablet) {
+                    SSActionBar.setupActionBar("TRACKS", currentArtist, currentArtist, false, this);
+                }
+
+                // MOBILE: Updates the action bar with the BACK button present.
+                else {
+                    SSActionBar.setupActionBar("TRACKS", currentArtist, currentArtist, true, this);
+                }
             }
 
             // SSArtistsFragment | SSPlayerFragment: Sets up the action bar attributes.
