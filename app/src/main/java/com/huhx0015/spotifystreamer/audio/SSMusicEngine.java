@@ -285,6 +285,10 @@ public class SSMusicEngine {
             try { ((OnMusicPlayerListener) playerFragment).playbackStatus(isPlay); }
             catch (ClassCastException cce) {} // Catch for class cast exception errors.
         }
+
+        else {
+            Log.d(LOG_TAG, "playbackStatus(): SSPlayerFragment was null.");
+        }
     }
 
     // setDuration(): Signals the SSPlayerFragment to set the max duration for the Spotify song.
@@ -295,6 +299,10 @@ public class SSMusicEngine {
         if (playerFragment != null) {
             try { ((OnMusicPlayerListener) playerFragment).setDuration(duration); }
             catch (ClassCastException cce) {} // Catch for class cast exception errors.
+        }
+
+        else {
+            Log.d(LOG_TAG, "setDuration(): SSPlayerFragment was null.");
         }
     }
 }

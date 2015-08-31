@@ -1,11 +1,6 @@
 package com.huhx0015.spotifystreamer.activities;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
-import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -26,7 +21,7 @@ import com.huhx0015.spotifystreamer.fragments.SSTracksFragment;
 import com.huhx0015.spotifystreamer.intent.SSShareIntent;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
-import com.huhx0015.spotifystreamer.services.SSMusicService;
+import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
 import com.huhx0015.spotifystreamer.ui.actionbar.SSActionBar;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
 import com.huhx0015.spotifystreamer.ui.views.SSFragmentView;
@@ -43,16 +38,13 @@ import butterknife.ButterKnife;
  *  -----------------------------------------------------------------------------------------------
  */
 
-public class SSMainActivity extends AppCompatActivity implements OnMusicServiceListener,
-        OnSpotifySelectedListener {
+public class SSMainActivity extends AppCompatActivity implements OnSpotifySelectedListener,
+        OnTrackInfoUpdateListener {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
     // ACTIVITY VARIABLES
     private static WeakReference<AppCompatActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
-
-    // BITMAP VARIABLES
-    private Bitmap currentBitmap; // Used to reference the current bitmap artist or album image.
 
     // DATA VARIABLES
     private static final String CURRENT_FRAGMENT = "currentFragment"; // Used for restoring the proper fragment for rotation change events.
@@ -64,7 +56,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     private static final String TRACK_LIST = "trackListResult"; // Parcelable key value for the track list.
 
     // FRAGMENT VARIABLES
-    public Boolean isRotationEvent = false; // Used to determine if a screen orientation change event has occurred.
+    private Boolean isRotationEvent = false; // Used to determine if a screen orientation change event has occurred.
     private Boolean isPlaying = false; // Used to determine if the SSPlayerFragment is in focus.
     private Boolean isSettings = false; // Used to determine if the SSSettingsFragment is in focus.
     private String currentFragment = ""; // Used to determine which fragment is currently active.
@@ -83,10 +75,9 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSMainActivity.class.getSimpleName();
 
-    // SERVICE VARIABLES
-    private Boolean serviceBound = false; // Used to determine if the SSMusicService is currently bound to the activity.
-    private Intent audioIntent; // An Intent object that references the Intent for the SSMusicService.
-    private SSMusicService musicService; // A service that handles the control of audio playback in the background.
+    // SHARE VARIABLES
+    private Bitmap currentBitmap; // Used to reference the current bitmap artist or album image.
+    private String spotifyUrl = ""; // Used to reference the Spotify track URL of the current track.
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
@@ -101,6 +92,8 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(LOG_TAG, "ACTIVITY LIFECYCLE (onCreate): onCreate invoked.");
 
         // Creates a weak reference of this activity.
         weakRefActivity = new WeakReference<AppCompatActivity>(this);
@@ -123,29 +116,21 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         setupLayout(); // Sets up the layout for the activity.
     }
 
-    // onStart(): Called when the activity is made visible.
-    @Override
-    public void onStart() {
-        super.onStart();
-        setUpAudioService(); // Sets up the background audio service.
-    }
-
     // onPause(): This function is called whenever the fragment is suspended.
     @Override
     public void onPause(){
         super.onPause();
 
-        // TODO: Test this. DOESN'T WORK.
-        // If not a screen orientation change event, music playback is suspended.
-        if (!isRotationEvent) {
-        //    pauseTrack(false); // Pauses music playback.
-        }
+        Log.d(LOG_TAG, "ACTIVITY LIFECYCLE (onPause): onPause invoked.");
     }
 
     // onDestroy(): This function runs when the activity has terminated and is being destroyed.
     // Calls recycleMemory() to free up memory allocation.
     @Override
     public void onDestroy() {
+
+        Log.d(LOG_TAG, "ACTIVITY LIFECYCLE (onDestroy): onDestroy invoked.");
+
         recycleView(); // Recycles all services and View objects to free up memory resources.
         super.onDestroy();
     }
@@ -306,6 +291,7 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
         // The activity is finished if the SSArtistsFragment is in focus.
         else {
+            removeAudioService(); // Stops the SSMusicService running in the background.
             finish(); // Finishes the activity.
         }
     }
@@ -375,15 +361,31 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
             Log.d(LOG_TAG, "setupFragment(): Reloading fragments for tablet view...");
 
-            SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
+            SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer,
+                    R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, weakRefActivity);
 
-            // If a screen orientation event has occurred and the fragment that was in focus was
-            // SSTracksFragment, a new SSTracksFragment is created and is made visible in the
-            // view layout.
+            // SSTracksFragment: If a screen orientation event has occurred and the fragment that
+            // was in focus was SSTracksFragment, a new SSTracksFragment is created and is made
+            // visible in the view layout.
             if ( (isRotationEvent) && (currentFragment.equals("TRACKS")) ) {
                 SSTracksFragment newTracksFragment = new SSTracksFragment();
                 newTracksFragment.initializeFragment(currentTrack, true);
-                SSFragmentView.addFragment(newTracksFragment, fragmentSecondaryContainer, R.id.ss_main_activity_secondary_fragment_container, "TRACKS", false, weakRefActivity);
+                SSFragmentView.addFragment(newTracksFragment, fragmentSecondaryContainer,
+                        R.id.ss_main_activity_secondary_fragment_container, "TRACKS", false, weakRefActivity);
+            }
+
+            // SSPlayerFragment: If a screen orientation event has occurred and the SSPlayerFragment
+            // DialogFragment was displayed prior, the SSPlayerFragment DialogFragment is re-shown.
+            if ( (isRotationEvent) && (playerFragment != null)) {
+
+                try {
+                    displayPlayerFragment(true, trackListResult, listPosition);
+                }
+
+                // Null pointer exception handler.
+                catch (NullPointerException e) {
+                    Log.e(LOG_TAG, "setupFragment(): A null pointer exception has occurred while trying to restore the SSPlayerFragment DialogFragment.");
+                }
             }
         }
 
@@ -394,25 +396,33 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
             // SSPlayerFragment: Attempts to reload the SSPlayerFragment, if the SSPlayerFragment
             // was in prior focus.
-            Boolean isReloaded = SSFragmentView.reloadFragment(playerFragment, currentFragment, "PLAYER", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
+            if ( (isRotationEvent) && (playerFragment != null) ) {
 
-            // TODO: Currently crashes.
-            /*
-            if (isReloaded) {
-                attachPlayerFragment(playerFragment);
-            }
-            */
+                try {
+                    displayPlayerFragment(true, trackListResult, listPosition);
+                }
 
-            // SSTracksFragment: Attempts to reload the SSTracksFragment, if the SSTracksFragment
-            // was in prior focus.
-            if (!isReloaded) {
-                isReloaded = SSFragmentView.reloadFragment(tracksFragment, currentFragment, "TRACKS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
+                // Null pointer exception handler.
+                catch (NullPointerException e) {
+                    Log.e(LOG_TAG, "setupFragment(): A null pointer exception has occurred while trying to restore the SSPlayerFragment DialogFragment.");
+                }
             }
 
-            // SSArtistsFragment: Attempts to reload the SSArtistFragment, if the SSTracksFragment
-            // was in prior focus.
-            if (!isReloaded) {
-                SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, this, weakRefActivity);
+            else {
+
+                // SSTracksFragment: Attempts to reload the SSTracksFragment, if the SSTracksFragment
+                // was in prior focus.
+                Boolean isReloaded = SSFragmentView.reloadFragment(tracksFragment, currentFragment,
+                        "TRACKS", fragmentContainer, R.id.ss_main_activity_fragment_container,
+                        currentArtist, currentTrack, weakRefActivity);
+
+                // SSArtistsFragment: Attempts to reload the SSArtistFragment, if the
+                // SSTracksFragment was in prior focus.
+                if (!isReloaded) {
+                    SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS",
+                            fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist,
+                            currentTrack, weakRefActivity);
+                }
             }
         }
     }
@@ -423,17 +433,26 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
     private void changeFragment(Fragment frag, String fragToAdd, String fragToRemove, String subtitle,
                                 Boolean isAnimated) {
 
-        Log.d(LOG_TAG, "changeFragment(): Fragment changed.");
+        // SPECIAL CASE: If changeFragment() is invoked from setupFragment() after a screen
+        // orientation change event, the specified fragment is added without any transition animations.
+        if (isRotationEvent) {
+            isAnimated = false; // Indicates that the fragment animations are not to be utilized.
+        }
 
-        // Removes the SSArtistsFragment from the stack.
-        SSFragmentView.removeFragment(fragmentContainer, fragToRemove, false, weakRefActivity);
+        // Removes the specified fragment from the stack.
+        else {
+            SSFragmentView.removeFragment(fragmentContainer, fragToRemove, false, weakRefActivity);
+        }
 
         // Adds the fragment to the primary fragment container.
-        SSFragmentView.addFragment(frag, fragmentContainer, R.id.ss_main_activity_fragment_container, fragToAdd, isAnimated, weakRefActivity);
+        SSFragmentView.addFragment(frag, fragmentContainer, R.id.ss_main_activity_fragment_container,
+                fragToAdd, isAnimated, weakRefActivity);
 
         // Sets the name of the action bar.
         SSActionBar.setupActionBar(fragToAdd, currentArtist, subtitle, this);
         currentFragment = fragToAdd; // Sets the current active fragment.
+
+        Log.d(LOG_TAG, "changeFragment(): Fragment changed.");
     }
 
     // displayFragmentDialog(): Displays the DialogFragment view for the specified fragment.
@@ -442,65 +461,12 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
         frag.show(fragMan, fragType); // Displays the DialogFragment.
     }
 
-    /** SERVICE METHODS ________________________________________________________________________ **/
-
-    // musicConnection(): A ServiceConnection object for managing the service connection states for
-    // the SSMusicService service.
-    private ServiceConnection musicConnection = new ServiceConnection() {
-
-        // onServiceConnected(): Runs when the service is connected to the activity.
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-
-            // Sets the binder for the service.
-            SSMusicService.SSMusicBinder binder = (SSMusicService.SSMusicBinder) service;
-            musicService = binder.getService();
-            serviceBound = true; // Indicates that the service is bounded.
-        }
-
-        // onServiceDisconnnected: Runs when the service is disconnected from the activity.
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            serviceBound = false; // Indicates that the service is no longer bound.
-        }
-    };
-
-    // setUpAudioService(): Sets up the SSMusicService service for playing audio from the
-    // SSMusicEngine class in the background.
-    private void setUpAudioService() {
-
-        if (audioIntent == null) {
-
-            // Sets up the service intent and begins the service.
-            audioIntent = new Intent(this, SSMusicService.class); // Sets a Intent to the service.
-            bindService(audioIntent, musicConnection, Context.BIND_AUTO_CREATE); // Binds the service.
-            startService(audioIntent); // Starts the service.
-        }
-    }
-
-    // removeAudioService(): Stops the SSMusicService running in the background.
-    private void removeAudioService() {
-
-        if (audioIntent != null) {
-            stopService(audioIntent); // Stops the service.
-            musicService = null;
-        }
-    }
-
-    // attachPlayerFragment(): Attaches a player fragment with
-    private void attachPlayerFragment(Fragment fragment) {
-        musicService.attachPlayerFragment(fragment);
-    }
-
     /** RECYCLE METHODS ________________________________________________________________________ **/
 
-    // recycleView(): Recycles background services and View objects to clear up resources prior to
-    // Activity destruction.
+    // recycleView(): Recycles the View objects to clear up resources prior to Activity destruction.
     private void recycleView() {
 
         try {
-
-            removeAudioService(); // Stops the SSMusicService running in the background.
 
             // Unbinds all Drawable objects attached to the current layout.
             SSUnbind.unbindDrawables(findViewById(R.id.ss_main_activity_layout));
@@ -560,13 +526,8 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             SSArtistsFragment artistFragment = new SSArtistsFragment();
             artistFragment.initializeFragment(name, true);
 
-            // TABLET: Removes the SSTracksFragment from the secondary fragment container.
-            if (isTablet) {
-                // TODO: Do nothing for now, need to think about the flow for the tablet version.
-            }
-
             // MOBILE: Removes the previous fragment and adds the new fragment.
-            else {
+            if (!isTablet) {
                 changeFragment(artistFragment, "ARTISTS", "TRACKS", name, false);
             }
 
@@ -590,8 +551,6 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
 
             // TABLET: Displays the SSPlayerFragment as a DialogFragment.
             if (isTablet) {
-
-                // TODO: Add a DialogFragment listener for monitoring dialog dismiss events.
                 displayFragmentDialog(playerFragment, "PLAYER");
             }
 
@@ -599,8 +558,6 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             else {
                 changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true);
             }
-
-            attachPlayerFragment(playerFragment); // Attaches the SSPlayerFragment to the SSMusicEngine.
 
             Log.d(LOG_TAG, "displayPlayerFragment(): SSPlayerFragment now being displayed.");
         }
@@ -616,37 +573,25 @@ public class SSMainActivity extends AppCompatActivity implements OnMusicServiceL
             // MOBILE: Removes the previous fragment and adds the new fragment.
             if (!isTablet) {
                 changeFragment(tracksFragment, "TRACKS", "PLAYER", list.get(position).getArtist(), false);
-                pauseTrack(true); // Stops music playback.
             }
 
             Log.d(LOG_TAG, "displayPlayerFragment(): SSTracksFragment now being displayed.");
         }
     }
 
-    // pauseTrack(): Invoked by SSPlayerFragment to signal the SSMusicService to pause the song
-    // stream.
-    @Override
-    public void pauseTrack(Boolean isStop) {
-        musicService.pauseTrack(isStop); // Signals the SSMusicService to pause the song stream.
+    // removeAudioService(): Signals the SSApplication class to unbind and remove the SSMusicService
+    // running in the background.
+    private void removeAudioService() {
+        try { ((OnMusicServiceListener) getApplication()).removeAudioService(); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
-    // playTrack(): Invoked by SSPlayerFragment to signal the SSMusicService to play the selected
-    // stream.
+    // setCurrentTrack(): Invoked by SSPlayerFragment to update the activity on the album bitmap
+    // and the Spotify URL of the selected music track.
     @Override
-    public void playTrack(String url, Boolean loop, Bitmap albumImage, Boolean notiOn, String artist, String track) {
-
-        // Signals the SSMusicService to begin music playback of the selected track.
-        musicService.playTrack(url, loop, albumImage, notiOn, artist, track);
-
-        // Sets the current bitmap to the album associated with the playing track.
+    public void setCurrentTrack(Bitmap albumImage, String trackUrl) {
         this.currentBitmap = albumImage;
-    }
-
-    // setPosition(): Invoked by SSPlayerFragment to signal the SSMusicService to skip to the
-    // selected position in the song.
-    @Override
-    public void setPosition(int position) {
-        musicService.setPosition(position); // Signals the SSMusicService to set the song position.
+        this.spotifyUrl = trackUrl;
     }
 
     // updateArtistInput(): Invoked by SSArtistsFragment to keep an update of the user's artist

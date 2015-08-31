@@ -124,7 +124,7 @@ public class SSFragmentView {
                 container.removeAllViews(); // Removes all views in the layout.
                 container.setVisibility(View.INVISIBLE); // Hides the fragment.
 
-                Log.d(LOG_TAG, "removeFragment(): Fragment has been removed.");
+                Log.d(LOG_TAG, "removeFragment(): " + fragType + " fragment has been removed.");
             }
         }
     }
@@ -133,8 +133,7 @@ public class SSFragmentView {
     // typically called after a screen orientation change in the SSMainActivity activity class.
     public static Boolean reloadFragment(Fragment fragment, String curFragment, String fragType,
                                          ViewGroup container, int containerID, String currentArtist,
-                                         String currentTrack, AppCompatActivity activity,
-                                         WeakReference<AppCompatActivity> refActivity) {
+                                         String currentTrack, WeakReference<AppCompatActivity> refActivity) {
 
         // SSArtistsFragment: If the fragment is null, it indicates that it is not on the fragment
         // stack. The fragment is initialized. This is needed to ensure that the SSArtistFragment
@@ -142,6 +141,9 @@ public class SSFragmentView {
         if (fragType.equals("ARTISTS")) {
 
             if (fragment == null) {
+
+                Log.d(LOG_TAG, "reloadFragment(): Fragment was null, re-creating " + fragType + " fragment.");
+
                 fragment = new SSArtistsFragment(); // Initializes the SSArtistsFragment class.
             }
         }
@@ -156,12 +158,12 @@ public class SSFragmentView {
 
                 // SSTracksFragment: Sets up the action bar attributes.
                 if (fragType.equals("TRACKS")) {
-                    SSActionBar.setupActionBar(fragType, null, currentArtist, activity);
+                    SSActionBar.setupActionBar(fragType, null, currentArtist, refActivity.get());
                 }
 
                 // SSArtistsFragment | SSPlayerFragment: Sets up the action bar attributes.
                 else {
-                    SSActionBar.setupActionBar(fragType, currentArtist, currentTrack, activity);
+                    SSActionBar.setupActionBar(fragType, currentArtist, currentTrack, refActivity.get());
                 }
 
                 Log.d(LOG_TAG, "reloadFragment(): Reloading " + fragType + " fragment into the container.");

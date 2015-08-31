@@ -123,13 +123,20 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+
+        Log.d(LOG_TAG, "FRAGMENT LIFECYCLE (onAttach): onAttach() invoked.");
+
         this.currentActivity = (SSMainActivity) activity; // Sets the currentActivity to attached activity object.
+        attachPlayerFragment(); // Attaches this fragment to the music service.
     }
 
-    // onCreate(): Runs when the fragment is first started.
+    // onCreate(): Runs when the fragment is first created.
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(LOG_TAG, "FRAGMENT LIFECYCLE (onCreate): onCreate() invoked.");
+
         setRetainInstance(true); // Retains this fragment during runtime changes.
     }
 
@@ -137,6 +144,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        Log.d(LOG_TAG, "FRAGMENT LIFECYCLE (onCreateView): onCreateView() invoked.");
 
         View ss_fragment_view = (ViewGroup) inflater.inflate(R.layout.ss_player_fragment, container, false);
         ButterKnife.bind(this, ss_fragment_view); // ButterKnife view injection initialization.
@@ -147,28 +156,16 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         return ss_fragment_view;
     }
 
-    // onResume(): This function runs immediately after onStart() finishes and is always re-run
-    // whenever the fragment is resumed from an onPause() state.
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        // TODO: Test this. DOESN'T WORK.
-        //if (!currentActivity.isRotationEvent) {
-            //playTrack(streamURL, isLoop); // Music playback is resumed.
-        //}
-    }
-
     // onDestroyView(): This function runs when the screen is no longer visible and the view is
     // destroyed.
     @Override
     public void onDestroyView() {
         super.onDestroyView();
 
+        Log.d(LOG_TAG, "FRAGMENT LIFECYCLE (onDestroyView): onDestroyView() invoked.");
+
         isDestroyed = true; // Indicates that the fragment is in the process of being destroyed.
         ButterKnife.unbind(this); // Sets all injected views to null.
-
-        Log.d(LOG_TAG, "onDestroyView(): Fragment view destroyed.");
     }
 
     // onDestroy(): This function runs when the fragment has terminated and is being destroyed.
@@ -176,12 +173,12 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     public void onDestroy() {
         super.onDestroy();
 
+        Log.d(LOG_TAG, "FRAGMENT LIFECYCLE (onDestroy): onDestroy() invoked.");
+
         //pauseTrack(true); // Stops the track, if currently playing in the background.
 
         // Resets the current track value and the isPlaying value in SSMainActivity is set to false.
         //currentActivity.setCurrentTrack(null, false);
-
-        Log.d(LOG_TAG, "onDestroy(): Fragment destroyed.");
     }
 
     /** FRAGMENT EXTENSION METHOD ______________________________________________________________ **/
@@ -528,6 +525,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     public void playbackStatus(Boolean isPlay) {
 
         if (!isDestroyed) {
+
             isPlaying = isPlay; // Updates the current playback status of the streaming song.
             updateControlButtons(isPlaying); // Updates the player control buttons.
 
@@ -626,21 +624,38 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // pauseTrack(): Signals the attached activity to invoke the SSMusicService to pause playback
     // of the streamed Spotify track.
     private void pauseTrack(Boolean isStop) {
-        try { ((OnMusicServiceListener) currentActivity).pauseTrack(isStop); }
+
+        try { ((OnMusicServiceListener) currentActivity.getApplication()).pauseTrack(isStop); }
+        //try { ((OnMusicServiceListener) currentActivity).pauseTrack(isStop); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
     // playTrack(): Signals the attached activity to invoke the SSMusicService to begin playback
     // of the streamed Spotify track.
     private void playTrack(String url, Boolean loop, Bitmap albumImage, Boolean notiOn, String artist, String track) {
-        try { ((OnMusicServiceListener) currentActivity).playTrack(url, loop, albumImage, notiOn, artist, track); }
+
+        try { ((OnMusicServiceListener) currentActivity.getApplication()).playTrack(url, loop, albumImage, notiOn, artist, track); }
+        //try { ((OnMusicServiceListener) currentActivity).playTrack(url, loop, albumImage, notiOn, artist, track); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
     // setPosition(): Signals the attached activity to invoke the SSMusicService to update the song
     // position.
     private void setPosition(int position) {
-        try { ((OnMusicServiceListener) currentActivity).setPosition(position); }
+
+        try { ((OnMusicServiceListener) currentActivity.getApplication()).setPosition(position); }
+
+        //try { ((OnMusicServiceListener) currentActivity).setPosition(position); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
+
+    // TODO: TOTALLY EXPERIMENTAL!
+    private void attachPlayerFragment() {
+
+        Log.d(LOG_TAG, "attachPlayerFragment(): Player fragment attached.");
+
+        try { ((OnMusicServiceListener) currentActivity.getApplication()).attachFragment(this); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
 }
