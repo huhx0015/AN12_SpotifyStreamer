@@ -24,5 +24,5 @@ public interface OnSpotifySelectedListener {
 
     // displayPlayerFragment(): Interface method which signals the attached activity to switch the
     // fragment view between SSTracksFragment and the SSPlayerFragment.
-    void displayPlayerFragment(Boolean isShow, ArrayList<SSSpotifyModel> list, int position, Boolean isReset);
+    void displayPlayerFragment(Boolean isShow, String fragToRemove, ArrayList<SSSpotifyModel> list, int position, Boolean isReset);
 }

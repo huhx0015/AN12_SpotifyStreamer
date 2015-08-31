@@ -170,7 +170,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 // SSPlayerFragment: Removes the SSPlayerFragment and displays the main
                 // SSTracksFragment view.
                 else if (currentFragment.equals("PLAYER")) {
-                    displayPlayerFragment(false, trackListResult, listPosition, false);
+                    displayPlayerFragment(false, "TRACKS", trackListResult, listPosition, false);
                 }
 
                 // SSTracksFragment: Removes the SSTracksFragment and displays the main
@@ -185,8 +185,14 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             case R.id.ss_action_play_button:
 
                 // Displays the last selected song that was played.
-                if ( (trackListResult != null) && (listPosition != -1) ) {
-                    displayPlayerFragment(true, trackListResult, listPosition, false);
+                if ( (trackListResult != null) && (listPosition != -1) && !(currentFragment.equals("PLAYER")) ) {
+                    displayPlayerFragment(true, currentFragment, trackListResult, listPosition, false);
+                }
+
+                // Displays a Toast message, indicating that the player fragment view is already
+                // being shown.
+                else if (currentFragment.equals("PLAYER")) {
+                    SSToast.toastyPopUp("Player view is already open.", this);
                 }
 
                 // Displays a Toast message, indicating that no track has been selected.
@@ -257,7 +263,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // If the SSPlayerFragment is currently being displayed, the fragment is removed and
         // switched with the SSTracksFragmentView.
         else if ( (currentFragment.equals("PLAYER")) && !(isTablet) ) {
-            displayPlayerFragment(false, trackListResult, listPosition, false);
+            displayPlayerFragment(false, "TRACKS", trackListResult, listPosition, false);
         }
 
         // If the SSTracksFragment is currently being displayed, the fragment is removed and
@@ -353,7 +359,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             if ( (isRotationEvent) && (playerFragment != null)) {
 
                 try {
-                    displayPlayerFragment(true, trackListResult, listPosition, false);
+                    displayPlayerFragment(true, "TRACKS", trackListResult, listPosition, false);
                 }
 
                 // Null pointer exception handler.
@@ -373,7 +379,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             if ( (isRotationEvent) && (playerFragment != null) ) {
 
                 try {
-                    displayPlayerFragment(true, trackListResult, listPosition, false);
+                    displayPlayerFragment(true, "TRACKS", trackListResult, listPosition, false);
                 }
 
                 // Null pointer exception handler.
@@ -547,7 +553,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
     // displayPlayerFragment(): Displays or removes the SSPlayerFragment from the view layout.
     @Override
-    public void displayPlayerFragment(Boolean isShow, ArrayList<SSSpotifyModel> list, int position, Boolean isReset) {
+    public void displayPlayerFragment(Boolean isShow, String fragToRemove, ArrayList<SSSpotifyModel> list, int position, Boolean isReset) {
 
         // Displays the SSPlayerFragment in the view layout.
         if (isShow) {
@@ -566,7 +572,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // MOBILE: Removes the previous fragment and adds the new fragment.
             else {
-                changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true);
+                changeFragment(playerFragment, "PLAYER", fragToRemove, list.get(position).getSong(), true);
             }
 
             // Stops any track playing in the background and resets the track position.

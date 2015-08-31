@@ -215,11 +215,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             public void onClick(View v) {
 
                 // Retrieves the current seekbar progress and sets the new seekbar position value.
-                if (isPlaying) {
-                    int newPosition = playerBar.getProgress() + 6;
-                    playerBar.setProgress(newPosition); // Sets the new seekbar position.
-                    setPosition(newPosition); // Sets the new position of the song.
-                }
+                int newPosition = playerBar.getProgress() + 6;
+                playerBar.setProgress(newPosition); // Sets the new seekbar position.
+                setPosition(newPosition); // Sets the new position of the song.
             }
         });
 
@@ -294,18 +292,15 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             public void onClick(View v) {
 
                 // Retrieves the current seekbar progress and sets the new seekbar position value.
-                if (isPlaying) {
+                int newPosition = playerBar.getProgress() - 6;
 
-                    int newPosition = playerBar.getProgress() - 6;
-
-                    // If the new position is less than 0, the value is set at 0.
-                    if (newPosition < 0) {
-                        newPosition = 0;
-                    }
-
-                    playerBar.setProgress(newPosition); // Sets the new seekbar position.
-                    setPosition(newPosition); // Sets the new position of the song.
+                // If the new position is less than 0, the value is set at 0.
+                if (newPosition < 0) {
+                    newPosition = 0;
                 }
+
+                playerBar.setProgress(newPosition); // Sets the new seekbar position.
+                setPosition(newPosition); // Sets the new position of the song.
             }
         });
     }
@@ -386,6 +381,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // setUpSeekbar(): Sets up a listener for the Seekbar object.
     private void setUpSeekbar() {
 
+        playerBar.setMax(30); // Sets the maximum duration to 30 seconds by default.
+
         playerBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             // onProgressChanged(): Called when the seekbar progress has changed.
@@ -394,6 +391,16 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
                 // If the progress change is from user input, the position of the song is changed.
                 if (fromUser) {
+
+                    // Updates the minimum duration TextView object.
+                    if (progress < 10) {
+                        minDurationText.setText("0:0" + progress);
+                    }
+
+                    else {
+                        minDurationText.setText("0:" + progress);
+                    }
+
                     setPosition(progress); // Sets the new position of the song.
                 }
             }
@@ -434,6 +441,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         // Signals the activity to signal the SSMusicService to begin streaming playback of
         // the current track.
         playTrack(streamURL, false, albumBitmap, notificationsOn, artistName, songName);
+
+        // Sets the current track name for the SSMainActivity activity.
+        updateCurrentTrack(albumBitmap, songName, streamURL, selectedPosition);
 
         // Displays the progress indicator container. This will be shown until music
         // playback is fully ready.
@@ -481,6 +491,10 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // Updates the album image and song details.
             setUpImage();
             setUpText();
+
+            minDurationText.setText("0:00"); // Resets the minimum duration TextView object.
+            playerBar.setProgress(0); // Resets the seekbar.
+            setPosition(0); // Resets the song track position.
 
             // Sets the current track name for the SSMainActivity activity.
             updateCurrentTrack(albumBitmap, songName, streamURL, selectedPosition);
