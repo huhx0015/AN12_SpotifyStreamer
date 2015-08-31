@@ -376,7 +376,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // SSPlayerFragment: Attempts to reload the SSPlayerFragment, if the SSPlayerFragment
             // was in prior focus.
-            if ( (isRotationEvent) && (playerFragment != null) ) {
+            if ( (isRotationEvent) && (playerFragment != null) && (currentFragment.equals("PLAYER")) ) {
 
                 try {
                     displayPlayerFragment(true, "TRACKS", trackListResult, listPosition, false);
