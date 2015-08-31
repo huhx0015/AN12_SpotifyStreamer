@@ -21,6 +21,7 @@ import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
+import com.huhx0015.spotifystreamer.network.SSConnectivity;
 import com.huhx0015.spotifystreamer.preferences.SSPreferences;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
@@ -45,10 +46,10 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     private SSMainActivity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
     // AUDIO VARIABLES
+    private Boolean isLoop = false; // Indicates the song will be looped infinitely.
     private Boolean isPaused = false; // Indicates that a song is currently paused.
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
-    private Boolean isLoop = false; // Indicates the song will be looped infinitely.
-    private int maxDuration = 0; // Used to determine the max duration of the current selected track.
+    private Boolean isPreparing = false; // Used to determine if a song is currently being prepared for playback.
 
     // BITMAP VARIABLES
     private Bitmap albumBitmap; // Stores the Bitmap for the album image.
@@ -215,9 +216,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             public void onClick(View v) {
 
                 // Retrieves the current seekbar progress and sets the new seekbar position value.
-                int newPosition = playerBar.getProgress() + 6;
-                playerBar.setProgress(newPosition); // Sets the new seekbar position.
-                setPosition(newPosition); // Sets the new position of the song.
+                if (!isPreparing) {
+                    int newPosition = playerBar.getProgress() + 6;
+                    playerBar.setProgress(newPosition); // Sets the new seekbar position.
+                    setPosition(newPosition); // Sets the new position of the song.
+                }
             }
         });
 
@@ -228,7 +231,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             public void onClick(View v) {
 
                 // Sets the song to the next track in the list.
-                playNextSong(true);
+                if (!isPreparing) {
+                    playNextSong(true);
+                }
             }
         });
 
@@ -238,18 +243,21 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             @Override
             public void onClick(View v) {
 
-                // PAUSE: Pauses the song if the song is currently playing.
-                if (isPlaying) {
+                if (!isPreparing) {
 
-                    isPaused = true;
+                    // PAUSE: Pauses the song if the song is currently playing.
+                    if (isPlaying) {
 
-                    // Signals the activity to signal the SSMusicService to pause the song.
-                    pauseTrack(false);
-                }
+                        isPaused = true;
 
-                // PLAY: Plays the song if no song is currently playing in the background.
-                else {
-                    initializeSongPlay();
+                        // Signals the activity to signal the SSMusicService to pause the song.
+                        pauseTrack(false);
+                    }
+
+                    // PLAY: Plays the song if no song is currently playing in the background.
+                    else {
+                        initializeSongPlay();
+                    }
                 }
             }
         });
@@ -261,7 +269,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             public void onClick(View v) {
 
                 // Sets the song to the previous track in the list.
-                playNextSong(false);
+                if (!isPreparing) {
+                    playNextSong(false);
+                }
             }
         });
 
@@ -271,16 +281,19 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             @Override
             public void onClick(View v) {
 
-                // REPEAT OFF: Turns off song looping.
-                if (isLoop) {
-                    isLoop = false;
-                    SSToast.toastyPopUp("LOOPING disabled.", currentActivity);
-                }
+                if (!isPreparing) {
 
-                // REPEAT ON: Turns on infinite looping of the song.
-                else {
-                    isLoop = true;
-                    SSToast.toastyPopUp("LOOPING enabled.", currentActivity);
+                    // REPEAT OFF: Turns off song looping.
+                    if (isLoop) {
+                        isLoop = false;
+                        SSToast.toastyPopUp("LOOPING disabled.", currentActivity);
+                    }
+
+                    // REPEAT ON: Turns on infinite looping of the song.
+                    else {
+                        isLoop = true;
+                        SSToast.toastyPopUp("LOOPING enabled.", currentActivity);
+                    }
                 }
             }
         });
@@ -291,16 +304,19 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             @Override
             public void onClick(View v) {
 
-                // Retrieves the current seekbar progress and sets the new seekbar position value.
-                int newPosition = playerBar.getProgress() - 6;
+                if (!isPreparing) {
 
-                // If the new position is less than 0, the value is set at 0.
-                if (newPosition < 0) {
-                    newPosition = 0;
+                    // Retrieves the current seekbar progress and sets the new seekbar position value.
+                    int newPosition = playerBar.getProgress() - 6;
+
+                    // If the new position is less than 0, the value is set at 0.
+                    if (newPosition < 0) {
+                        newPosition = 0;
+                    }
+
+                    playerBar.setProgress(newPosition); // Sets the new seekbar position.
+                    setPosition(newPosition); // Sets the new position of the song.
                 }
-
-                playerBar.setProgress(newPosition); // Sets the new seekbar position.
-                setPosition(newPosition); // Sets the new position of the song.
             }
         });
     }
@@ -395,9 +411,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     // Updates the minimum duration TextView object.
                     if (progress < 10) {
                         minDurationText.setText("0:0" + progress);
-                    }
-
-                    else {
+                    } else {
                         minDurationText.setText("0:" + progress);
                     }
 
@@ -436,8 +450,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         loadPreferences(); // Loads values from SharedPreferences.
 
-        isPaused = false; // Indicates that the song is not paused.
-
         // Signals the activity to signal the SSMusicService to begin streaming playback of
         // the current track.
         playTrack(streamURL, false, albumBitmap, notificationsOn, artistName, songName);
@@ -448,6 +460,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         // Displays the progress indicator container. This will be shown until music
         // playback is fully ready.
         progressLayer.setVisibility(View.VISIBLE);
+
+        isPaused = false; // Indicates that the song is not paused.
+        isPreparing = true; // Indicates that the song is currently being prepared for playback.
     }
 
     // updateControlButtons(): Updates the graphics of the playback control buttons.
@@ -458,6 +473,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             Picasso.with(currentActivity)
                     .load(android.R.drawable.ic_media_pause)
+                    .placeholder(android.R.drawable.ic_media_play)
                     .resize((int) (64 * curDensity), (int) (64 * curDensity))
                     .into(playPauseButton);
         }
@@ -467,6 +483,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             Picasso.with(currentActivity)
                     .load(android.R.drawable.ic_media_play)
+                    .placeholder(android.R.drawable.ic_media_pause)
                     .resize((int) (64 * curDensity), (int) (64 * curDensity))
                     .into(playPauseButton);
         }
@@ -548,6 +565,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // PLAYING:
             if (isPlay) {
                 progressLayer.setVisibility(View.INVISIBLE); // Hides the progress indicator container.
+                isPreparing = false; // Indicates that the song is no longer being prepared.
             }
 
             Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
@@ -586,7 +604,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     @Override
     public void seekbarStatus(int position) {
 
-        if (!isDestroyed) {
+        if (!isDestroyed && !isPreparing) {
 
             // Updates the seekbar as long as the song is playing.
             if (position != -1) {
@@ -633,7 +651,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         if (!isDestroyed) {
             playerBar.setMax(duration); // Sets the maximum duration of the player seekbar.
-            maxDuration = duration; // Sets the maximum duration of the current song.
             maxDurationText.setText("0:" + duration);
             Log.d(LOG_TAG, "setDuration(): Maximum duration of the seekbar set.");
         }

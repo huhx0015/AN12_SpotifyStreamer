@@ -94,7 +94,6 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:id="@+id/ss_previous_button"
-                    android:src="@android:drawable/ic_media_previous"
                     android:layout_weight="1"
                     android:background="@android:color/transparent" />
 
@@ -102,7 +101,6 @@
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:id="@+id/ss_rewind_button"
-                    android:src="@android:drawable/ic_media_rew"
                     android:layout_weight="1"
                     android:background="@android:color/transparent" />
 
@@ -110,7 +108,6 @@
                     android:layout_width="64dp"
                     android:layout_height="64dp"
                     android:id="@+id/ss_play_pause_button"
-                    android:src="@android:drawable/ic_media_play"
                     android:layout_weight="1"
                     android:background="@android:color/transparent" />
 
@@ -118,7 +115,6 @@
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:id="@+id/ss_forward_button"
-                    android:src="@android:drawable/ic_media_next"
                     android:layout_weight="1"
                     android:background="@android:color/transparent" />
 
@@ -126,7 +122,6 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:id="@+id/ss_next_button"
-                    android:src="@android:drawable/ic_media_ff"
                     android:layout_weight="1"
                     android:background="@android:color/transparent" />
 

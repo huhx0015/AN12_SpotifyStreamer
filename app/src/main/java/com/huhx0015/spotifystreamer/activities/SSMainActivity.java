@@ -274,7 +274,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // The activity is finished if the SSArtistsFragment is in focus.
         else {
-            pauseTrack(true);
+            pauseTrack(true); // Stops any track playing in the background.
             //removeAudioService(); // Stops the SSMusicService running in the background.
             finish(); // Finishes the activity.
         }
@@ -567,7 +567,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Displays the SSPlayerFragment in the view layout.
         if (isShow) {
 
-            this.listPosition = position; // Sets the selected position in the top tracks list.
+            listPosition = position; // Sets the selected position in the top tracks list.
 
             // Adds a new SSPlayerFragment onto the fragment stack and is made visible in the view
             // layout.
