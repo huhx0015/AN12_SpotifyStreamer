@@ -14,6 +14,6 @@ import android.graphics.Bitmap;
 public interface OnTrackInfoUpdateListener {
 
     // setCurrentTrack(): Interface method which signals the attached activity to update the current
-    // Bitmap and Spotify track URL.
-    void setCurrentTrack(Bitmap albumImage, String trackUrl);
+    // Bitmap, track name, and Spotify track URL.
+    void setCurrentTrack(Bitmap albumImage, String songName, String trackUrl, int position);
 }

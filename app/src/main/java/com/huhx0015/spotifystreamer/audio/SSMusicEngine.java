@@ -72,6 +72,18 @@ public class SSMusicEngine {
 
     /** MUSIC FUNCTIONALITY ____________________________________________________________________ **/
 
+    // getSongDuration(): Returns the current song's maximum duration.
+    public int getSongDuration() {
+
+        int maxDuration = 0;
+
+        if (backgroundSong != null) {
+            maxDuration = backgroundSong.getDuration() / 1000; // Retrieves the maximum song duration.
+        }
+
+        return maxDuration;
+    }
+
     // getSongPosition(): Returns the current song position of the current song playing in the
     // background.
     public int getSongPosition() {
@@ -269,6 +281,29 @@ public class SSMusicEngine {
 
         else {
             Log.d(LOG_TAG, "ERROR: MediaPlayer object is null and cannot be released.");
+        }
+    }
+
+    // updatePlayer(): Updates the attached player fragment on the playback status, as well as the
+    // max duration of the song.
+    public void updatePlayer() {
+
+        // If a song is currently playing in the background, the attached playerFragment is signaled
+        // on the current song playback status.
+        if (isSongPlaying()) {
+            playbackStatus(true);
+        }
+
+        // Signals to the playerFragment that no song is currently playing in the background.
+        else {
+            playbackStatus(false);
+        }
+
+        int maxDuration = getSongDuration(); // Retrieves the current song's maximum duration.
+
+        // Sends the updated duration value to the playerFragment.
+        if (maxDuration != 0) {
+            setDuration(maxDuration);
         }
     }
 

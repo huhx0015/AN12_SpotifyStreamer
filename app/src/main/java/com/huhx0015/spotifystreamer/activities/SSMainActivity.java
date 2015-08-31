@@ -11,7 +11,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
@@ -47,17 +46,17 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private static WeakReference<AppCompatActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
 
     // DATA VARIABLES
+    private static final String ARTIST_INPUT = "artistInput"; // Used for restoring the artist input value for rotation change events.
+    private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
+    private static final String ARTIST_NAME = "artistName"; // Used for restoring the artist name value for rotation change events.
     private static final String CURRENT_FRAGMENT = "currentFragment"; // Used for restoring the proper fragment for rotation change events.
     private static final String CURRENT_TRACK = "currentTrack"; // Used for restoring the proper track name value for rotation change events.
-    private static final String ARTIST_INPUT = "artistInput"; // Used for restoring the artist input value for rotation change events.
-    private static final String ARTIST_NAME = "artistName"; // Used for restoring the artist name value for rotation change events.
-    private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
+    private static final String CURRENT_TRACK_POS = "currentTrackPosition"; // Used for restoring the proper track position value for rotation change events.
     private static final String ROTATION_CHANGE = "rotationChange"; // Used for restoring the rotationChange value for rotation change events.
     private static final String TRACK_LIST = "trackListResult"; // Parcelable key value for the track list.
 
     // FRAGMENT VARIABLES
     private Boolean isRotationEvent = false; // Used to determine if a screen orientation change event has occurred.
-    private Boolean isPlaying = false; // Used to determine if the SSPlayerFragment is in focus.
     private Boolean isSettings = false; // Used to determine if the SSSettingsFragment is in focus.
     private String currentFragment = ""; // Used to determine which fragment is currently active.
     private String currentArtist = ""; // Used to determine the current artist name.
@@ -83,7 +82,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
     @Bind(R.id.ss_main_activity_secondary_fragment_container) FrameLayout fragmentSecondaryContainer;
     @Bind(R.id.ss_main_activity_settings_fragment_container) FrameLayout settingsFragmentContainer;
-    @Bind(R.id.ss_main_activity_secondary_progress_indicator) ProgressBar secondaryProgressBar;
 
     /** ACTIVITY LIFECYCLE METHODS _____________________________________________________________ **/
 
@@ -103,13 +101,19 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         if (savedInstanceState != null) {
 
             // Restores the saved instance values.
-            isRotationEvent = savedInstanceState.getBoolean(ROTATION_CHANGE);
+            artistListResult = savedInstanceState.getParcelableArrayList(ARTIST_LIST);
             currentArtist = savedInstanceState.getString(ARTIST_NAME);
             currentInput = savedInstanceState.getString(ARTIST_INPUT);
-            currentTrack = savedInstanceState.getString(CURRENT_TRACK);
             currentFragment = savedInstanceState.getString(CURRENT_FRAGMENT);
-            artistListResult = savedInstanceState.getParcelableArrayList(ARTIST_LIST);
+            currentTrack = savedInstanceState.getString(CURRENT_TRACK);
+            listPosition = savedInstanceState.getInt(CURRENT_TRACK_POS);
+            isRotationEvent = savedInstanceState.getBoolean(ROTATION_CHANGE);
             trackListResult = savedInstanceState.getParcelableArrayList(TRACK_LIST);
+        }
+
+        // Signals the SSApplication class to start up the SSMusicService.
+        else {
+            setUpAudioService();
         }
 
         // LAYOUT SETUP:
@@ -228,14 +232,14 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
 
-        // Saves the current fragment state and current artist and track list values into the
-        // instance. Used to determine which fragment should be shown when the activity is
-        // re-created after the rotation change event.
+        // Saves current state values into the instance. These values are restored upon re-creation
+        // of the activity.
         savedInstanceState.putBoolean(ROTATION_CHANGE, true);
-        savedInstanceState.putString(CURRENT_FRAGMENT, currentFragment);
-        savedInstanceState.putString(CURRENT_TRACK, currentTrack);
+        savedInstanceState.putInt(CURRENT_TRACK_POS, listPosition);
         savedInstanceState.putString(ARTIST_INPUT, currentInput);
         savedInstanceState.putString(ARTIST_NAME, currentArtist);
+        savedInstanceState.putString(CURRENT_FRAGMENT, currentFragment);
+        savedInstanceState.putString(CURRENT_TRACK, currentTrack);
         savedInstanceState.putParcelableArrayList(ARTIST_LIST, artistListResult);
         savedInstanceState.putParcelableArrayList(TRACK_LIST, trackListResult);
 
@@ -316,13 +320,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // setTrackResults(): Sets the track list result for this activity.
     public void setTrackResults(ArrayList<SSSpotifyModel> list) {
         this.trackListResult = list;
-    }
-
-    // setCurrentTrack(): Sets the current track playing in the background, as well as setting the
-    // the isPlaying value for determining if a song is currently playing.
-    public void setCurrentTrack(String track, Boolean isPlay) {
-        this.currentTrack = track;
-        this.isPlaying = isPlay;
     }
 
     /** LAYOUT METHODS _________________________________________________________________________ **/
@@ -559,6 +556,11 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true);
             }
 
+            // If not currently a screen rotation event, the all currently playing songs are stopped.
+            if (!isRotationEvent) {
+                pauseTrack(true);
+            }
+
             Log.d(LOG_TAG, "displayPlayerFragment(): SSPlayerFragment now being displayed.");
         }
 
@@ -579,6 +581,13 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         }
     }
 
+    // pauseTrack(): Signals the attached class to invoke the SSMusicService to pause playback
+    // of the streamed Spotify track.
+    private void pauseTrack(Boolean isStop) {
+        try { ((OnMusicServiceListener) getApplication()).pauseTrack(isStop); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
     // removeAudioService(): Signals the SSApplication class to unbind and remove the SSMusicService
     // running in the background.
     private void removeAudioService() {
@@ -586,12 +595,21 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
-    // setCurrentTrack(): Invoked by SSPlayerFragment to update the activity on the album bitmap
-    // and the Spotify URL of the selected music track.
+    // setCurrentTrack(): Invoked by SSPlayerFragment to update the activity on the album bitmap,
+    // track name, the Spotify URL of the selected music track, and the current list position.
     @Override
-    public void setCurrentTrack(Bitmap albumImage, String trackUrl) {
+    public void setCurrentTrack(Bitmap albumImage, String songName, String trackUrl, int position) {
         this.currentBitmap = albumImage;
+        this.currentTrack = songName;
         this.spotifyUrl = trackUrl;
+        this.listPosition = position;
+    }
+
+    // removeAudioService(): Signals the SSApplication class to setup the SSMusicService service for
+    // playing audio from the SSMusicEngine class in the background.
+    private void setUpAudioService() {
+        try { ((OnMusicServiceListener) getApplication()).setUpAudioService(); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
     // updateArtistInput(): Invoked by SSArtistsFragment to keep an update of the user's artist

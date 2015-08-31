@@ -191,6 +191,12 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         ss_music.getInstance().setSongPosition(position);
     }
 
+    // updatePlayer(): Signals the SSMusicEngine instance to update the attached player fragment of
+    // the current song status, as well as the song's max duration.
+    public void updatePlayer() {
+        ss_music.getInstance().updatePlayer();
+    }
+
     /** MEDIA PLAYER NOTIFICATION METHODS ______________________________________________________ **/
 
     // processIntent(): If this service is invoked by external audio controls in the notification

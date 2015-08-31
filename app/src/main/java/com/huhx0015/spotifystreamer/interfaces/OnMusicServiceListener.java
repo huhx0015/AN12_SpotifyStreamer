@@ -35,4 +35,12 @@ public interface OnMusicServiceListener {
     // setPosition(): Interface method that signals the attached class to skip to the position of
     // a Spotify track in the SSMusicService class.
     void setPosition(int position);
+
+    // setUpAudioService(): Interface method that signals the attached class to setup the
+    // SSMusicService service for playing audio from the SSMusicEngine class in the background.
+    void setUpAudioService();
+
+    // setPosition(): Interface method that signals the attached class to update the player on the
+    // current song playback status and max song duration.
+    void updatePlayer();
 }

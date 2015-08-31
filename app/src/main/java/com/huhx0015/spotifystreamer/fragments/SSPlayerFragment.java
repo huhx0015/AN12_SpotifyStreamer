@@ -20,6 +20,7 @@ import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
+import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
 import com.huhx0015.spotifystreamer.preferences.SSPreferences;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
@@ -168,19 +169,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         ButterKnife.unbind(this); // Sets all injected views to null.
     }
 
-    // onDestroy(): This function runs when the fragment has terminated and is being destroyed.
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        Log.d(LOG_TAG, "FRAGMENT LIFECYCLE (onDestroy): onDestroy() invoked.");
-
-        //pauseTrack(true); // Stops the track, if currently playing in the background.
-
-        // Resets the current track value and the isPlaying value in SSMainActivity is set to false.
-        //currentActivity.setCurrentTrack(null, false);
-    }
-
     /** FRAGMENT EXTENSION METHOD ______________________________________________________________ **/
 
     // onSaveInstanceState(): Called to retrieve per-instance state from an fragment before being
@@ -201,13 +189,17 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         // Retrieves the device's density attributes.
         curDensity = getResources().getDisplayMetrics().density;
 
-        // Sets the current track name for the SSMainActivity activity.
-        currentActivity.setCurrentTrack(songName, true);
-
         setUpButtons(); // Sets up the button listeners for the fragment.
         setUpSeekbar(); // Sets up the seekbar listener for the player bar.
         setUpImage(); // Sets up the images for the ImageView objects for the fragment.
         setUpText(); // Sets up the text for the TextView objects for the fragment.
+
+        // Retrieves the current song status and max duration of the song from
+        // SSApplication/SSMusicService/SSMusicEngine.
+        updatePlayer();
+
+        // Sets the current track information for the SSMainActivity activity.
+        updateCurrentTrack(albumBitmap, songName, streamURL, selectedPosition);
     }
 
     // setUpButtons(): Sets up the button listeners for the fragment.
@@ -483,6 +475,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             setUpImage();
             setUpText();
 
+            // Sets the current track name for the SSMainActivity activity.
+            updateCurrentTrack(albumBitmap, songName, streamURL, selectedPosition);
+
             return true; // Indicates that the track has changed.
         }
 
@@ -621,35 +616,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         }
     }
 
-    // pauseTrack(): Signals the attached activity to invoke the SSMusicService to pause playback
-    // of the streamed Spotify track.
-    private void pauseTrack(Boolean isStop) {
-
-        try { ((OnMusicServiceListener) currentActivity.getApplication()).pauseTrack(isStop); }
-        //try { ((OnMusicServiceListener) currentActivity).pauseTrack(isStop); }
-        catch (ClassCastException cce) {} // Catch for class cast exception errors.
-    }
-
-    // playTrack(): Signals the attached activity to invoke the SSMusicService to begin playback
-    // of the streamed Spotify track.
-    private void playTrack(String url, Boolean loop, Bitmap albumImage, Boolean notiOn, String artist, String track) {
-
-        try { ((OnMusicServiceListener) currentActivity.getApplication()).playTrack(url, loop, albumImage, notiOn, artist, track); }
-        //try { ((OnMusicServiceListener) currentActivity).playTrack(url, loop, albumImage, notiOn, artist, track); }
-        catch (ClassCastException cce) {} // Catch for class cast exception errors.
-    }
-
-    // setPosition(): Signals the attached activity to invoke the SSMusicService to update the song
-    // position.
-    private void setPosition(int position) {
-
-        try { ((OnMusicServiceListener) currentActivity.getApplication()).setPosition(position); }
-
-        //try { ((OnMusicServiceListener) currentActivity).setPosition(position); }
-        catch (ClassCastException cce) {} // Catch for class cast exception errors.
-    }
-
-    // TODO: TOTALLY EXPERIMENTAL!
+    // attachPlayerFragment(): Signals the attached class to attach this fragment to the
+    // SSMusicService.
     private void attachPlayerFragment() {
 
         Log.d(LOG_TAG, "attachPlayerFragment(): Player fragment attached.");
@@ -658,4 +626,38 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
+    // pauseTrack(): Signals the attached class to invoke the SSMusicService to pause playback
+    // of the streamed Spotify track.
+    private void pauseTrack(Boolean isStop) {
+        try { ((OnMusicServiceListener) currentActivity.getApplication()).pauseTrack(isStop); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // playTrack(): Signals the attached class to invoke the SSMusicService to begin playback
+    // of the streamed Spotify track.
+    private void playTrack(String url, Boolean loop, Bitmap albumImage, Boolean notiOn, String artist, String track) {
+        try { ((OnMusicServiceListener) currentActivity.getApplication()).playTrack(url, loop, albumImage, notiOn, artist, track); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // setPosition(): Signals the attached class to invoke the SSMusicService to update the song
+    // position.
+    private void setPosition(int position) {
+        try { ((OnMusicServiceListener) currentActivity.getApplication()).setPosition(position); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // updateCurrentTrack(): Signals the attached activity to update the current Bitmap, track name,
+    // and Spotify track URL.
+    private void updateCurrentTrack(Bitmap bitmap, String name, String url, int position) {
+        try { ((OnTrackInfoUpdateListener) currentActivity).setCurrentTrack(bitmap, name, url, position); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // updatePlayer(): Signals the attached class to invoke the SSMusicService to begin playback
+    // of the streamed Spotify track.
+    private void updatePlayer() {
+        try { ((OnMusicServiceListener) currentActivity.getApplication()).updatePlayer(); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
 }
