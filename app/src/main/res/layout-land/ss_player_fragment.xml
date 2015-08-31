@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/ss_player_fragment_layout"
-    android:background="@android:color/white">
+    android:background="@android:color/transparent">
 
     <LinearLayout
         android:orientation="vertical"
@@ -28,10 +28,10 @@
             android:background="@drawable/ss_dark_transparent_tile">
 
             <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:id="@+id/ss_player_song_info_parent_container">
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/ss_player_song_info_parent_container"
+                android:layout_weight="1">
 
                 <ImageButton
                     android:layout_width="48dp"
@@ -85,9 +85,9 @@
                 android:id="@+id/ss_player_controls_container"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:layout_weight="1"
                 android:paddingLeft="16dp"
-                android:paddingRight="16dp">
+                android:paddingRight="16dp"
+                android:layout_weight="1">
 
                 <ImageButton
                     android:layout_width="48dp"
@@ -173,7 +173,8 @@
                         android:id="@+id/ss_player_seekbar_max_duration_text"
                         android:layout_gravity="right"
                         android:textColor="@android:color/white"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        android:typeface="sans" />
                 </FrameLayout>
 
             </LinearLayout>
@@ -185,7 +186,7 @@
         android:layout_height="match_parent"
         android:background="@drawable/ss_light_transparent_tile"
         android:id="@+id/ss_player_fragment_progress_layer"
-        android:visibility="gone">
+        android:visibility="invisible">
 
         <ProgressBar
             style="?android:attr/progressBarStyleLarge"

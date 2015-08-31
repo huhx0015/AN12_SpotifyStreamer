@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:id="@+id/ss_player_fragment_layout"
-    android:background="@android:color/white">
+    android:background="@android:color/transparent">
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:id="@+id/ss_player_fragment_parent_container">
 
         <ImageView
@@ -28,8 +28,8 @@
             android:background="@drawable/ss_dark_transparent_tile">
 
             <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
                 android:layout_weight="1"
                 android:id="@+id/ss_player_song_info_parent_container">
 
@@ -181,11 +181,11 @@
     </LinearLayout>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:background="@drawable/ss_light_transparent_tile"
         android:id="@+id/ss_player_fragment_progress_layer"
-        android:visibility="gone">
+        android:visibility="invisible">
 
         <ProgressBar
             style="?android:attr/progressBarStyleLarge"

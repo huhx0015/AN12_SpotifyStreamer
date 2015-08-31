@@ -98,6 +98,7 @@ public class SSApplication extends Application implements OnMusicServiceListener
             musicService.releaseMedia();
 
             stopService(audioIntent); // Stops the service.
+            audioIntent = null;
             musicService = null;
         }
     }
@@ -107,9 +108,9 @@ public class SSApplication extends Application implements OnMusicServiceListener
     @Override
     public void setUpAudioService() {
 
-        Log.d(LOG_TAG, "setUpAudioService(): Setting up SSMusicService...");
-
         if (audioIntent == null) {
+
+            Log.d(LOG_TAG, "setUpAudioService(): Setting up SSMusicService...");
 
             // Sets up the service intent and begins the service.
             audioIntent = new Intent(this, SSMusicService.class); // Sets a Intent to the service.

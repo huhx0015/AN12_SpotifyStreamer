@@ -77,7 +77,7 @@ public class SSMusicEngine {
 
         int maxDuration = 0;
 
-        if (backgroundSong != null) {
+        if ( (backgroundSong != null) && (backgroundSong.isPlaying()) ) {
             maxDuration = backgroundSong.getDuration() / 1000; // Retrieves the maximum song duration.
         }
 
@@ -114,9 +114,11 @@ public class SSMusicEngine {
 
         if (backgroundSong != null) {
 
+            songPosition = position * 1000; // Sets the new song position.
+
             // Sets the song position as long as the song is currently playing in the background.
             if (backgroundSong.isPlaying()) {
-                backgroundSong.seekTo(position * 1000); // Sets the new song position.
+                backgroundSong.seekTo(songPosition);
             }
         }
     }

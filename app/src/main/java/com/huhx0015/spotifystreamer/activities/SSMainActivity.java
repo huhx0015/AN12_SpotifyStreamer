@@ -556,9 +556,10 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 changeFragment(playerFragment, "PLAYER", "TRACKS", list.get(position).getSong(), true);
             }
 
-            // If not currently a screen rotation event, the all currently playing songs are stopped.
+            // If not currently a screen rotation event, all currently playing songs are stopped.
             if (!isRotationEvent) {
-                pauseTrack(true);
+                pauseTrack(true); // Stops any song playing in the background.
+                setPosition(0); // Resets the position of the track to the beginning.
             }
 
             Log.d(LOG_TAG, "displayPlayerFragment(): SSPlayerFragment now being displayed.");
@@ -585,6 +586,13 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // of the streamed Spotify track.
     private void pauseTrack(Boolean isStop) {
         try { ((OnMusicServiceListener) getApplication()).pauseTrack(isStop); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // setPosition(): Signals the attached class to invoke the SSMusicService to update the song
+    // position.
+    private void setPosition(int position) {
+        try { ((OnMusicServiceListener) getApplication()).setPosition(position); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
