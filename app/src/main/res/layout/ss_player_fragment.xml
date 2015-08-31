@@ -162,7 +162,8 @@
                         android:id="@+id/ss_player_seekbar_min_duration_text"
                         android:layout_gravity="left"
                         android:textColor="@android:color/white"
-                        android:typeface="sans" />
+                        android:typeface="sans"
+                        android:textSize="14sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -170,7 +171,9 @@
                         android:text="0:30"
                         android:id="@+id/ss_player_seekbar_max_duration_text"
                         android:layout_gravity="right"
-                        android:textColor="@android:color/white" />
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"
+                        android:typeface="sans" />
                 </FrameLayout>
 
             </LinearLayout>

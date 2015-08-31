@@ -218,7 +218,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // SHARE:
             case R.id.ss_action_share_button:
-                SSShareIntent.shareIntent(currentTrack, currentArtist, currentBitmap, this);
+                SSShareIntent.shareIntent(currentTrack, currentArtist, spotifyUrl, this);
                 return true;
 
             // DEFAULT:
