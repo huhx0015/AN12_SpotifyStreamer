@@ -473,7 +473,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             Picasso.with(currentActivity)
                     .load(android.R.drawable.ic_media_pause)
-                    .placeholder(android.R.drawable.ic_media_play)
                     .resize((int) (64 * curDensity), (int) (64 * curDensity))
                     .into(playPauseButton);
         }
@@ -483,7 +482,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             Picasso.with(currentActivity)
                     .load(android.R.drawable.ic_media_play)
-                    .placeholder(android.R.drawable.ic_media_pause)
                     .resize((int) (64 * curDensity), (int) (64 * curDensity))
                     .into(playPauseButton);
         }
@@ -548,6 +546,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // Retrieves the current country code setting.
         notificationsOn = SSPreferences.getNotifications(SS_prefs);
+
+        Log.d(LOG_TAG, "loadPreferences(): Current notification settings: " + notificationsOn);
     }
 
     /** INTERFACE METHODS ______________________________________________________________________ **/

@@ -252,6 +252,8 @@ public class SSTracksFragment extends Fragment {
 
         // Retrieves the current country code setting.
         countryCode = SSPreferences.getCountryCode(SS_prefs);
+
+        Log.d(LOG_TAG, "loadPreferences(): Current country code: " + countryCode);
     }
 
     /** RECYCLERVIEW METHODS ___________________________________________________________________ **/

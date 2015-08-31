@@ -192,7 +192,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 // Displays a Toast message, indicating that the player fragment view is already
                 // being shown.
                 else if (currentFragment.equals("PLAYER")) {
-                    SSToast.toastyPopUp("Player view is already open.", this);
+                    SSToast.toastyPopUp("NOW PLAYING is already visible.", this);
                 }
 
                 // Displays a Toast message, indicating that no track has been selected.
