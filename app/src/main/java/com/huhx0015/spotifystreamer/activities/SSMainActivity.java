@@ -18,6 +18,7 @@ import com.huhx0015.spotifystreamer.fragments.SSPlayerFragment;
 import com.huhx0015.spotifystreamer.fragments.SSSettingsFragment;
 import com.huhx0015.spotifystreamer.fragments.SSTracksFragment;
 import com.huhx0015.spotifystreamer.intent.SSShareIntent;
+import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
@@ -59,6 +60,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // FRAGMENT VARIABLES
     private Boolean isRotationEvent = false; // Used to determine if a screen orientation change event has occurred.
     private Boolean isSettings = false; // Used to determine if the SSSettingsFragment is in focus.
+    private SSPlayerFragment playFragment; // Keeps a reference to the SSPlayerFragment.
     private String currentFragment = ""; // Used to determine which fragment is currently active.
     private String currentArtist = ""; // Used to determine the current artist name.
     private String currentInput = ""; // Used to determine the current artist input.
@@ -189,10 +191,10 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                     displayPlayerFragment(true, currentFragment, trackListResult, listPosition, false);
                 }
 
-                // Displays a Toast message, indicating that the player fragment view is already
-                // being shown.
+                // If the SSPlayerFragment is already in focus, it begins playback of the song if
+                // it is not already playing or being prepared for playback.
                 else if (currentFragment.equals("PLAYER")) {
-                    SSToast.toastyPopUp("NOW PLAYING is already visible.", this);
+                    playCurrentSong(); // Plays the current track song.
                 }
 
                 // Displays a Toast message, indicating that no track has been selected.
@@ -571,17 +573,17 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // Adds a new SSPlayerFragment onto the fragment stack and is made visible in the view
             // layout.
-            SSPlayerFragment playerFragment = new SSPlayerFragment();
-            playerFragment.initializeFragment(list, position);
+            playFragment = new SSPlayerFragment();
+            playFragment.initializeFragment(list, position);
 
             // TABLET: Displays the SSPlayerFragment as a DialogFragment.
             if (isTablet) {
-                displayFragmentDialog(playerFragment, "PLAYER");
+                displayFragmentDialog(playFragment, "PLAYER");
             }
 
             // MOBILE: Removes the previous fragment and adds the new fragment.
             else {
-                changeFragment(playerFragment, "PLAYER", fragToRemove, list.get(position).getSong(), true);
+                changeFragment(playFragment, "PLAYER", fragToRemove, list.get(position).getSong(), true);
             }
 
             // Stops any track playing in the background and resets the track position.
@@ -610,10 +612,42 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         }
     }
 
+    // setCurrentTrack(): Invoked by SSPlayerFragment to update the activity on the album bitmap,
+    // track name, the Spotify URL of the selected music track, and the current list position.
+    @Override
+    public void setCurrentTrack(Bitmap albumImage, String songName, String trackUrl, int position) {
+        this.currentTrack = songName;
+        this.spotifyUrl = trackUrl;
+        this.listPosition = position;
+    }
+
+    // updateArtistInput(): Invoked by SSArtistsFragment to keep an update of the user's artist
+    // input.
+    @Override
+    public void updateArtistInput(String name) {
+        currentInput = name; // Sets the current artist input name.
+    }
+
     // pauseTrack(): Signals the attached class to invoke the SSMusicService to pause playback
     // of the streamed Spotify track.
     private void pauseTrack(Boolean isStop) {
         try { ((OnMusicServiceListener) getApplication()).pauseTrack(isStop); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // playCurrentSong(): Signals the SSPlayerFragment to play the current tracklist song.
+    private void playCurrentSong() {
+
+        if (playFragment != null) {
+            try { ((OnMusicPlayerListener) playFragment).playCurrentSong(); }
+            catch (ClassCastException cce) {} // Catch for class cast exception errors.
+        }
+    }
+
+    // removeAudioService(): Signals the SSApplication class to unbind and remove the SSMusicService
+    // running in the background.
+    private void removeAudioService() {
+        try { ((OnMusicServiceListener) getApplication()).removeAudioService(); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
@@ -624,22 +658,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
-    // removeAudioService(): Signals the SSApplication class to unbind and remove the SSMusicService
-    // running in the background.
-    private void removeAudioService() {
-        try { ((OnMusicServiceListener) getApplication()).removeAudioService(); }
-        catch (ClassCastException cce) {} // Catch for class cast exception errors.
-    }
-
-    // setCurrentTrack(): Invoked by SSPlayerFragment to update the activity on the album bitmap,
-    // track name, the Spotify URL of the selected music track, and the current list position.
-    @Override
-    public void setCurrentTrack(Bitmap albumImage, String songName, String trackUrl, int position) {
-        this.currentTrack = songName;
-        this.spotifyUrl = trackUrl;
-        this.listPosition = position;
-    }
-
     // removeAudioService(): Signals the SSApplication class to setup the SSMusicService service for
     // playing audio from the SSMusicEngine class in the background.
     private void setUpAudioService() {
@@ -647,10 +665,5 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
-    // updateArtistInput(): Invoked by SSArtistsFragment to keep an update of the user's artist
-    // input.
-    @Override
-    public void updateArtistInput(String name) {
-        currentInput = name; // Sets the current artist input name.
-    }
+
 }

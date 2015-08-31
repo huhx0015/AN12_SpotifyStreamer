@@ -572,6 +572,16 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         }
     }
 
+    // playCurrentSong(): An interface method invoked by SSMainActivity to play the current song
+    // in the tracklist.
+    @Override
+    public void playCurrentSong() {
+
+        if (!isPlaying && !isPreparing) {
+            initializeSongPlay(); // Plays the current track song.
+        }
+    }
+
     // playNextSong(): An interface method invoked by the SSMusicEngine to play the next or previous
     // song in the tracklist.
     @Override
