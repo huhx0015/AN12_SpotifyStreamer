@@ -18,7 +18,7 @@
         <CheckBoxPreference
             android:key="ss_notifications"
             android:title="Display Notification Player: ON"
-            android:summary="Controls whether notification player control should be enabled or not."
+            android:summary="Controls whether notification player control should be enabled or not. This feature is only supported on devices running on Android 5.0 and above."
             android:defaultValue="true" />
     </PreferenceCategory>
 

@@ -346,12 +346,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer,
                     R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, weakRefActivity);
 
-            // SSSettingsFragment: Reloads the SSSettingsFragment into focus, if the
-            // SSSettingsFragment was displayed prior to screen rotation.
-            if ( (isRotationEvent) && (isSettings) ) {
-                displaySettingsFragment(true, true);
-            }
-
             // SSTracksFragment: If a screen orientation event has occurred and the fragment that
             // was in focus was SSTracksFragment, a new SSTracksFragment is created and is made
             // visible in the view layout.
@@ -378,18 +372,19 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                     Log.e(LOG_TAG, "setupFragment(): A null pointer exception has occurred while trying to restore the SSPlayerFragment DialogFragment.");
                 }
             }
+
+            // SSSettingsFragment: Reloads the SSSettingsFragment into focus, if the
+            // SSSettingsFragment was displayed prior to screen rotation.
+            if ( (isRotationEvent) && (isSettings) ) {
+                displaySettingsFragment(true, true);
+                SSActionBar.setupActionBar("SETTINGS", null, null, true, this);
+            }
         }
 
         // MOBILE: Reloads the fragment that was in focus prior to the screen orientation change.
         else {
 
             Log.d(LOG_TAG, "setupFragment(): Reloading fragments for mobile view...");
-
-            // SSSettingsFragment: Reloads the SSSettingsFragment into focus, if the
-            // SSSettingsFragment was displayed prior to screen rotation.
-            if ( (isRotationEvent) && (isSettings) ) {
-                displaySettingsFragment(true, true);
-            }
 
             // SSPlayerFragment: Attempts to reload the SSPlayerFragment, if the SSPlayerFragment
             // was in prior focus.
@@ -420,6 +415,13 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                             fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist,
                             currentTrack, weakRefActivity);
                 }
+            }
+
+            // SSSettingsFragment: Reloads the SSSettingsFragment into focus, if the
+            // SSSettingsFragment was displayed prior to screen rotation.
+            if ( (isRotationEvent) && (isSettings) ) {
+                displaySettingsFragment(true, true);
+                SSActionBar.setupActionBar("SETTINGS", null, null, true, this);
             }
         }
     }

@@ -48,7 +48,7 @@ public class SSShareIntent {
 
                 // Adds the data to the intent.
                 sendIntent.putExtra(Intent.EXTRA_SUBJECT, shareSubject);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, shareSubject + ": " + shareMessage);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, shareSubject + ":\n" + shareMessage);
                 sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 context.startActivity(Intent.createChooser(sendIntent, "Share my Spotify Streamer experience with: "));
 

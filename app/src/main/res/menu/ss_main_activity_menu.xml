@@ -4,8 +4,9 @@
 
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
+        android:icon="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
         android:orderInCategory="100"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/ss_action_play_button"
