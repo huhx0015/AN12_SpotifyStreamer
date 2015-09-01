@@ -13,12 +13,12 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="NOTIFICATIONS"
+        android:title="NOTIFICATION PLAYER"
         android:key="ss_notifications_category">
         <CheckBoxPreference
             android:key="ss_notifications"
-            android:title="Display Notifications: ON"
-            android:summary="Controls whether notifications should be enabled or not."
+            android:title="Display Notification Player: ON"
+            android:summary="Controls whether notification player control should be enabled or not."
             android:defaultValue="true" />
     </PreferenceCategory>
 

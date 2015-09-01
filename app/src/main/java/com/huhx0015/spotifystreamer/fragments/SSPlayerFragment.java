@@ -21,7 +21,6 @@ import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
-import com.huhx0015.spotifystreamer.network.SSConnectivity;
 import com.huhx0015.spotifystreamer.preferences.SSPreferences;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
@@ -436,11 +435,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // Sets the artist and album name for the TextView object.
         artistAlbumNameText.setText(artistName + " - " + albumName);
-        artistAlbumNameText.setShadowLayer(8, 0, 0, 0); // Sets the shadow layer font.
+        artistAlbumNameText.setShadowLayer(8, 2, 2, 2); // Sets the shadow layer font.
 
         // Sets the song name for the TextView object.
         songNameText.setText(songName);
-        songNameText.setShadowLayer(8, 0, 0, 0); // Sets the shadow layer font.
+        songNameText.setShadowLayer(8, 2, 2, 2); // Sets the shadow layer font.
     }
 
     /** MUSIC PLAYER METHODS ___________________________________________________________________ **/
@@ -577,8 +576,14 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     @Override
     public void playCurrentSong() {
 
+        // Plays the current track song.
         if (!isPlaying && !isPreparing) {
-            initializeSongPlay(); // Plays the current track song.
+            initializeSongPlay();
+        }
+
+        // Displays a Toast informing the user that a song is already playing in the background.
+        else {
+            SSToast.toastyPopUp(songName + " by " + artistName + " is already playing.", currentActivity);
         }
     }
 

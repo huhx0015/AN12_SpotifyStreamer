@@ -55,6 +55,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private static final String CURRENT_TRACK = "currentTrack"; // Used for restoring the proper track name value for rotation change events.
     private static final String CURRENT_TRACK_POS = "currentTrackPosition"; // Used for restoring the proper track position value for rotation change events.
     private static final String ROTATION_CHANGE = "rotationChange"; // Used for restoring the rotationChange value for rotation change events.
+    private static final String SETTINGS_FRAGMENT = "settingsFragment"; // Used for restoring the isSettings value for rotation change events.
     private static final String TRACK_LIST = "trackListResult"; // Parcelable key value for the track list.
 
     // FRAGMENT VARIABLES
@@ -110,6 +111,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             currentTrack = savedInstanceState.getString(CURRENT_TRACK);
             listPosition = savedInstanceState.getInt(CURRENT_TRACK_POS);
             isRotationEvent = savedInstanceState.getBoolean(ROTATION_CHANGE);
+            isSettings = savedInstanceState.getBoolean(SETTINGS_FRAGMENT);
             trackListResult = savedInstanceState.getParcelableArrayList(TRACK_LIST);
         }
 
@@ -166,7 +168,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
                 // SSSettingsFragment: Hides the SSSettingsFragment view.
                 if (isSettings) {
-                    displaySettingsFragment(false); // Hides the SSSettingsFragment.
+                    displaySettingsFragment(false, false); // Hides the SSSettingsFragment.
                 }
 
                 // SSPlayerFragment: Removes the SSPlayerFragment and displays the main
@@ -214,12 +216,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
                 // Displays the SSSettingsFragment view.
                 if (!isSettings) {
-                    displaySettingsFragment(true); // Displays the SSSettingsFragment.
+                    displaySettingsFragment(true, false); // Displays the SSSettingsFragment.
                 }
 
                 // Hides the SSSettingsFragment view.
                 else {
-                    displaySettingsFragment(false); // Hides the SSSettingsFragment.
+                    displaySettingsFragment(false, false); // Hides the SSSettingsFragment.
                 }
 
                 return true;
@@ -238,6 +240,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Saves current state values into the instance. These values are restored upon re-creation
         // of the activity.
         savedInstanceState.putBoolean(ROTATION_CHANGE, true);
+        savedInstanceState.putBoolean(SETTINGS_FRAGMENT, isSettings);
         savedInstanceState.putInt(CURRENT_TRACK_POS, listPosition);
         savedInstanceState.putString(ARTIST_INPUT, currentInput);
         savedInstanceState.putString(ARTIST_NAME, currentArtist);
@@ -259,7 +262,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // SSSettingsFragment: Hides the SSSettingsFragment view.
         if (isSettings) {
-            displaySettingsFragment(false); // Removes the SSSettingsFragment from view.
+            displaySettingsFragment(false, false); // Removes the SSSettingsFragment from view.
         }
 
         // If the SSPlayerFragment is currently being displayed, the fragment is removed and
@@ -343,6 +346,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer,
                     R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, weakRefActivity);
 
+            // SSSettingsFragment: Reloads the SSSettingsFragment into focus, if the
+            // SSSettingsFragment was displayed prior to screen rotation.
+            if ( (isRotationEvent) && (isSettings) ) {
+                displaySettingsFragment(true, true);
+            }
+
             // SSTracksFragment: If a screen orientation event has occurred and the fragment that
             // was in focus was SSTracksFragment, a new SSTracksFragment is created and is made
             // visible in the view layout.
@@ -375,6 +384,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         else {
 
             Log.d(LOG_TAG, "setupFragment(): Reloading fragments for mobile view...");
+
+            // SSSettingsFragment: Reloads the SSSettingsFragment into focus, if the
+            // SSSettingsFragment was displayed prior to screen rotation.
+            if ( (isRotationEvent) && (isSettings) ) {
+                displaySettingsFragment(true, true);
+            }
 
             // SSPlayerFragment: Attempts to reload the SSPlayerFragment, if the SSPlayerFragment
             // was in prior focus.
@@ -444,15 +459,25 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     }
 
     // displaySettingsFragment(): Displays or hides the SSSettingsFragment view.
-    private void displaySettingsFragment(Boolean isShow) {
+    private void displaySettingsFragment(Boolean isShow, Boolean isRotation) {
 
         // Displays the SSSettingsFragment view.
         if (isShow) {
+
             isSettings = true; // Indicates that the SSSettingsFragment is active.
             settingsFragmentContainer.setVisibility(View.VISIBLE);
+
+            // If the SSSettingsFragment is being re-added after a screen orientation change,
+            // fragment animations are disabled.
+            Boolean isAnimate = true;
+            if (isRotation) {
+                isAnimate = false;
+            }
+
+            // Sets up the SSSettingsFragment.
             SSSettingsFragment settingsFragment = new SSSettingsFragment();
             SSFragmentView.addFragment(settingsFragment, settingsFragmentContainer,
-                    R.id.ss_main_activity_settings_fragment_container, "SETTINGS", true, weakRefActivity);
+                    R.id.ss_main_activity_settings_fragment_container, "SETTINGS", isAnimate, weakRefActivity);
         }
 
         // Hides the SSSettingsFragment view.
@@ -664,6 +689,4 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         try { ((OnMusicServiceListener) getApplication()).setUpAudioService(); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
-
-
 }

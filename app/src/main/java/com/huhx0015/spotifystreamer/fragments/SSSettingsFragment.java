@@ -90,13 +90,13 @@ public class SSSettingsFragment extends PreferenceFragment implements SharedPref
         // Updates the notification setting title.
         // ON:
         if (notificationsPref.isChecked()) {
-            notificationsPref.setTitle("Display Notifications: ON");
+            notificationsPref.setTitle("Display Notification Player: ON");
             SSPreferences.setNotifications(true, SS_prefs); // Sets the new value in SharedPreferences.
         }
 
         // OFF:
         else {
-            notificationsPref.setTitle("Display Notifications: OFF");
+            notificationsPref.setTitle("Display Notification Player: OFF");
             SSPreferences.setNotifications(false, SS_prefs); // Sets the new value in SharedPreferences.
         }
     }
