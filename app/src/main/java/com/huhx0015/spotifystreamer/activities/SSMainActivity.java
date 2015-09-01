@@ -1,15 +1,20 @@
 package com.huhx0015.spotifystreamer.activities;
 
+import android.content.res.Configuration;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
@@ -67,6 +72,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private String currentTrack = ""; // Used to determine the current track name.
 
     // LAYOUT VARIABLES
+    private ActionBarDrawerToggle drawerToggle; // References the ActionBar drawer toggle object.
     private Boolean isTablet = false; // Used to determine if the current device is a mobile or tablet device.
 
     // LIST VARIABLES
@@ -81,9 +87,11 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private String spotifyUrl = ""; // Used to reference the Spotify track URL of the current track.
 
     // VIEW INJECTION VARIABLES
+    @Bind(R.id.ss_main_activity_drawer_layout) DrawerLayout drawerLayout;
     @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
     @Bind(R.id.ss_main_activity_secondary_fragment_container) FrameLayout fragmentSecondaryContainer;
     @Bind(R.id.ss_main_activity_settings_fragment_container) FrameLayout settingsFragmentContainer;
+    @Bind(R.id.ss_main_activity_left_drawer_container) LinearLayout leftDrawerContainer;
 
     /** ACTIVITY LIFECYCLE METHODS _____________________________________________________________ **/
 
@@ -143,6 +151,14 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     }
 
     /** ACTIVITY EXTENSION METHODS _____________________________________________________________ **/
+
+    // onConfigurationChanged(): Called by the system when the device configuration changes while
+    // your activity is running.
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
 
     // onCreateOptionsMenu(): Inflates the menu when the menu key is pressed. This adds items to
     // the action bar if it is present.
@@ -229,6 +245,22 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    // onPostCreate(): Called when activity start-up is complete (after onStart() and
+    // onRestoreInstanceState(Bundle) have been called).
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        drawerToggle.syncState();
+    }
+
+    // onPrepareOptionsMenu(): Called whenever invalidateOptionsMenu() is invoked.
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return super.onPrepareOptionsMenu(menu);
     }
 
     // onSaveInstanceState(): Called to retrieve per-instance state from an activity before being
@@ -318,12 +350,39 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         setContentView(R.layout.ss_main_activity); // Sets the XML layout file for the activity.
         ButterKnife.bind(this); // ButterKnife view injection initialization.
 
+        //setupDrawer(); // Initializes the drawer view for the layout.
         setupFragment(); // Initializes the fragment view for the layout.
 
         // If a rotation event occurred, the isRotationEvent value is reset.
         if (isRotationEvent) {
             isRotationEvent = false;
         }
+    }
+
+    // setupDrawer(): Sets up the drawer for the activity layout.
+    private void setupDrawer() {
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.ss_toolbar);
+        //setSupportActionBar(toolbar);
+
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
+                toolbar, R.string.drawer_open, R.string.drawer_close) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+
+        drawerToggle.setDrawerIndicatorEnabled(true); // Draws the toggle button indicator.
+        drawerLayout.setDrawerListener(drawerToggle); // Sets the drawer toggle as the DrawerListener.
     }
 
     // setupFragment(): Initializes the fragment view for the layout.
@@ -514,9 +573,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // recycleView(): Recycles the View objects to clear up resources prior to Activity destruction.
     private void recycleView() {
 
+        // Unbinds all Drawable objects attached to the current layout.
         try {
-
-            // Unbinds all Drawable objects attached to the current layout.
             SSUnbind.unbindDrawables(findViewById(R.id.ss_main_activity_layout));
         }
 
@@ -638,8 +696,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         }
     }
 
-    // setCurrentTrack(): Invoked by SSPlayerFragment to update the activity on the album bitmap,
-    // track name, the Spotify URL of the selected music track, and the current list position.
+    // setCurrentTrack(): Invoked by SSPlayerFragment to update the activity on the track name, the
+    // Spotify URL of the selected music track, and the current list position.
     @Override
     public void setCurrentTrack(String songName, String trackUrl, int position) {
         currentTrack = songName;
