@@ -1,7 +1,5 @@
 package com.huhx0015.spotifystreamer.interfaces;
 
-import android.graphics.Bitmap;
-
 /**
  * -------------------------------------------------------------------------------------------------
  * [OnTrackInfoUpdateListener] INTERFACE
@@ -15,5 +13,9 @@ public interface OnTrackInfoUpdateListener {
 
     // setCurrentTrack(): Interface method which signals the attached activity to update the current
     // Bitmap, track name, and Spotify track URL.
-    void setCurrentTrack(Bitmap albumImage, String songName, String trackUrl, int position);
+    void setCurrentTrack(String songName, String trackUrl, int position);
+
+    // updateActionBar(): Interface method which signals the attached activity to update the
+    // ActionBar with the current selected track song name.
+    void updateActionBar(String songName);
 }

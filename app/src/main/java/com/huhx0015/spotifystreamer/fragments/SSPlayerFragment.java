@@ -199,7 +199,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         updatePlayer();
 
         // Sets the current track information for the SSMainActivity activity.
-        updateCurrentTrack(albumBitmap, songName, streamURL, selectedPosition);
+        updateCurrentTrack(songName, streamURL, selectedPosition);
     }
 
     // setUpButtons(): Sets up the button listeners for the fragment.
@@ -464,11 +464,14 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         playTrack(streamURL, false, albumBitmap, notificationsOn, artistName, songName);
 
         // Sets the current track name for the SSMainActivity activity.
-        updateCurrentTrack(albumBitmap, songName, streamURL, selectedPosition);
+        updateCurrentTrack(songName, streamURL, selectedPosition);
 
-        // Displays the progress indicator container. This will be shown until music
-        // playback is fully ready.
         if (!isDestroyed) {
+
+            updateActionBar(songName); // Updates the ActionBar title.
+
+            // Displays the progress indicator container. This will be shown until music
+            // playback is fully ready.
             progressLayer.setVisibility(View.VISIBLE);
         }
 
@@ -506,13 +509,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         if ( (position < trackList.size()) && (position >= 0)) {
 
             // Updates the track details based on the current position.
-            this.selectedPosition = position;
-            this.artistName = trackList.get(position).getArtist();
-            this.songId = trackList.get(position).getSongId();
-            this.songName = trackList.get(position).getSong();
-            this.albumName = trackList.get(position).getAlbum();
-            this.albumImageURL = trackList.get(position).getAlbumImage();
-            this.streamURL = trackList.get(position).getSongURL();
+            selectedPosition = position;
+            artistName = trackList.get(position).getArtist();
+            songId = trackList.get(position).getSongId();
+            songName = trackList.get(position).getSong();
+            albumName = trackList.get(position).getAlbum();
+            albumImageURL = trackList.get(position).getAlbumImage();
+            streamURL = trackList.get(position).getSongURL();
 
             setUpImage(true); // Updates the album image.
 
@@ -525,7 +528,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             setPosition(0); // Resets the song track position.
 
             // Sets the current track name for the SSMainActivity activity.
-            updateCurrentTrack(albumBitmap, songName, streamURL, selectedPosition);
+            updateCurrentTrack(songName, streamURL, selectedPosition);
 
             return true; // Indicates that the track has changed.
         }
@@ -716,10 +719,15 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 
-    // updateCurrentTrack(): Signals the attached activity to update the current Bitmap, track name,
-    // and Spotify track URL.
-    private void updateCurrentTrack(Bitmap bitmap, String name, String url, int position) {
-        try { ((OnTrackInfoUpdateListener) currentActivity).setCurrentTrack(bitmap, name, url, position); }
+    // updateActionBar(): Signals the attached activity to update the ActionBar title.
+    private void updateActionBar(String name) {
+        try { ((OnTrackInfoUpdateListener) currentActivity).updateActionBar(name); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // updateCurrentTrack(): Signals the attached activity to update the track name and Spotify track URL.
+    private void updateCurrentTrack(String name, String url, int position) {
+        try { ((OnTrackInfoUpdateListener) currentActivity).setCurrentTrack(name, url, position); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 

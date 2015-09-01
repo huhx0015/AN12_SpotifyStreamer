@@ -1,6 +1,5 @@
 package com.huhx0015.spotifystreamer.activities;
 
-import android.graphics.Bitmap;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -642,10 +641,21 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // setCurrentTrack(): Invoked by SSPlayerFragment to update the activity on the album bitmap,
     // track name, the Spotify URL of the selected music track, and the current list position.
     @Override
-    public void setCurrentTrack(Bitmap albumImage, String songName, String trackUrl, int position) {
-        this.currentTrack = songName;
-        this.spotifyUrl = trackUrl;
-        this.listPosition = position;
+    public void setCurrentTrack(String songName, String trackUrl, int position) {
+        currentTrack = songName;
+        spotifyUrl = trackUrl;
+        listPosition = position;
+    }
+
+    // updateActionBar(): Invoked by SSPlayerFragment to update the ActionBar title with the current
+    // track song title.
+    @Override
+    public void updateActionBar(String songName) {
+
+        // Only updates the ActionBar if the device is not a tablet device.
+        if (!isTablet) {
+            SSActionBar.setupActionBar("PLAYER", currentArtist, songName, true, this);
+        }
     }
 
     // updateArtistInput(): Invoked by SSArtistsFragment to keep an update of the user's artist
