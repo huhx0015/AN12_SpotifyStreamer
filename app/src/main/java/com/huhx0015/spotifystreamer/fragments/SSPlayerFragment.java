@@ -191,7 +191,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         setUpButtons(); // Sets up the button listeners for the fragment.
         setUpSeekbar(); // Sets up the seekbar listener for the player bar.
-        setUpImage(); // Sets up the images for the ImageView objects for the fragment.
+        setUpImage(false); // Sets up the images for the ImageView objects for the fragment.
         setUpText(); // Sets up the text for the TextView objects for the fragment.
 
         // Retrieves the current song status and max duration of the song from
@@ -321,7 +321,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     }
 
     // setUpImage(): Sets up the images for the ImageView objects in the fragment.
-    private void setUpImage() {
+    private void setUpImage(Boolean onlyAlbum) {
 
         // ALBUM COVER: Loads the image from the image URL into the albumImage ImageView object and
         // stores a reference to the loaded bitmap.
@@ -330,8 +330,12 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // onBitmapLoaded(): Runs when the bitmap is loaded.
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                albumImage.setImageBitmap(bitmap); // Sets the album image bitmap.
+
                 albumBitmap = bitmap; // Stores the reference to the album bitmap.
+
+                if (!isDestroyed) {
+                    albumImage.setImageBitmap(bitmap); // Sets the album image bitmap.
+                }
             }
 
             // onBitmapFailed(): Runs when the bitmap failed to load.
@@ -350,47 +354,51 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                 .load(albumImageURL)
                 .into(target);
 
-        // FORWARD BUTTON:
-        Picasso.with(currentActivity)
-                .load(android.R.drawable.ic_media_ff)
-                .resize((int) (56 * curDensity), (int) (56 * curDensity))
-                .into(forwardButton);
+        // Loads the image resources into the player control ImageView objects.
+        if (!onlyAlbum) {
 
-        // NEXT BUTTON:
-        Picasso.with(currentActivity)
-                .load(android.R.drawable.ic_media_next)
-                .resize((int) (48 * curDensity), (int) (48 * curDensity))
-                .into(nextButton);
+            // FORWARD BUTTON:
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.ic_media_ff)
+                    .resize((int) (56 * curDensity), (int) (56 * curDensity))
+                    .into(forwardButton);
 
-        // PLAY/PAUSE BUTTON:
-        Picasso.with(currentActivity)
-                .load(android.R.drawable.ic_media_play)
-                .resize((int) (64 * curDensity), (int) (64 * curDensity))
-                .into(playPauseButton);
+            // NEXT BUTTON:
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.ic_media_next)
+                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                    .into(nextButton);
 
-        // PREVIOUS BUTTON:
-        Picasso.with(currentActivity)
-                .load(android.R.drawable.ic_media_previous)
-                .resize((int) (48 * curDensity), (int) (48 * curDensity))
-                .into(previousButton);
+            // PLAY/PAUSE BUTTON:
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.ic_media_play)
+                    .resize((int) (64 * curDensity), (int) (64 * curDensity))
+                    .into(playPauseButton);
 
-        // NEXT BUTTON:
-        Picasso.with(currentActivity)
-                .load(android.R.drawable.ic_media_next)
-                .resize((int) (48 * curDensity), (int) (48 * curDensity))
-                .into(nextButton);
+            // PREVIOUS BUTTON:
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.ic_media_previous)
+                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                    .into(previousButton);
 
-        // REPEAT BUTTON:
-        Picasso.with(currentActivity)
-                .load(android.R.drawable.stat_notify_sync)
-                .resize((int) (48 * curDensity), (int) (48 * curDensity))
-                .into(repeatButton);
+            // NEXT BUTTON:
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.ic_media_next)
+                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                    .into(nextButton);
 
-        // REWIND BUTTON:
-        Picasso.with(currentActivity)
-                .load(android.R.drawable.ic_media_rew)
-                .resize((int) (56 * curDensity), (int) (56 * curDensity))
-                .into(rewindButton);
+            // REPEAT BUTTON:
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.stat_notify_sync)
+                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                    .into(repeatButton);
+
+            // REWIND BUTTON:
+            Picasso.with(currentActivity)
+                    .load(android.R.drawable.ic_media_rew)
+                    .resize((int) (56 * curDensity), (int) (56 * curDensity))
+                    .into(rewindButton);
+        }
     }
 
     // setUpSeekbar(): Sets up a listener for the Seekbar object.
@@ -410,7 +418,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     // Updates the minimum duration TextView object.
                     if (progress < 10) {
                         minDurationText.setText("0:0" + progress);
-                    } else {
+                    }
+
+                    else {
                         minDurationText.setText("0:" + progress);
                     }
 
@@ -458,7 +468,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // Displays the progress indicator container. This will be shown until music
         // playback is fully ready.
-        progressLayer.setVisibility(View.VISIBLE);
+        if (!isDestroyed) {
+            progressLayer.setVisibility(View.VISIBLE);
+        }
 
         isPaused = false; // Indicates that the song is not paused.
         isPreparing = true; // Indicates that the song is currently being prepared for playback.
@@ -502,12 +514,14 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             this.albumImageURL = trackList.get(position).getAlbumImage();
             this.streamURL = trackList.get(position).getSongURL();
 
-            // Updates the album image and song details.
-            setUpImage();
-            setUpText();
+            setUpImage(true); // Updates the album image.
 
-            minDurationText.setText("0:00"); // Resets the minimum duration TextView object.
-            playerBar.setProgress(0); // Resets the seekbar.
+            if (!isDestroyed) {
+                setUpText(); // Updates the artist and song name TextView objects.
+                minDurationText.setText("0:00"); // Resets the minimum duration TextView object.
+                playerBar.setProgress(0); // Resets the seekbar.
+            }
+
             setPosition(0); // Resets the song track position.
 
             // Sets the current track name for the SSMainActivity activity.

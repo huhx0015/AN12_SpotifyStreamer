@@ -47,7 +47,7 @@ public class SSNotificationPlayer {
                         .setMediaSession(streamerMediaSession.getSessionToken()))
 
                 .setLargeIcon(albumImage) // Sets the album bitmap image.
-                .setSmallIcon(R.mipmap.ic_launcher) // Sets the application icon image.
+                .setSmallIcon(R.drawable.ic_launcher) // Sets the application icon image.
                 .setShowWhen(false) // Disables timestamp display.
 
                 // Sets the application name, artist, and track name as the notification content.
