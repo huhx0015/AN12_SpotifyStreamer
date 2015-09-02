@@ -1,5 +1,6 @@
 package com.huhx0015.spotifystreamer.activities;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;

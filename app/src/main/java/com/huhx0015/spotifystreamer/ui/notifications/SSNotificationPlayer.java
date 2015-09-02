@@ -44,8 +44,9 @@ public class SSNotificationPlayer {
 
         // Sets up the PendingIntent for the ContentIntent property, which launches an Intent to
         // open the SSMainActivity activity class.
-        Intent contentIntent = new Intent(context, SSMainActivity.class);
-        PendingIntent contentPendingIntent = PendingIntent.getActivity(context, 0, contentIntent, 0);
+        //Intent contentIntent = new Intent(context, SSMainActivity.class);
+        //contentIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        //PendingIntent contentPendingIntent = PendingIntent.getActivity(context, 0, contentIntent, 0);
 
         // Sets up the PendingIntent for the DeleteIntent property, which signals the SSMusicEngine
         // to stop audio playback when this notification is dismissed.
@@ -65,13 +66,13 @@ public class SSNotificationPlayer {
                 .setLargeIcon(albumImage) // Sets the album bitmap image.
                 .setSmallIcon(R.drawable.ic_launcher) // Sets the application icon image.
                 .setShowWhen(false) // Disables timestamp display.
-                .setContentIntent(contentPendingIntent) // Launches the SSMainActivity activity when the notification is pressed.
+                //.setContentIntent(contentPendingIntent) // Launches the SSMainActivity activity when the notification is pressed.
                 .setDeleteIntent(dismissPendingIntent) // Stops music playback when notification is dismissed.
                 .setVisibility(Notification.VISIBILITY_PUBLIC) // Sets the notification to be publicly viewable.
 
                 // Forces the notification to have maximum priority. This is needed to address an
                 // issue where the notification buttons will be hidden when it is below other
-                        // active notifications.
+                // active notifications.
                 .setPriority(Notification.PRIORITY_MAX) // Sets this notification to have max priority.
                 .setWhen(0)
 

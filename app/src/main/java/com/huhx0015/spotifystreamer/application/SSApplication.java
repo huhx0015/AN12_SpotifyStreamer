@@ -48,7 +48,7 @@ public class SSApplication extends Application implements OnMusicServiceListener
             serviceBound = true; // Indicates that the service is bounded.
         }
 
-        // onServiceDisconnnected: Runs when the service is disconnected from the activity.
+        // onServiceDisconnected: Runs when the service is disconnected from the activity.
         @Override
         public void onServiceDisconnected(ComponentName name) {
             serviceBound = false; // Indicates that the service is no longer bound.

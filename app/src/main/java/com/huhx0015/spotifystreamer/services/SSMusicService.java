@@ -272,7 +272,7 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     private void processIntent(Intent intent) {
 
         // If the intent or the associated action is null, the method is terminated early.
-        if( intent == null || intent.getAction() == null ) {
+        if (intent == null || intent.getAction() == null) {
             return;
         }
 
