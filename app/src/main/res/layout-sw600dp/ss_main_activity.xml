@@ -78,6 +78,12 @@
                 android:background="@android:color/white"
                 android:padding="16dp"></FrameLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="@drawable/ss_toolbar_drop_shadow"
+                android:id="@+id/ss_toolbar_drop_shadow" />
+
         </FrameLayout>
 
     </LinearLayout>

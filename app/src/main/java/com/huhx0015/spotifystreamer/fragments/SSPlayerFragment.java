@@ -1,9 +1,12 @@
 package com.huhx0015.spotifystreamer.fragments;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -13,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
@@ -22,6 +26,7 @@ import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
 import com.huhx0015.spotifystreamer.preferences.SSPreferences;
+import com.huhx0015.spotifystreamer.ui.graphics.SSBlurBuilder;
 import com.huhx0015.spotifystreamer.ui.notifications.SSNotificationPlayer;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
@@ -76,12 +81,16 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSPlayerFragment.class.getSimpleName();
 
+    // SYSTEM VARIABLES
+    private final int api_level = android.os.Build.VERSION.SDK_INT; // Used to determine the device's Android API version.
+
     // SHARED PREFERENCE VARIABLES
     private static final String SS_OPTIONS = "ss_options"; // Used to reference the name of the preference XML file.
     private Boolean notificationsOn = true; // Used to determine if notification display is enabled or not.
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_player_fragment_progress_layer) FrameLayout progressLayer;
+    @Bind(R.id.ss_player_fragment_parent_container) LinearLayout playerContainer;
     @Bind(R.id.ss_player_album_image) ImageView albumImage;
     @Bind(R.id.ss_forward_button) ImageButton forwardButton;
     @Bind(R.id.ss_next_button) ImageButton nextButton;
@@ -332,13 +341,29 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         Target target = new Target() {
 
             // onBitmapLoaded(): Runs when the bitmap is loaded.
+            @SuppressLint("NewApi")
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
 
                 albumBitmap = bitmap; // Stores the reference to the album bitmap.
 
+                // Sets the album image and the blurred background image as long as this fragment
+                // view is not destroyed.
                 if (!isDestroyed) {
+
                     albumImage.setImageBitmap(bitmap); // Sets the album image bitmap.
+
+                    // Android API Level 16+: Sets a highly blurred version of the album image as
+                    // the background for the fragment layout.
+                    if (api_level >= 16) {
+                        playerContainer.setBackground(SSBlurBuilder.createBlurDrawable(currentActivity, bitmap));
+                    }
+
+                    // Android API Level 1-15: Sets a highly blurred version of the album image as
+                    // the background for the fragment layout.
+                    else {
+                        playerContainer.setBackgroundDrawable(SSBlurBuilder.createBlurDrawable(currentActivity, bitmap));
+                    }
                 }
             }
 
@@ -434,13 +459,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // onStartTrackingTouch(): Called when a touch event on the Seekbar object has started.
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) { }
 
             // onStopTrackingTouch: Called when a touch event on the Seekbar object has ended.
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) { }
         });
     }
 
@@ -533,8 +556,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // Sets the current track name for the SSMainActivity activity.
             updateCurrentTrack(songName, streamURL, selectedPosition);
-
-
 
             return true; // Indicates that the track has changed.
         }
@@ -630,8 +651,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         // Sets the song to the next track in the list.
         Boolean isUpdate = updateTrack(newPosition);
 
-        // Updates the notification player with the updated track.
-        updateNotification(streamURL, notificationsOn, albumBitmap, artistName, songName);
+        // If the fragment view is currently destroyed, the notification player is updated with the
+        // updated track.
+        if (isDestroyed) {
+            updateNotification(streamURL, notificationsOn, albumBitmap, artistName, songName);
+        }
 
         // If the previous track was playing when the next button was pressed, the new track
         // is automatically played.
