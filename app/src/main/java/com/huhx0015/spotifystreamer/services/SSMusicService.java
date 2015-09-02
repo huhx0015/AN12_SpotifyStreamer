@@ -60,7 +60,7 @@ public class SSMusicService extends Service {
     // SYSTEM VARIABLES
     private final int api_level = android.os.Build.VERSION.SDK_INT; // Used to determine the device's Android API version.
 
-    // THREADING VARIABLES
+    // THREAD VARIABLES
     private Handler seekHandler = new Handler(); // Handler for the seekbar update thread.
 
     /** SERVICE LIFECYCLE METHODS ______________________________________________________________ **/
@@ -306,7 +306,7 @@ public class SSMusicService extends Service {
         }
     }
 
-    /** THREADING METHODS ______________________________________________________________________ **/
+    /** THREAD METHODS _________________________________________________________________________ **/
 
     // seekbarThread(): A threaded function which updates the player seekbar in the
     // SSPlayerFragment.

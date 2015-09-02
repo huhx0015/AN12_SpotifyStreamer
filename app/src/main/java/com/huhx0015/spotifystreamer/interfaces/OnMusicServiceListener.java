@@ -40,6 +40,10 @@ public interface OnMusicServiceListener {
     // SSMusicService service for playing audio from the SSMusicEngine class in the background.
     void setUpAudioService();
 
+    // startStopSongtimer(): Interface method that signals the attached class to start/stop the song
+    // timer thread, which will display a timeout message if the song is not ready by a given time.
+    void startStopSongTimer(Boolean isStart);
+
     // updateNotification(): Interface method that signals the attached class to update the
     // notification player when the next/previous button is pressed from SSPlayerFragment.
     void updateNotification(String songUrl, Boolean notiOn, Bitmap albumImage, String artist, String track);

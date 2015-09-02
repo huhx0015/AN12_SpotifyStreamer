@@ -1,12 +1,10 @@
 package com.huhx0015.spotifystreamer.fragments;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -203,6 +201,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         setUpSeekbar(); // Sets up the seekbar listener for the player bar.
         setUpImage(false); // Sets up the images for the ImageView objects for the fragment.
         setUpText(); // Sets up the text for the TextView objects for the fragment.
+
+        updateActionBar(songName); // Updates the ActionBar title.
 
         // Retrieves the current song status and max duration of the song from
         // SSApplication/SSMusicService/SSMusicEngine.
@@ -500,6 +500,10 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // Displays the progress indicator container. This will be shown until music
             // playback is fully ready.
             progressLayer.setVisibility(View.VISIBLE);
+
+            // Starts the song timer thread. This will display a time out error Toast message if the
+            // song is not ready in a given amount of time.
+            startStopSongTimer(true);
         }
 
         isPaused = false; // Indicates that the song is not paused.
@@ -605,11 +609,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             isPlaying = isPlay; // Updates the current playback status of the streaming song.
             updateControlButtons(isPlaying); // Updates the player control buttons.
 
+            // TODO: Test this to see if this is works or not.
             // PLAYING:
-            if (isPlay) {
+            //if (isPlay) {
                 progressLayer.setVisibility(View.INVISIBLE); // Hides the progress indicator container.
+                startStopSongTimer(false); // Turns off the song timer.
                 isPreparing = false; // Indicates that the song is no longer being prepared.
-            }
+            //}
 
             Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
         }
@@ -749,6 +755,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // position.
     private void setPosition(int position) {
         try { ((OnMusicServiceListener) currentActivity.getApplication()).setPosition(position); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // startStopSongTimer(): Signals the attached class to start/stop the song timer that is used
+    // to display a time out error if the song is not ready for playback by a certain amount of time.
+    private void startStopSongTimer(Boolean isStart) {
+        try { ((OnMusicServiceListener) currentActivity.getApplication()).startStopSongTimer(isStart); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 

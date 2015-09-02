@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
+import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 
 /** -----------------------------------------------------------------------------------------------
  *  [SSApplication] CLASS
@@ -35,6 +37,11 @@ public class SSApplication extends Application implements OnMusicServiceListener
     // SYSTEM VARIABLES
     private final int api_level = android.os.Build.VERSION.SDK_INT; // Used to determine the device's Android API version.
 
+    // THREAD VARIABLES
+    private Handler readySongTimerHandler = new Handler(); // Handler for the ready song timer thread.
+    private static final int TIMEOUT_VALUE = 10; // Number of seconds until a timeout message is displayed.
+    private int currentTimer = 0; // Number of seconds that has elapsed for the readySongTimerThread.
+
     /** SERVICE METHODS ________________________________________________________________________ **/
 
     // musicConnection(): A ServiceConnection object for managing the service connection states for
@@ -55,6 +62,31 @@ public class SSApplication extends Application implements OnMusicServiceListener
         @Override
         public void onServiceDisconnected(ComponentName name) {
             serviceBound = false; // Indicates that the service is no longer bound.
+        }
+    };
+
+    /** THREAD METHODS _________________________________________________________________________ **/
+
+    // readySongTimerThread(): A threaded function which is run when playback of a song has been
+    // initialized. It runs for a given time, where if the song has not already started playback,
+    // a timeout error Toast message will be displayed.
+    private Runnable readySongTimerThread = new Runnable() {
+
+        public void run() {
+
+            // Compares the current timer value with the TIMEOUT_VALUE. If it has not exceeded the
+            // TIMEOUT_VALUE, the thread is looped again.
+            if (currentTimer <= TIMEOUT_VALUE) {
+                currentTimer++; // Increments the timer value.
+                readySongTimerHandler.postDelayed(this, 1000); // Thread is run again in 1000 ms.
+            }
+
+            // Displays an timeout error message and stops the ready song timer thread.
+            else {
+                SSToast.toastyPopUp("The track could not be played due to a time-out error.", getApplicationContext());
+                currentTimer = 0; // Resets the current timer value.
+                readySongTimerHandler.removeCallbacks(this);
+            }
         }
     };
 
@@ -89,13 +121,6 @@ public class SSApplication extends Application implements OnMusicServiceListener
         musicService.playTrack(url, loop, albumImage, notiOn, artist, track);
     }
 
-    // setPosition(): Invoked by SSPlayerFragment to signal the SSMusicService to skip to the
-    // selected position in the song.
-    @Override
-    public void setPosition(int position) {
-        musicService.setPosition(position); // Signals the SSMusicService to set the song position.
-    }
-
     // removeAudioService(): Invoked by the SSMainActivity to stops the SSMusicService running in
     // the background.
     @Override
@@ -113,6 +138,13 @@ public class SSApplication extends Application implements OnMusicServiceListener
         }
     }
 
+    // setPosition(): Invoked by SSPlayerFragment to signal the SSMusicService to skip to the
+    // selected position in the song.
+    @Override
+    public void setPosition(int position) {
+        musicService.setPosition(position); // Signals the SSMusicService to set the song position.
+    }
+
     // setUpAudioService(): Sets up the SSMusicService service for playing audio from the
     // SSMusicEngine class in the background.
     @Override
@@ -126,6 +158,25 @@ public class SSApplication extends Application implements OnMusicServiceListener
             audioIntent = new Intent(this, SSMusicService.class); // Sets a Intent to the service.
             bindService(audioIntent, musicConnection, Context.BIND_AUTO_CREATE); // Binds the service.
             startService(audioIntent); // Starts the service.
+        }
+    }
+
+    // startSongTimer(): Invoked by the SSPlayerFragment to start/stop the song timer thread.
+    @Override
+    public void startStopSongTimer(Boolean isStart) {
+
+        // Starts the song timer thread.
+        if (isStart) {
+            readySongTimerHandler.postDelayed(readySongTimerThread, 1000);
+        }
+
+        // Stops the song timer thread.
+        else {
+
+            // TODO: Needs testing.
+            updatePlayer(); // Updates the SSPlayerFragment of the current song playback status.
+            currentTimer = 0; // Resets the current timer value.
+            readySongTimerHandler.removeCallbacks(readySongTimerThread);
         }
     }
 
