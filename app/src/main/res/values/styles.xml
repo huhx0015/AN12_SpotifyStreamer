@@ -1,23 +1,23 @@
 <resources>
 
     <!-- Base Application Theme -->
-    <style name="AppTheme" parent="Theme.AppCompat">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/ss_toolbar_light_color</item>
+        <item name="colorPrimaryDark">@color/ss_toolbar_dark_color</item>
+        <item name="colorAccent">@color/ss_toolbar_accent_color</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:dialogTheme">@style/DialogTheme</item>
     </style>
 
     <!-- Activity Theme -->
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
-
         <item name="colorPrimary">@color/ss_toolbar_light_color</item>
         <item name="colorPrimaryDark">@color/ss_toolbar_dark_color</item>
         <item name="colorAccent">@color/ss_toolbar_accent_color</item>
-
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-
         <item name="android:dialogTheme">@style/DialogTheme</item>
-
     </style>
 
     <!-- Toolbar Theme -->
@@ -31,7 +31,7 @@
     </style>
 
     <!-- Dialog Theme -->
-    <style name="DialogTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="DialogTheme" parent="@android:style/Theme.Holo.Dialog.NoActionBar">
     </style>
 
 </resources>

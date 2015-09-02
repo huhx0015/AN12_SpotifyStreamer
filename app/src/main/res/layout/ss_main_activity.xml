@@ -58,14 +58,6 @@
 
                 </FrameLayout>
 
-                <ProgressBar
-                    style="?android:attr/progressBarStyleLarge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/ss_main_activity_secondary_progress_indicator"
-                    android:layout_gravity="center"
-                    android:visibility="gone" />
-
             </LinearLayout>
 
             <FrameLayout
