@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.media.session.MediaSession;
 import android.os.Build;
 import com.huhx0015.spotifystreamer.R;
+import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
 
 /** -----------------------------------------------------------------------------------------------
@@ -25,10 +26,14 @@ public class SSNotificationPlayer {
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
     // MEDIA ACTION VARIABLES:
-    public static final String ACTION_PLAY = "action_play";
-    public static final String ACTION_PAUSE = "action_pause";
     public static final String ACTION_NEXT = "action_next";
+    public static final String ACTION_PAUSE = "action_pause";
+    public static final String ACTION_PLAY = "action_play";
     public static final String ACTION_PREVIOUS = "action_previous";
+    public static final String ACTION_STOP = "action_stop";
+
+    // NOTIFICATION VARIABLES
+    private static final int NOTIFICATION_ID = 1995; // Unique identifier for this application's notifications.
 
     /** NOTIFICATION METHODS ___________________________________________________________________ **/
 
@@ -36,6 +41,17 @@ public class SSNotificationPlayer {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void createNotificationPlayer(MediaSession streamerMediaSession, Bitmap albumImage,
                                           String artist, String track, Context context) {
+
+        // Sets up the PendingIntent for the ContentIntent property, which launches an Intent to
+        // open the SSMainActivity activity class.
+        Intent contentIntent = new Intent(context, SSMainActivity.class);
+        PendingIntent contentPendingIntent = PendingIntent.getActivity(context, 0, contentIntent, 0);
+
+        // Sets up the PendingIntent for the DeleteIntent property, which signals the SSMusicEngine
+        // to stop audio playback when this notification is dismissed.
+        Intent dismissIntent = new Intent(context, SSMusicService.class);
+        dismissIntent.setAction(ACTION_STOP); // Defines this intent action to be ACTION_STOP.
+        PendingIntent dismissPendingIntent = PendingIntent.getService(context, 1, dismissIntent, 0);
 
         // Creates a new Notification with audio controls.
         final Notification notiPlay = new Notification.Builder(context)
@@ -49,6 +65,15 @@ public class SSNotificationPlayer {
                 .setLargeIcon(albumImage) // Sets the album bitmap image.
                 .setSmallIcon(R.drawable.ic_launcher) // Sets the application icon image.
                 .setShowWhen(false) // Disables timestamp display.
+                .setContentIntent(contentPendingIntent) // Launches the SSMainActivity activity when the notification is pressed.
+                .setDeleteIntent(dismissPendingIntent) // Stops music playback when notification is dismissed.
+                .setVisibility(Notification.VISIBILITY_PUBLIC) // Sets the notification to be publicly viewable.
+
+                // Forces the notification to have maximum priority. This is needed to address an
+                // issue where the notification buttons will be hidden when it is below other
+                        // active notifications.
+                .setPriority(Notification.PRIORITY_MAX) // Sets this notification to have max priority.
+                .setWhen(0)
 
                 // Sets the application name, artist, and track name as the notification content.
                 .setContentTitle(context.getResources().getString(R.string.app_name))
@@ -66,10 +91,17 @@ public class SSNotificationPlayer {
         streamerMediaSession.getController().getTransportControls();
 
         // Sets the constructed notification.
-        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(1, notiPlay);
+        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notiPlay);
     }
 
-    /** PLAYBACK METHODS _______________________________________________________________________ **/
+    // removeNotifications(): This method is used to remove any active notifications displayed from
+    // this application.
+    public static void removeNotifications(Context context) {
+        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancel(NOTIFICATION_ID);
+    }
+
+    /** PENDING INTENT METHODS _________________________________________________________________ **/
 
     // triggerPlaybackAction(): This method is invoked whenever the controls in the media player
     // notification are pressed.

@@ -28,6 +28,7 @@ import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
 import com.huhx0015.spotifystreamer.ui.actionbar.SSActionBar;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
+import com.huhx0015.spotifystreamer.ui.notifications.SSNotificationPlayer;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.huhx0015.spotifystreamer.ui.views.SSFragmentView;
 import java.lang.ref.WeakReference;
@@ -290,6 +291,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // The activity is finished if the SSArtistsFragment is in focus.
         else {
             pauseTrack(true); // Stops any track playing in the background.
+            SSNotificationPlayer.removeNotifications(this); // Removes all active notifications.
             finish(); // Finishes the activity.
         }
     }

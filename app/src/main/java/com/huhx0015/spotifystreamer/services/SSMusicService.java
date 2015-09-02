@@ -44,10 +44,11 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     private static final String LOG_TAG = SSMusicService.class.getSimpleName(); // Used for logging output to logcat.
 
     // MEDIA ACTION VARIABLES:
-    public static final String ACTION_PLAY = "action_play";
-    public static final String ACTION_PAUSE = "action_pause";
     public static final String ACTION_NEXT = "action_next";
+    public static final String ACTION_PAUSE = "action_pause";
+    public static final String ACTION_PLAY = "action_play";
     public static final String ACTION_PREVIOUS = "action_previous";
+    public static final String ACTION_STOP = "action_stop";
 
     // MEDIA SESSION VARIABLES:
     private MediaController streamerMediaController;
@@ -124,8 +125,12 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
         Log.d(LOG_TAG, "attachPlayerFragment(): Attaching the SSPlayerFragment to the service.");
 
-        this.playerFragment = fragment;
-        ss_music.getInstance().attachFragment(fragment);
+        this.playerFragment = fragment; // Sets the SSPlayerFragment to this class.
+
+        // Attaches the SSPlayerFragment to the SSMusicEngine instance.
+        if (ss_music.getInstance() != null) {
+            ss_music.getInstance().attachFragment(fragment);
+        }
     }
 
     // pauseTrack(): Accesses the SSMusicEngine instance to pause the streaming song track.
@@ -245,6 +250,13 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
                 super.onSkipToPrevious();
                 playNextSong(false); // Signals SSPlayerFragment to play the previous song in the tracklist.
             }
+
+            // STOP: Runs when the stop action has been initiated.
+            @Override
+            public void onStop() {
+                super.onStop();
+                pauseTrack(true); // Stops the currently playing song track.
+            }
         });
 
         // Enables the ability to receive transport controls via the MediaSession Callback.
@@ -285,6 +297,11 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         // NEXT:
         else if (trigger.equalsIgnoreCase(ACTION_NEXT)) {
             streamerMediaController.getTransportControls().skipToNext();
+        }
+
+        // STOP:
+        else if (trigger.equalsIgnoreCase(ACTION_STOP)) {
+            streamerMediaController.getTransportControls().stop();
         }
     }
 

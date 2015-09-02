@@ -60,7 +60,14 @@ public class SSApplication extends Application implements OnMusicServiceListener
     // attachFragment(): Invoked by SSPlayerFragment to attach it to the SSMusicService.
     @Override
     public void attachFragment(Fragment fragment) {
-        musicService.attachPlayerFragment(fragment);
+
+        if (musicService != null) {
+            musicService.attachPlayerFragment(fragment); // Attaches the SSPlayerFragment.
+        }
+
+        else {
+            Log.e(LOG_TAG, "attachFragment(): SSPlayerFragment failed to attach.");
+        }
     }
 
     // pauseTrack(): Invoked by SSPlayerFragment to signal the SSMusicService to pause the song
