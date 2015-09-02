@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.media.session.MediaSession;
 import android.os.Build;
 import com.huhx0015.spotifystreamer.R;
-import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
 
 /** -----------------------------------------------------------------------------------------------

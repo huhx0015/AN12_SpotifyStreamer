@@ -11,6 +11,7 @@ import android.util.Log;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.preferences.SSPreferences;
+import com.huhx0015.spotifystreamer.ui.notifications.SSNotificationPlayer;
 
 /** ------------------------------------------------------------------------------------------------
  *  [SSSettingsFragment] CLASS
@@ -98,6 +99,7 @@ public class SSSettingsFragment extends PreferenceFragment implements SharedPref
         else {
             notificationsPref.setTitle("Display Notification Player: OFF");
             SSPreferences.setNotifications(false, SS_prefs); // Sets the new value in SharedPreferences.
+            SSNotificationPlayer.removeNotifications(currentActivity); // Removes all active notifications.
         }
     }
 }

@@ -560,7 +560,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         // Initializes the SharedPreferences object.
         SharedPreferences SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
 
-        // Retrieves the current country code setting.
+        // Retrieves the current notification player setting.
         notificationsOn = SSPreferences.getNotifications(SS_prefs);
 
         Log.d(LOG_TAG, "loadPreferences(): Current notification settings: " + notificationsOn);
