@@ -40,7 +40,11 @@ public interface OnMusicServiceListener {
     // SSMusicService service for playing audio from the SSMusicEngine class in the background.
     void setUpAudioService();
 
-    // setPosition(): Interface method that signals the attached class to update the player on the
+    // updateNotification(): Interface method that signals the attached class to update the
+    // notification player when the next/previous button is pressed from SSPlayerFragment.
+    void updateNotification(String songUrl, Boolean notiOn, Bitmap albumImage, String artist, String track);
+
+    // updatePlayer(): Interface method that signals the attached class to update the player on the
     // current song playback status and max song duration.
     void updatePlayer();
 }

@@ -22,6 +22,7 @@ import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
 import com.huhx0015.spotifystreamer.preferences.SSPreferences;
+import com.huhx0015.spotifystreamer.ui.notifications.SSNotificationPlayer;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -248,6 +249,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     if (isPlaying) {
 
                         isPaused = true;
+
+                        // Removes any active notification player.
+                        SSNotificationPlayer.removeNotifications(currentActivity);
 
                         // Signals the activity to signal the SSMusicService to pause the song.
                         pauseTrack(false);
@@ -530,6 +534,8 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // Sets the current track name for the SSMainActivity activity.
             updateCurrentTrack(songName, streamURL, selectedPosition);
 
+
+
             return true; // Indicates that the track has changed.
         }
 
@@ -623,6 +629,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // Sets the song to the next track in the list.
         Boolean isUpdate = updateTrack(newPosition);
+
+        // Updates the notification player with the updated track.
+        updateNotification(streamURL, notificationsOn, albumBitmap, artistName, songName);
 
         // If the previous track was playing when the next button was pressed, the new track
         // is automatically played.
@@ -728,6 +737,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // updateCurrentTrack(): Signals the attached activity to update the track name and Spotify track URL.
     private void updateCurrentTrack(String name, String url, int position) {
         try { ((OnTrackInfoUpdateListener) currentActivity).setCurrentTrack(name, url, position); }
+        catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // updateNotification(): Signals the attached class to invoke the SSMusicService to update the
+    // notification player when the next/previous button is pressed.
+    private void updateNotification(String songUrl, Boolean notiOn, Bitmap image, String artist, String track) {
+        try { ((OnMusicServiceListener) currentActivity.getApplication()).updateNotification(songUrl, notiOn, image, artist, track); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 

@@ -32,6 +32,9 @@ public class SSApplication extends Application implements OnMusicServiceListener
     private Intent audioIntent; // An Intent object that references the Intent for the SSMusicService.
     private SSMusicService musicService; // A service that handles the control of audio playback in the background.
 
+    // SYSTEM VARIABLES
+    private final int api_level = android.os.Build.VERSION.SDK_INT; // Used to determine the device's Android API version.
+
     /** SERVICE METHODS ________________________________________________________________________ **/
 
     // musicConnection(): A ServiceConnection object for managing the service connection states for
@@ -123,6 +126,18 @@ public class SSApplication extends Application implements OnMusicServiceListener
             audioIntent = new Intent(this, SSMusicService.class); // Sets a Intent to the service.
             bindService(audioIntent, musicConnection, Context.BIND_AUTO_CREATE); // Binds the service.
             startService(audioIntent); // Starts the service.
+        }
+    }
+
+    // updateNotification(): Invoked by the SSPlayerFragment to signal the SSMusicService to update
+    // the notification player when the next/previous button is pressed from SSPlayerFragment.
+    @Override
+    public void updateNotification(String songUrl, Boolean notiOn, Bitmap albumImage, String artist, String track) {
+
+        // A new notification player is only displayed if the device is running on Android API level
+        // 21 (LOLLIPOP) or higher.
+        if (notiOn && (api_level >= 21)) {
+            musicService.initializeMediaSession(songUrl, albumImage, artist, track);
         }
     }
 

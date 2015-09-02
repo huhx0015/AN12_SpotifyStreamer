@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
-import android.media.MediaPlayer;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
@@ -29,13 +28,12 @@ import com.huhx0015.spotifystreamer.ui.toast.SSToast;
  *  tracks in the background.
  *  -----------------------------------------------------------------------------------------------
  */
-public class SSMusicService extends Service implements MediaPlayer.OnPreparedListener {
+public class SSMusicService extends Service {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
     // AUDIO VARIABLES
     private SSMusicEngine ss_music; // SSMusicEngine class object that is used for music functionality.
-    private String songURL = ""; // References the song URL.
 
     // FRAGMENT VARIABLES
     private Fragment playerFragment; // References the player fragment attached to this service.
@@ -48,6 +46,7 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     public static final String ACTION_PAUSE = "action_pause";
     public static final String ACTION_PLAY = "action_play";
     public static final String ACTION_PREVIOUS = "action_previous";
+    public static final String ACTION_REMOVE = "action_remove";
     public static final String ACTION_STOP = "action_stop";
 
     // MEDIA SESSION VARIABLES:
@@ -114,10 +113,6 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         return false;
     }
 
-    // onPrepared(): Runs when the MediaPlayer object is ready for audio playback.
-    @Override
-    public void onPrepared(MediaPlayer mp) {}
-
     /** MUSIC ENGINE METHODS ___________________________________________________________________ **/
 
     // attachPlayerFragment(): Attaches the SSPlayerFragment to the SSMusicEngine class.
@@ -161,12 +156,11 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
         // Initiates music playback in SSMusicEngine.
         ss_music.getInstance().playSongUrl(songUrl, loop);
-        this.songURL = songUrl; // Sets the current song URL.
 
         // ANDROID API 21+: If notification playback has been enabled, the notification media player
         // is built and displayed for devices running ANDROID API 21 (LOLLIPOP) and above.
         if (notiOn && api_level >= 21) {
-            initializeMediaSession(albumImage, albumArtist, albumTrack);
+            initializeMediaSession(songUrl, albumImage, albumArtist, albumTrack);
         }
 
         seekHandler.postDelayed(seekbarThread, 1000); // Begins the seekbar update thread.
@@ -194,7 +188,8 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
     // intializeMediaSession(): Builds a new MediaSession for displaying a notification that users
     // can interact with and be able to control audio playback.
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void initializeMediaSession(final Bitmap albumImage, final String albumArtist, final String albumTrack) {
+    public void initializeMediaSession(final String songUrl, final Bitmap albumImage,
+                                       final String albumArtist, final String albumTrack) {
 
         // Creates a new MediaSession.
         streamerMediaSession = new MediaSession(getApplicationContext(), "SPOTIFY STREAMER");
@@ -226,7 +221,7 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
 
                 // Plays the song track.
                 else {
-                    playTrack(songURL, false, albumImage, true, albumArtist, albumTrack);
+                    playTrack(songUrl, false, albumImage, true, albumArtist, albumTrack);
                 }
             }
 
@@ -302,6 +297,12 @@ public class SSMusicService extends Service implements MediaPlayer.OnPreparedLis
         // STOP:
         else if (trigger.equalsIgnoreCase(ACTION_STOP)) {
             streamerMediaController.getTransportControls().stop();
+        }
+
+        // REMOVE:
+        else if (trigger.equalsIgnoreCase(ACTION_REMOVE)) {
+            streamerMediaController.getTransportControls().stop();
+            SSNotificationPlayer.removeNotifications(this); // Removes any active notification player.
         }
     }
 

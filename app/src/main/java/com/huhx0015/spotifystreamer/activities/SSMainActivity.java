@@ -679,6 +679,10 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // Stops any track playing in the background and resets the track position.
             if (isReset) {
+
+                // Removes any active notification player.
+                SSNotificationPlayer.removeNotifications(this);
+
                 pauseTrack(true); // Stops any song playing in the background.
                 setPosition(0); // Resets the position of the track to the beginning.
             }

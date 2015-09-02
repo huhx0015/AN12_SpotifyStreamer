@@ -29,6 +29,7 @@ public class SSNotificationPlayer {
     public static final String ACTION_PAUSE = "action_pause";
     public static final String ACTION_PLAY = "action_play";
     public static final String ACTION_PREVIOUS = "action_previous";
+    public static final String ACTION_REMOVE = "action_remove";
     public static final String ACTION_STOP = "action_stop";
 
     // NOTIFICATION VARIABLES
@@ -69,23 +70,28 @@ public class SSNotificationPlayer {
                 .setDeleteIntent(dismissPendingIntent) // Stops music playback when notification is dismissed.
                 .setVisibility(Notification.VISIBILITY_PUBLIC) // Sets the notification to be publicly viewable.
 
+                // Sets the application name, artist, and track name as the notification content.
+                .setContentTitle(context.getResources().getString(R.string.app_name))
+                .setContentText(artist) // Sets the artist name as the content text.
+                .setContentInfo(track) // Sets the track name as the content info.
+
                 // Forces the notification to have maximum priority. This is needed to address an
                 // issue where the notification buttons will be hidden when it is below other
                 // active notifications.
                 .setPriority(Notification.PRIORITY_MAX) // Sets this notification to have max priority.
                 .setWhen(0)
 
-                // Sets the application name, artist, and track name as the notification content.
-                .setContentTitle(context.getResources().getString(R.string.app_name))
-                .setContentText(artist) // Sets the artist name as the content text.
-                .setContentInfo(track) // Sets the track name as the content info.
-
                 // Adds the playback controls for the media player.
                 .addAction(android.R.drawable.ic_media_previous, "Previous", triggerPlaybackAction(3, context))
                 .addAction(android.R.drawable.ic_media_play, "Play", triggerPlaybackAction(0, context))
                 .addAction(android.R.drawable.ic_media_pause, "Pause", triggerPlaybackAction(1, context))
                 .addAction(android.R.drawable.ic_media_next, "Next", triggerPlaybackAction(2, context))
+                .addAction(android.R.drawable.ic_notification_clear_all, "Remove", triggerPlaybackAction(4, context))
                 .build();
+
+        // Makes this notification an on-going event. With this enabled, the notification cannot be
+        // dismissed manually.
+        notiPlay.flags = Notification.FLAG_ONGOING_EVENT;
 
         // Retrieves the transport controls from the current media session.
         streamerMediaSession.getController().getTransportControls();
@@ -115,7 +121,7 @@ public class SSNotificationPlayer {
         // Defines an intent to invoke based on the incoming actionId value.
         switch (actionId) {
 
-            // PLAY: Sets an intent to the SSMusicService to initate the playback of the current track.
+            // PLAY: Sets an intent to the SSMusicService to initiate the playback of the current track.
             case 0:
                 actionIntent = new Intent(ACTION_PLAY);
                 actionIntent.setComponent(serviceName);
@@ -141,6 +147,13 @@ public class SSNotificationPlayer {
                 actionIntent = new Intent(ACTION_PREVIOUS);
                 actionIntent.setComponent(serviceName);
                 pendingIntent = PendingIntent.getService(context, 3, actionIntent, 0);
+                return pendingIntent;
+
+            // REMOVE: Sets an intent to the SSMusicService to remove any active notification player.
+            case 4:
+                actionIntent = new Intent(ACTION_REMOVE);
+                actionIntent.setComponent(serviceName);
+                pendingIntent = PendingIntent.getService(context, 5, actionIntent, 0);
                 return pendingIntent;
 
             // DEFAULT: Does nothing.
