@@ -3,7 +3,9 @@ package com.huhx0015.spotifystreamer.ui.views;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +35,8 @@ public class SSFragmentView {
 
     // addFragment(): Sets up the fragment view for standard fragments.
     public static void addFragment(Fragment fragment, ViewGroup container, int containerId,
-                                   final String fragType, Boolean isAnimated,
+                                   final String fragType, Boolean isAnimated, Toolbar toolbar,
+                                   ActionBarDrawerToggle toggle,
                                    WeakReference<AppCompatActivity> refActivity) {
 
         if ((refActivity.get() != null) && (!refActivity.get().isFinishing())) {
@@ -49,7 +52,7 @@ public class SSFragmentView {
 
             // Sets up the transition animation.
             if (isAnimated) {
-                setFragmentTransition(fragType, container, true, refActivity);
+                setFragmentTransition(fragType, container, true, toolbar, toggle, refActivity);
             }
 
             // Displays the fragment view without any transition animations.
@@ -61,7 +64,8 @@ public class SSFragmentView {
 
     // addFragment(): Sets up the fragment view for PreferenceFragments.
     public static void addFragment(android.app.Fragment fragment, ViewGroup container, int containerId,
-                                   final String fragType, Boolean isAnimated,
+                                   final String fragType, Boolean isAnimated, Toolbar toolbar,
+                                   ActionBarDrawerToggle toggle,
                                    WeakReference<AppCompatActivity> refActivity) {
 
         if ((refActivity.get() != null) && (!refActivity.get().isFinishing())) {
@@ -77,7 +81,7 @@ public class SSFragmentView {
 
             // Sets up the transition animation.
             if (isAnimated) {
-                setFragmentTransition(fragType, container, true, refActivity);
+                setFragmentTransition(fragType, container, true, toolbar, toggle, refActivity);
             }
 
             // Displays the fragment view without any transition animations.
@@ -89,13 +93,14 @@ public class SSFragmentView {
 
     // removeFragment(): This method is responsible for removing the fragment view.
     public static void removeFragment(ViewGroup container, final String fragType, Boolean isAnimated,
-                                WeakReference<AppCompatActivity> refActivity) {
+                                Toolbar toolbar, ActionBarDrawerToggle toggle,
+                                      WeakReference<AppCompatActivity> refActivity) {
 
         if ((refActivity.get() != null) && (!refActivity.get().isFinishing())) {
 
             // Animates the fragment transition.
             if (isAnimated) {
-                setFragmentTransition(fragType, container, false, refActivity);
+                setFragmentTransition(fragType, container, false, toolbar, toggle, refActivity);
             }
 
             // The fragment is removed from the view layout.
@@ -133,7 +138,9 @@ public class SSFragmentView {
     // typically called after a screen orientation change in the SSMainActivity activity class.
     public static Boolean reloadFragment(Fragment fragment, String curFragment, String fragType,
                                          ViewGroup container, int containerID, String currentArtist,
-                                         String currentTrack, WeakReference<AppCompatActivity> refActivity) {
+                                         String currentTrack, Toolbar toolbar,
+                                         ActionBarDrawerToggle toggle,
+                                         WeakReference<AppCompatActivity> refActivity) {
 
         // SSArtistsFragment: If the fragment is null, it indicates that it is not on the fragment
         // stack. The fragment is initialized. This is needed to ensure that the SSArtistFragment
@@ -154,16 +161,16 @@ public class SSFragmentView {
 
             if (!fragment.isInLayout()) {
 
-                addFragment(fragment, container, containerID, fragType, false, refActivity);
+                addFragment(fragment, container, containerID, fragType, false, toolbar, toggle, refActivity);
 
                 // SSTracksFragment: Sets up the action bar attributes.
                 if (fragType.equals("TRACKS")) {
-                    SSActionBar.setupActionBar(fragType, null, currentArtist, true, refActivity.get());
+                    SSActionBar.setupActionBar(toolbar, toggle, fragType, null, currentArtist, true);
                 }
 
                 // SSArtistsFragment | SSPlayerFragment: Sets up the action bar attributes.
                 else {
-                    SSActionBar.setupActionBar(fragType, currentArtist, currentTrack, true, refActivity.get());
+                    SSActionBar.setupActionBar(toolbar, toggle, fragType, currentArtist, currentTrack, true);
                 }
 
                 Log.d(LOG_TAG, "reloadFragment(): Reloading " + fragType + " fragment into the container.");
@@ -180,6 +187,8 @@ public class SSFragmentView {
     public static void setFragmentTransition(final String fragType,
                                               final ViewGroup container,
                                               final Boolean isAppearing,
+                                              final Toolbar toolbar,
+                                              final ActionBarDrawerToggle toggle,
                                               final WeakReference<AppCompatActivity> refActivity) {
 
         int animationResource; // References the animation XML resource file.
@@ -221,7 +230,7 @@ public class SSFragmentView {
                 if (!isAppearing) {
 
                     // Removes the fragment from the view.
-                    removeFragment(container, fragType, false, refActivity);
+                    removeFragment(container, fragType, false, toolbar, toggle, refActivity);
                 }
 
                 else {
@@ -229,7 +238,7 @@ public class SSFragmentView {
                     // SETTINGS: Sets the proper action bar title when the SSSettingsFragment is
                     // active.
                     if (fragType.equals("SETTINGS")) {
-                        SSActionBar.setupActionBar(fragType, null, null, true, refActivity.get());
+                        SSActionBar.setupActionBar(toolbar, toggle, fragType, null, null, true);
                     }
                 }
             }

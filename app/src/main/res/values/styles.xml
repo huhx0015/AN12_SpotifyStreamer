@@ -1,15 +1,37 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <!-- Base Application Theme -->
+    <style name="AppTheme" parent="Theme.AppCompat">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- Activity Theme -->
+    <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
+
         <item name="colorPrimary">@color/ss_toolbar_light_color</item>
         <item name="colorPrimaryDark">@color/ss_toolbar_dark_color</item>
         <item name="colorAccent">@color/ss_toolbar_accent_color</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
         <item name="android:dialogTheme">@style/DialogTheme</item>
+
     </style>
 
-    <!-- Dialog theme. -->
-    <style name="DialogTheme" parent="@android:style/Theme.Holo.Dialog.NoActionBar">
+    <!-- Toolbar Theme -->
+    <style name="Widget.SpotifyStreamer.ActionBar" parent="Widget.AppCompat.ActionBar">
+        <item name="theme">@style/ThemeOverlay.SpotifyStreamer.ActionBar</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+    </style>
+
+    <style name="ThemeOverlay.SpotifyStreamer.ActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:textColorPrimary">@android:color/white</item>
+    </style>
+
+    <!-- Dialog Theme -->
+    <style name="DialogTheme" parent="Theme.AppCompat.Light.NoActionBar">
     </style>
 
 </resources>

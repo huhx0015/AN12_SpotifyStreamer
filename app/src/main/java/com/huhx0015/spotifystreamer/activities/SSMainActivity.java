@@ -92,6 +92,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Bind(R.id.ss_main_activity_secondary_fragment_container) FrameLayout fragmentSecondaryContainer;
     @Bind(R.id.ss_main_activity_settings_fragment_container) FrameLayout settingsFragmentContainer;
     @Bind(R.id.ss_main_activity_left_drawer_container) LinearLayout leftDrawerContainer;
+    @Bind(R.id.ss_main_activity_toolbar) Toolbar activityToolbar;
 
     /** ACTIVITY LIFECYCLE METHODS _____________________________________________________________ **/
 
@@ -161,7 +162,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     }
 
     // onCreateOptionsMenu(): Inflates the menu when the menu key is pressed. This adds items to
-    // the action bar if it is present.
+    // the action bar if it is present. Required to populate the menu items in the Toolbar object.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -177,28 +178,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Handle action bar item clicks here. The action bar will automatically handle clicks on
         // the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
-
-            // BACK BUTTON:
-            case android.R.id.home:
-
-                // SSSettingsFragment: Hides the SSSettingsFragment view.
-                if (isSettings) {
-                    displaySettingsFragment(false, false); // Hides the SSSettingsFragment.
-                }
-
-                // SSPlayerFragment: Removes the SSPlayerFragment and displays the main
-                // SSTracksFragment view.
-                else if (currentFragment.equals("PLAYER")) {
-                    displayPlayerFragment(false, "TRACKS", trackListResult, listPosition, false);
-                }
-
-                // SSTracksFragment: Removes the SSTracksFragment and displays the main
-                // SSArtistsFragment view.
-                else if (currentFragment.equals("TRACKS")) {
-                    displayTracksFragment(false, currentInput);
-                }
-
-                return true;
 
             // PLAY BUTTON:
             case R.id.ss_action_play_button:
@@ -311,7 +290,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // The activity is finished if the SSArtistsFragment is in focus.
         else {
             pauseTrack(true); // Stops any track playing in the background.
-            //removeAudioService(); // Stops the SSMusicService running in the background.
             finish(); // Finishes the activity.
         }
     }
@@ -350,7 +328,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         setContentView(R.layout.ss_main_activity); // Sets the XML layout file for the activity.
         ButterKnife.bind(this); // ButterKnife view injection initialization.
 
-        //setupDrawer(); // Initializes the drawer view for the layout.
+        setupDrawer(); // Initializes the drawer view for the layout.
         setupFragment(); // Initializes the fragment view for the layout.
 
         // If a rotation event occurred, the isRotationEvent value is reset.
@@ -359,30 +337,49 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         }
     }
 
-    // setupDrawer(): Sets up the drawer for the activity layout.
+    // setupDrawer(): Sets up the drawer and the Toolbar for the activity layout.
     private void setupDrawer() {
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.ss_toolbar);
-        //setSupportActionBar(toolbar);
+        // Sets the activity Toolbar object as the main ActionBar for this activity.
+        setSupportActionBar(activityToolbar);
 
+        // Initializes the drawer toggle and sets it to the activityToolbar.
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
-                toolbar, R.string.drawer_open, R.string.drawer_close) {
+                activityToolbar, R.string.drawer_open, R.string.drawer_close) {
 
-            /** Called when a drawer has settled in a completely closed state. */
+            // onDrawerClosed(): Called when a drawer has settled in a completely closed state.
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu(); // Creates a call to onPrepareOptionsMenu().
             }
 
-            /** Called when a drawer has settled in a completely open state. */
+            // onDrawerOpened(): Called when a drawer has settled in a completely open state.
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu(); // Creates a call to onPrepareOptionsMenu().
             }
         };
 
-        drawerToggle.setDrawerIndicatorEnabled(true); // Draws the toggle button indicator.
-        drawerLayout.setDrawerListener(drawerToggle); // Sets the drawer toggle as the DrawerListener.
+        drawerLayout.setDrawerListener(drawerToggle); // Sets the drawer listener to the drawerLayout.
+
+        // Sets a listener to the drawer toggle. If the drawer indicator is not enabled,
+        // onBackPressed() is invoked. This is in replacement of the old case android.R.id.home key
+        // press in onOptionsItemSelected() method.
+        drawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                // If the drawer indicator is not enabled, onBackPressed() is invoked.
+                if (!drawerToggle.isDrawerIndicatorEnabled()) {
+                    onBackPressed();
+                }
+            }
+        });
+
+        // Retrieves the DrawerLayout to set the status bar color. This only takes effect on
+        // Lollipop, or when using translucentStatusBar on KitKat.
+        drawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.ss_toolbar_dark_color));
     }
 
     // setupFragment(): Initializes the fragment view for the layout.
@@ -402,7 +399,8 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             Log.d(LOG_TAG, "setupFragment(): Reloading fragments for tablet view...");
 
             SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer,
-                    R.id.ss_main_activity_fragment_container, currentArtist, currentTrack, weakRefActivity);
+                    R.id.ss_main_activity_fragment_container, currentArtist, currentTrack,
+                    activityToolbar, drawerToggle, weakRefActivity);
 
             // SSTracksFragment: If a screen orientation event has occurred and the fragment that
             // was in focus was SSTracksFragment, a new SSTracksFragment is created and is made
@@ -411,10 +409,11 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 SSTracksFragment newTracksFragment = new SSTracksFragment();
                 newTracksFragment.initializeFragment(currentTrack, true);
                 SSFragmentView.addFragment(newTracksFragment, fragmentSecondaryContainer,
-                        R.id.ss_main_activity_secondary_fragment_container, "TRACKS", false, weakRefActivity);
+                        R.id.ss_main_activity_secondary_fragment_container, "TRACKS", false,
+                        activityToolbar, drawerToggle, weakRefActivity);
 
                 // Sets up the action bar.
-                SSActionBar.setupActionBar("TRACKS", currentArtist, currentArtist, false, this);
+                SSActionBar.setupActionBar(activityToolbar, drawerToggle, "TRACKS", currentArtist, currentArtist, false);
             }
 
             // SSPlayerFragment: If a screen orientation event has occurred and the SSPlayerFragment
@@ -435,7 +434,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // SSSettingsFragment was displayed prior to screen rotation.
             if ( (isRotationEvent) && (isSettings) ) {
                 displaySettingsFragment(true, true);
-                SSActionBar.setupActionBar("SETTINGS", null, null, true, this);
+                SSActionBar.setupActionBar(activityToolbar, drawerToggle, "SETTINGS", null, null, true);
             }
         }
 
@@ -464,14 +463,14 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 // was in prior focus.
                 Boolean isReloaded = SSFragmentView.reloadFragment(tracksFragment, currentFragment,
                         "TRACKS", fragmentContainer, R.id.ss_main_activity_fragment_container,
-                        currentArtist, currentTrack, weakRefActivity);
+                        currentArtist, currentTrack, activityToolbar, drawerToggle, weakRefActivity);
 
                 // SSArtistsFragment: Attempts to reload the SSArtistFragment, if the
                 // SSTracksFragment was in prior focus.
                 if (!isReloaded) {
                     SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS",
                             fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist,
-                            currentTrack, weakRefActivity);
+                            currentTrack, activityToolbar, drawerToggle, weakRefActivity);
                 }
             }
 
@@ -479,7 +478,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // SSSettingsFragment was displayed prior to screen rotation.
             if ( (isRotationEvent) && (isSettings) ) {
                 displaySettingsFragment(true, true);
-                SSActionBar.setupActionBar("SETTINGS", null, null, true, this);
+                SSActionBar.setupActionBar(activityToolbar, drawerToggle, "SETTINGS", null, null, true);
             }
         }
     }
@@ -498,15 +497,16 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // Removes the specified fragment from the stack.
         else {
-            SSFragmentView.removeFragment(fragmentContainer, fragToRemove, false, weakRefActivity);
+            SSFragmentView.removeFragment(fragmentContainer, fragToRemove, false, activityToolbar,
+                    drawerToggle, weakRefActivity);
         }
 
         // Adds the fragment to the primary fragment container.
         SSFragmentView.addFragment(frag, fragmentContainer, R.id.ss_main_activity_fragment_container,
-                fragToAdd, isAnimated, weakRefActivity);
+                fragToAdd, isAnimated, activityToolbar, drawerToggle, weakRefActivity);
 
         // Sets the name of the action bar.
-        SSActionBar.setupActionBar(fragToAdd, currentArtist, subtitle, true, this);
+        SSActionBar.setupActionBar(activityToolbar, drawerToggle, fragToAdd, currentArtist, subtitle, true);
         currentFragment = fragToAdd; // Sets the current active fragment.
 
         Log.d(LOG_TAG, "changeFragment(): Fragment changed.");
@@ -537,31 +537,33 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // Sets up the SSSettingsFragment.
             SSSettingsFragment settingsFragment = new SSSettingsFragment();
             SSFragmentView.addFragment(settingsFragment, settingsFragmentContainer,
-                    R.id.ss_main_activity_settings_fragment_container, "SETTINGS", isAnimate, weakRefActivity);
+                    R.id.ss_main_activity_settings_fragment_container, "SETTINGS", isAnimate,
+                    activityToolbar, drawerToggle, weakRefActivity);
         }
 
         // Hides the SSSettingsFragment view.
         else {
 
-            SSFragmentView.removeFragment(settingsFragmentContainer, "SETTINGS", true, weakRefActivity);
+            SSFragmentView.removeFragment(settingsFragmentContainer, "SETTINGS", true,
+                    activityToolbar, drawerToggle, weakRefActivity);
 
             // SSTracksFragment: Sets up the action bar attributes.
             if (currentFragment.equals("TRACKS")) {
 
                 // TABLET: Updates the action bar without the BACK button.
                 if (isTablet) {
-                    SSActionBar.setupActionBar("TRACKS", currentArtist, currentArtist, false, this);
+                    SSActionBar.setupActionBar(activityToolbar, drawerToggle, "TRACKS", currentArtist, currentArtist, false);
                 }
 
                 // MOBILE: Updates the action bar with the BACK button present.
                 else {
-                    SSActionBar.setupActionBar("TRACKS", currentArtist, currentArtist, true, this);
+                    SSActionBar.setupActionBar(activityToolbar, drawerToggle, "TRACKS", currentArtist, currentArtist, true);
                 }
             }
 
             // SSArtistsFragment | SSPlayerFragment: Sets up the action bar attributes.
             else {
-                SSActionBar.setupActionBar(currentFragment, currentArtist, currentTrack, true, this);
+                SSActionBar.setupActionBar(activityToolbar, drawerToggle, currentFragment, currentArtist, currentTrack, true);
             }
 
             isSettings = false; // Indicates that the SSSettingsFragment is inactive.
@@ -612,10 +614,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // TABLET: Loads the SSTracksFragment into the secondary fragment container.
             if (isTablet) {
 
-                SSFragmentView.addFragment(tracksFragment, fragmentSecondaryContainer, R.id.ss_main_activity_secondary_fragment_container, "TRACKS", true, weakRefActivity);
+                SSFragmentView.addFragment(tracksFragment, fragmentSecondaryContainer,
+                        R.id.ss_main_activity_secondary_fragment_container, "TRACKS", true,
+                        activityToolbar, drawerToggle, weakRefActivity);
 
                 // Sets the name of the action bar.
-                SSActionBar.setupActionBar("TRACKS", currentArtist, name, false, this);
+                SSActionBar.setupActionBar(activityToolbar, drawerToggle, "TRACKS", currentArtist, name, false);
 
                 currentFragment = "TRACKS"; // Sets the current active fragment.
             }
@@ -712,7 +716,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // Only updates the ActionBar if the device is not a tablet device.
         if (!isTablet) {
-            SSActionBar.setupActionBar("PLAYER", currentArtist, songName, true, this);
+            SSActionBar.setupActionBar(activityToolbar, drawerToggle, "PLAYER", currentArtist, songName, true);
         }
     }
 

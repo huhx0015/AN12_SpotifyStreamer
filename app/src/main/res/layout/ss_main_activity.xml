@@ -5,18 +5,28 @@
     android:layout_height="match_parent">
 
     <!-- The main content view -->
-    <android.support.design.widget.CoordinatorLayout
+    <LinearLayout
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:orientation="vertical"
         tools:context=".SSMainActivity"
-        android:id="@+id/ss_main_activity_layout">
+        android:id="@+id/ss_main_activity_layout"
+        android:background="@android:color/white">
+
+        <android.support.v7.widget.Toolbar
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/ss_main_activity_toolbar"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:minHeight="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            style="@style/Widget.SpotifyStreamer.ActionBar" />
 
         <FrameLayout
             android:id="@+id/ss_main_activity_parent_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -67,7 +77,7 @@
 
         </FrameLayout>
 
-    </android.support.design.widget.CoordinatorLayout>
+    </LinearLayout>
 
     <!-- The navigation drawer -->
     <LinearLayout
@@ -79,7 +89,7 @@
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
-        android:background="#111">
+        android:background="@android:color/darker_gray">
     </LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>
