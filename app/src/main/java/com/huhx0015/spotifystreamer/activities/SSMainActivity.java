@@ -35,6 +35,7 @@ import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
 import com.huhx0015.spotifystreamer.ui.actionbar.SSActionBar;
 import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
 import com.huhx0015.spotifystreamer.ui.notifications.SSNotificationPlayer;
+import com.huhx0015.spotifystreamer.ui.toast.SSSnackbar;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.huhx0015.spotifystreamer.ui.views.SSFragmentView;
 import com.squareup.picasso.Picasso;
@@ -872,9 +873,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Displays a snackbar message display at the bottom of the screen, as long as this activity
         // is not currently paused.
         if (!isActivityPaused) {
-            Snackbar
-                    .make(mainLayout, message, Snackbar.LENGTH_LONG)
-                    .show();
+            SSSnackbar.snackOnThis(message, mainLayout);
         }
 
         // Displays a Toast message instead if the activity is currently in an onPause state.

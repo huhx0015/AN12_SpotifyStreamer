@@ -30,6 +30,7 @@ import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
 import com.huhx0015.spotifystreamer.preferences.SSPreferences;
 import com.huhx0015.spotifystreamer.ui.graphics.SSBlurBuilder;
 import com.huhx0015.spotifystreamer.ui.notifications.SSNotificationPlayer;
+import com.huhx0015.spotifystreamer.ui.toast.SSSnackbar;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 import java.util.ArrayList;
@@ -382,7 +383,19 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // onPrepareLoad(): Runs prior to loading the bitmap.
             @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {}
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                albumImage.setImageDrawable(null); // Sets the ImageView Drawable to be null.
+
+                // Sets the ImageView Drawable to be null.
+                if (api_level >= 16) {
+                    albumImage.setBackground(null); // API 16+: New method.
+                }
+
+                else {
+                    albumImage.setBackgroundDrawable(null); // API 9-15: Depreciated method.
+                }
+            }
         };
 
         // Loads the album image from the URL into the target.
@@ -448,9 +461,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     // Updates the minimum duration TextView object.
                     if (progress < 10) {
                         minDurationText.setText("0:0" + progress);
-                    }
-
-                    else {
+                    } else {
                         minDurationText.setText("0:" + progress);
                     }
 
@@ -460,11 +471,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // onStartTrackingTouch(): Called when a touch event on the Seekbar object has started.
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             // onStopTrackingTouch: Called when a touch event on the Seekbar object has ended.
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
     }
 
@@ -502,8 +515,18 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             updateActionBar(songName); // Updates the ActionBar title.
 
-            // Displays a Snackbar message of the song that is currently playing.
-            displaySnackbarMessage("NOW PLAYING: " + artistName + " - " + songName);
+            // Sets the message to display as a Snackbar message.
+            String snackMessage = "NOW PLAYING: " + artistName + " - " + songName;
+
+            // TABLET: Displays the Snackbar within this fragment layout container.
+            if (isTablet) {
+                SSSnackbar.snackOnThis(snackMessage, playerContainer);
+            }
+
+            // MOBILE: Displays the Snackbar within the activity layout container.
+            else {
+                displaySnackbarMessage(snackMessage);
+            }
 
             // Starts the song timer thread. This will display a time out error Toast message if the
             // song is not ready in a given amount of time.
