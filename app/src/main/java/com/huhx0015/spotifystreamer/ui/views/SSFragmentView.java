@@ -28,6 +28,12 @@ public class SSFragmentView {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
+    // FRAGMENT TAG VARIABLES
+    private static final String ARTISTS_TAG = "ARTISTS"; // Tag for SSArtistsFragment.
+    private static final String PLAYER_TAG = "PLAYER"; // Tag for SSPlayerFragment.
+    private static final String SETTINGS_TAG = "SETTINGS"; // Tag for SSSettingsFragment.
+    private static final String TRACKS_TAG = "TRACKS"; // Tag for SSTracksFragment.
+
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSFragmentView.class.getSimpleName();
 
@@ -108,7 +114,7 @@ public class SSFragmentView {
 
                 // SETTINGS: If the fragment to remove is a PreferenceFragment, the standard fragment
                 // classes are utilized.
-                if (fragType.equals("SETTINGS")) {
+                if (fragType.equals(SETTINGS_TAG)) {
 
                     // Initializes the manager and transaction objects for the fragments.
                     android.app.FragmentManager fragMan = refActivity.get().getFragmentManager();
@@ -145,7 +151,7 @@ public class SSFragmentView {
         // SSArtistsFragment: If the fragment is null, it indicates that it is not on the fragment
         // stack. The fragment is initialized. This is needed to ensure that the SSArtistFragment
         // is shown when the application is first launched.
-        if (fragType.equals("ARTISTS")) {
+        if (fragType.equals(ARTISTS_TAG)) {
 
             if (fragment == null) {
 
@@ -164,7 +170,7 @@ public class SSFragmentView {
                 addFragment(fragment, container, containerID, fragType, false, toolbar, toggle, refActivity);
 
                 // SSTracksFragment: Sets up the action bar attributes.
-                if (fragType.equals("TRACKS")) {
+                if (fragType.equals(TRACKS_TAG)) {
                     SSActionBar.setupActionBar(toolbar, toggle, fragType, null, currentArtist, true);
                 }
 
@@ -237,7 +243,7 @@ public class SSFragmentView {
 
                     // SETTINGS: Sets the proper action bar title when the SSSettingsFragment is
                     // active.
-                    if (fragType.equals("SETTINGS")) {
+                    if (fragType.equals(SETTINGS_TAG)) {
                         SSActionBar.setupActionBar(toolbar, toggle, fragType, null, null, true);
                     }
                 }

@@ -2,6 +2,8 @@ package com.huhx0015.spotifystreamer.ui.actionbar;
 
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+
 import com.huhx0015.spotifystreamer.R;
 
 /** -----------------------------------------------------------------------------------------------
@@ -13,6 +15,13 @@ import com.huhx0015.spotifystreamer.R;
 
 public class SSActionBar {
 
+    /** CLASS VARIABLES ________________________________________________________________________ **/
+
+    // FRAGMENT TAG VARIABLES
+    private static final String PLAYER_TAG = "PLAYER"; // Tag for SSPlayerFragment.
+    private static final String SETTINGS_TAG = "SETTINGS"; // Tag for SSSettingsFragment.
+    private static final String TRACKS_TAG = "TRACKS"; // Tag for SSTracksFragment.
+
     /** ACTION BAR METHODS _____________________________________________________________________ **/
 
     // setupActionBar(): Sets up the action bar attributes for the activity.
@@ -20,24 +29,26 @@ public class SSActionBar {
                                       String actionType, String currentArtist, String subtitle,
                                       Boolean isBack) {
 
+        Log.d("ACTIONBAR", "actionbar recreated: " + actionType);
+
         if (actionBar != null) {
 
             // TRACKS:
-            if (actionType.equals("TRACKS")) {
+            if (actionType.equals(TRACKS_TAG)) {
                 actionBar.setTitle("Top 10 Tracks"); // Sets the title of the action bar.
                 actionBar.setSubtitle(subtitle); // Sets the name of the current artist as the subtitle.
                 setBackCarat(drawerToggle, isBack); // Displays/hides the back carat button.
             }
 
             // PLAYER:
-            else if (actionType.equals("PLAYER")) {
+            else if (actionType.equals(PLAYER_TAG)) {
                 actionBar.setTitle("Now Playing"); // Sets the title of the action bar.
                 actionBar.setSubtitle(currentArtist + " - " + subtitle); // Sets the name of the track as the subtitle.
                 setBackCarat(drawerToggle, isBack); // Displays/hides the back carat button.
             }
 
             // SETTINGS:
-            else if (actionType.equals("SETTINGS")) {
+            else if (actionType.equals(SETTINGS_TAG)) {
                 actionBar.setTitle("Settings"); // Sets the title of the action bar.
                 actionBar.setSubtitle(null); // Disables the subtitles of the action bar.
                 setBackCarat(drawerToggle, isBack); // Displays/hides the back carat button.

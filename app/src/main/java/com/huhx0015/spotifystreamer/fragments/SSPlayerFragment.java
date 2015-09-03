@@ -202,8 +202,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         setUpImage(false); // Sets up the images for the ImageView objects for the fragment.
         setUpText(); // Sets up the text for the TextView objects for the fragment.
 
-        updateActionBar(songName); // Updates the ActionBar title.
-
         // Retrieves the current song status and max duration of the song from
         // SSApplication/SSMusicService/SSMusicEngine.
         updatePlayer();

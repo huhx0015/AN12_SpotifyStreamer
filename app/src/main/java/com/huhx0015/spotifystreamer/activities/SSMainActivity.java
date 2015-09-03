@@ -87,6 +87,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // SHARE VARIABLES
     private String spotifyUrl = ""; // Used to reference the Spotify track URL of the current track.
 
+    // FRAGMENT TAG VARIABLES
+    private static final String ARTISTS_TAG = "ARTISTS"; // Tag for SSArtistsFragment.
+    private static final String PLAYER_TAG = "PLAYER"; // Tag for SSPlayerFragment.
+    private static final String SETTINGS_TAG = "SETTINGS"; // Tag for SSSettingsFragment.
+    private static final String TRACKS_TAG = "TRACKS"; // Tag for SSTracksFragment.
+
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_main_activity_drawer_layout) DrawerLayout drawerLayout;
     @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
@@ -191,13 +197,13 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             case R.id.ss_action_play_button:
 
                 // Displays the last selected song that was played.
-                if ( (trackListResult != null) && (listPosition != -1) && !(currentFragment.equals("PLAYER")) ) {
+                if ( (trackListResult != null) && (listPosition != -1) && !(currentFragment.equals(PLAYER_TAG)) ) {
                     displayPlayerFragment(true, currentFragment, trackListResult, listPosition, false);
                 }
 
                 // If the SSPlayerFragment is already in focus, it begins playback of the song if
                 // it is not already playing or being prepared for playback.
-                else if (currentFragment.equals("PLAYER")) {
+                else if (currentFragment.equals(PLAYER_TAG)) {
                     playCurrentSong(); // Plays the current track song.
                 }
 
@@ -285,13 +291,13 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // If the SSPlayerFragment is currently being displayed, the fragment is removed and
         // switched with the SSTracksFragmentView.
-        else if ( (currentFragment.equals("PLAYER")) && !(isTablet) ) {
-            displayPlayerFragment(false, "TRACKS", trackListResult, listPosition, false);
+        else if ( (currentFragment.equals(PLAYER_TAG)) && !(isTablet) ) {
+            displayPlayerFragment(false, TRACKS_TAG, trackListResult, listPosition, false);
         }
 
         // If the SSTracksFragment is currently being displayed, the fragment is removed and
         // switched with the SSArtistsFragment view.
-        else if ( (currentFragment.equals("TRACKS")) && !(isTablet) ) {
+        else if ( (currentFragment.equals(TRACKS_TAG)) && !(isTablet) ) {
             displayTracksFragment(false, currentInput);
         }
 
@@ -397,9 +403,9 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Checks to see if there are any retained fragments when the activity is re-created from a
         // screen rotation event.
         FragmentManager fragManager = getSupportFragmentManager();
-        Fragment artistsFragment = fragManager.findFragmentByTag("ARTISTS");
-        Fragment tracksFragment = fragManager.findFragmentByTag("TRACKS");
-        Fragment playerFragment = fragManager.findFragmentByTag("PLAYER");
+        Fragment artistsFragment = fragManager.findFragmentByTag(ARTISTS_TAG);
+        Fragment tracksFragment = fragManager.findFragmentByTag(TRACKS_TAG);
+        Fragment playerFragment = fragManager.findFragmentByTag(PLAYER_TAG);
 
         // TABLET: Reloads the SSTracksFragment (if it was in focus previously) and the
         // SSArtistsFragment in their respective containers.
@@ -407,22 +413,22 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             Log.d(LOG_TAG, "setupFragment(): Reloading fragments for tablet view...");
 
-            SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS", fragmentContainer,
+            SSFragmentView.reloadFragment(artistsFragment, ARTISTS_TAG, ARTISTS_TAG, fragmentContainer,
                     R.id.ss_main_activity_fragment_container, currentArtist, currentTrack,
                     activityToolbar, drawerToggle, weakRefActivity);
 
             // SSTracksFragment: If a screen orientation event has occurred and the fragment that
             // was in focus was SSTracksFragment, a new SSTracksFragment is created and is made
             // visible in the view layout.
-            if ( (isRotationEvent) && (currentFragment.equals("TRACKS")) ) {
+            if ( (isRotationEvent) && (currentFragment.equals(TRACKS_TAG)) ) {
                 SSTracksFragment newTracksFragment = new SSTracksFragment();
                 newTracksFragment.initializeFragment(currentTrack, true);
                 SSFragmentView.addFragment(newTracksFragment, fragmentSecondaryContainer,
-                        R.id.ss_main_activity_secondary_fragment_container, "TRACKS", false,
+                        R.id.ss_main_activity_secondary_fragment_container, TRACKS_TAG, false,
                         activityToolbar, drawerToggle, weakRefActivity);
 
                 // Sets up the action bar.
-                SSActionBar.setupActionBar(activityToolbar, drawerToggle, "TRACKS", currentArtist, currentArtist, false);
+                SSActionBar.setupActionBar(activityToolbar, drawerToggle, TRACKS_TAG, currentArtist, currentArtist, false);
             }
 
             // SSPlayerFragment: If a screen orientation event has occurred and the SSPlayerFragment
@@ -430,7 +436,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             if ( (isRotationEvent) && (playerFragment != null)) {
 
                 try {
-                    displayPlayerFragment(true, "TRACKS", trackListResult, listPosition, false);
+                    displayPlayerFragment(true, TRACKS_TAG, trackListResult, listPosition, false);
                 }
 
                 // Null pointer exception handler.
@@ -443,7 +449,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // SSSettingsFragment was displayed prior to screen rotation.
             if ( (isRotationEvent) && (isSettings) ) {
                 displaySettingsFragment(true, true);
-                SSActionBar.setupActionBar(activityToolbar, drawerToggle, "SETTINGS", null, null, true);
+                SSActionBar.setupActionBar(activityToolbar, drawerToggle, SETTINGS_TAG, null, null, true);
             }
         }
 
@@ -454,10 +460,10 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // SSPlayerFragment: Attempts to reload the SSPlayerFragment, if the SSPlayerFragment
             // was in prior focus.
-            if ( (isRotationEvent) && (playerFragment != null) && (currentFragment.equals("PLAYER")) ) {
+            if ( (isRotationEvent) && (playerFragment != null) && (currentFragment.equals(PLAYER_TAG)) ) {
 
                 try {
-                    displayPlayerFragment(true, "TRACKS", trackListResult, listPosition, false);
+                    displayPlayerFragment(true, TRACKS_TAG, trackListResult, listPosition, false);
                 }
 
                 // Null pointer exception handler.
@@ -471,13 +477,13 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                 // SSTracksFragment: Attempts to reload the SSTracksFragment, if the SSTracksFragment
                 // was in prior focus.
                 Boolean isReloaded = SSFragmentView.reloadFragment(tracksFragment, currentFragment,
-                        "TRACKS", fragmentContainer, R.id.ss_main_activity_fragment_container,
+                        TRACKS_TAG, fragmentContainer, R.id.ss_main_activity_fragment_container,
                         currentArtist, currentTrack, activityToolbar, drawerToggle, weakRefActivity);
 
                 // SSArtistsFragment: Attempts to reload the SSArtistFragment, if the
                 // SSTracksFragment was in prior focus.
                 if (!isReloaded) {
-                    SSFragmentView.reloadFragment(artistsFragment, "ARTISTS", "ARTISTS",
+                    SSFragmentView.reloadFragment(artistsFragment, ARTISTS_TAG, ARTISTS_TAG,
                             fragmentContainer, R.id.ss_main_activity_fragment_container, currentArtist,
                             currentTrack, activityToolbar, drawerToggle, weakRefActivity);
                 }
@@ -487,7 +493,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // SSSettingsFragment was displayed prior to screen rotation.
             if ( (isRotationEvent) && (isSettings) ) {
                 displaySettingsFragment(true, true);
-                SSActionBar.setupActionBar(activityToolbar, drawerToggle, "SETTINGS", null, null, true);
+                SSActionBar.setupActionBar(activityToolbar, drawerToggle, SETTINGS_TAG, null, null, true);
             }
         }
     }
@@ -546,27 +552,27 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // Sets up the SSSettingsFragment.
             SSSettingsFragment settingsFragment = new SSSettingsFragment();
             SSFragmentView.addFragment(settingsFragment, settingsFragmentContainer,
-                    R.id.ss_main_activity_settings_fragment_container, "SETTINGS", isAnimate,
+                    R.id.ss_main_activity_settings_fragment_container, SETTINGS_TAG, isAnimate,
                     activityToolbar, drawerToggle, weakRefActivity);
         }
 
         // Hides the SSSettingsFragment view.
         else {
 
-            SSFragmentView.removeFragment(settingsFragmentContainer, "SETTINGS", true,
+            SSFragmentView.removeFragment(settingsFragmentContainer, SETTINGS_TAG, true,
                     activityToolbar, drawerToggle, weakRefActivity);
 
             // SSTracksFragment: Sets up the action bar attributes.
-            if (currentFragment.equals("TRACKS")) {
+            if (currentFragment.equals(TRACKS_TAG)) {
 
                 // TABLET: Updates the action bar without the BACK button.
                 if (isTablet) {
-                    SSActionBar.setupActionBar(activityToolbar, drawerToggle, "TRACKS", currentArtist, currentArtist, false);
+                    SSActionBar.setupActionBar(activityToolbar, drawerToggle, TRACKS_TAG, currentArtist, currentArtist, false);
                 }
 
                 // MOBILE: Updates the action bar with the BACK button present.
                 else {
-                    SSActionBar.setupActionBar(activityToolbar, drawerToggle, "TRACKS", currentArtist, currentArtist, true);
+                    SSActionBar.setupActionBar(activityToolbar, drawerToggle, TRACKS_TAG, currentArtist, currentArtist, true);
                 }
             }
 
@@ -624,18 +630,18 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             if (isTablet) {
 
                 SSFragmentView.addFragment(tracksFragment, fragmentSecondaryContainer,
-                        R.id.ss_main_activity_secondary_fragment_container, "TRACKS", true,
+                        R.id.ss_main_activity_secondary_fragment_container, TRACKS_TAG, true,
                         activityToolbar, drawerToggle, weakRefActivity);
 
                 // Sets the name of the action bar.
-                SSActionBar.setupActionBar(activityToolbar, drawerToggle, "TRACKS", currentArtist, name, false);
+                SSActionBar.setupActionBar(activityToolbar, drawerToggle, TRACKS_TAG, currentArtist, name, false);
 
-                currentFragment = "TRACKS"; // Sets the current active fragment.
+                currentFragment = TRACKS_TAG; // Sets the current active fragment.
             }
 
             // MOBILE: Removes the previous fragment and adds the new fragment.
             else {
-                changeFragment(tracksFragment, "TRACKS", "ARTISTS", name, true);
+                changeFragment(tracksFragment, TRACKS_TAG, ARTISTS_TAG, name, true);
             }
 
             currentArtist = name; // Sets the name of the current artist.
@@ -652,7 +658,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // MOBILE: Removes the previous fragment and adds the new fragment.
             if (!isTablet) {
-                changeFragment(artistFragment, "ARTISTS", "TRACKS", name, false);
+                changeFragment(artistFragment, ARTISTS_TAG, TRACKS_TAG, name, false);
             }
 
             Log.d(LOG_TAG, "displayTracksFragment(): SSArtistsFragment now being displayed.");
@@ -675,12 +681,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // TABLET: Displays the SSPlayerFragment as a DialogFragment.
             if (isTablet) {
-                displayFragmentDialog(playFragment, "PLAYER");
+                displayFragmentDialog(playFragment, PLAYER_TAG);
             }
 
             // MOBILE: Removes the previous fragment and adds the new fragment.
             else {
-                changeFragment(playFragment, "PLAYER", fragToRemove, list.get(position).getSong(), true);
+                changeFragment(playFragment, PLAYER_TAG, fragToRemove, list.get(position).getSong(), true);
             }
 
             // Stops any track playing in the background and resets the track position.
@@ -706,7 +712,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             // MOBILE: Removes the previous fragment and adds the new fragment.
             if (!isTablet) {
-                changeFragment(tracksFragment, "TRACKS", "PLAYER", list.get(position).getArtist(), false);
+                changeFragment(tracksFragment, TRACKS_TAG, PLAYER_TAG, list.get(position).getArtist(), false);
             }
 
             Log.d(LOG_TAG, "displayPlayerFragment(): SSTracksFragment now being displayed.");
@@ -729,7 +735,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // Only updates the ActionBar if the device is not a tablet device.
         if (!isTablet) {
-            SSActionBar.setupActionBar(activityToolbar, drawerToggle, "PLAYER", currentArtist, songName, true);
+            SSActionBar.setupActionBar(activityToolbar, drawerToggle, PLAYER_TAG, currentArtist, songName, true);
         }
     }
 
