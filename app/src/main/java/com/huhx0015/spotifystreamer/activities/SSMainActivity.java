@@ -105,6 +105,13 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         Log.d(LOG_TAG, "ACTIVITY LIFECYCLE (onCreate): onCreate invoked.");
 
+        // Since this is a single activity application, any activity duplicates will be immediately
+        // finished. This prevents having multiple instances of the SSMainActivity running.
+        if (!isTaskRoot()) {
+            Log.d(LOG_TAG, "onCreate(): Activity duplicate detected. Finishing activity.");
+            finish();
+        }
+
         // Creates a weak reference of this activity.
         weakRefActivity = new WeakReference<AppCompatActivity>(this);
 

@@ -150,7 +150,9 @@ public class SSApplication extends Application implements OnMusicServiceListener
     @Override
     public void setUpAudioService() {
 
-        if (audioIntent == null) {
+        // TODO: Test this. May be more stable?
+        if (serviceBound == false) {
+        //if (audioIntent == null) {
 
             Log.d(LOG_TAG, "setUpAudioService(): Setting up SSMusicService...");
 
@@ -174,7 +176,7 @@ public class SSApplication extends Application implements OnMusicServiceListener
         else {
 
             // TODO: Needs testing.
-            updatePlayer(); // Updates the SSPlayerFragment of the current song playback status.
+            //updatePlayer(); // Updates the SSPlayerFragment of the current song playback status.
             currentTimer = 0; // Resets the current timer value.
             readySongTimerHandler.removeCallbacks(readySongTimerThread);
         }

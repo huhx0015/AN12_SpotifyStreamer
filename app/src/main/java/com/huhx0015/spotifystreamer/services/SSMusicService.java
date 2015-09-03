@@ -147,6 +147,7 @@ public class SSMusicService extends Service {
             }
         }
 
+        playbackStatus(false); // Updates the SSPlayerFragment on the current playback status.
         seekHandler.removeCallbacks(seekbarThread); // Stops the seekbar update thread.
     }
 
@@ -350,6 +351,23 @@ public class SSMusicService extends Service {
 
         else {
             Log.d(LOG_TAG, "seekbarStatus(): SSPlayerFragment was null.");
+        }
+    }
+
+    // playbackStatus(): Signals the SSPlayerFragment on the current playback status of the
+    // streaming Spotify song.
+    private void playbackStatus(Boolean isPlay) {
+
+        if (playerFragment != null) {
+
+            Log.d(LOG_TAG, "playbackStatus(): Attempting to update the SSPlayerFragment of the song playback status.");
+
+            try { ((OnMusicPlayerListener) playerFragment).playbackStatus(isPlay); }
+            catch (ClassCastException cce) {} // Catch for class cast exception errors.
+        }
+
+        else {
+            Log.d(LOG_TAG, "playbackStatus(): SSPlayerFragment was null.");
         }
     }
 

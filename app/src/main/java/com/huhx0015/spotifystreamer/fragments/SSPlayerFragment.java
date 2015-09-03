@@ -459,11 +459,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // onStartTrackingTouch(): Called when a touch event on the Seekbar object has started.
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) { }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             // onStopTrackingTouch: Called when a touch event on the Seekbar object has ended.
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) { }
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
     }
 
@@ -609,13 +609,12 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             isPlaying = isPlay; // Updates the current playback status of the streaming song.
             updateControlButtons(isPlaying); // Updates the player control buttons.
 
-            // TODO: Test this to see if this is works or not.
             // PLAYING:
-            //if (isPlay) {
+            if (isPlay) {
                 progressLayer.setVisibility(View.INVISIBLE); // Hides the progress indicator container.
                 startStopSongTimer(false); // Turns off the song timer.
                 isPreparing = false; // Indicates that the song is no longer being prepared.
-            //}
+            }
 
             Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
         }
@@ -657,16 +656,15 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         // Sets the song to the next track in the list.
         Boolean isUpdate = updateTrack(newPosition);
 
-        // If the fragment view is currently destroyed, the notification player is updated with the
-        // updated track.
-        if (isDestroyed) {
-            updateNotification(streamURL, notificationsOn, albumBitmap, artistName, songName);
-        }
-
         // If the previous track was playing when the next button was pressed, the new track
         // is automatically played.
         if (isUpdate && isPlaying) {
             initializeSongPlay();
+        }
+
+        // The notification player is updated with the updated track.
+        else if (isUpdate && !isPlaying) {
+            updateNotification(streamURL, notificationsOn, albumBitmap, artistName, songName);
         }
     }
 

@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme"
         android:hardwareAccelerated="true"
         android:largeHeap="true"
-        android:launchMode="singleTop"
+        android:launchMode="singleTask"
         android:alwaysRetainTaskState="true"
         android:name=".application.SSApplication">
 

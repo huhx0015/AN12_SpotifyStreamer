@@ -244,7 +244,9 @@ public class SSMusicEngine {
             songPosition = backgroundSong.getCurrentPosition(); // Retrieves the current song position and saves it.
 
             // Pauses the song only if there is a song is currently playing.
-            if (backgroundSong.isPlaying()) { backgroundSong.pause(); } // Pauses the song.
+            if (backgroundSong.isPlaying()) {
+                backgroundSong.pause(); // Pauses the song.
+            }
 
             playbackStatus(false); // Updates SSPlayerFragment on the song playback status.
 
@@ -259,6 +261,7 @@ public class SSMusicEngine {
         // Checks to see if mapSong has been initiated first before stopping song playback.
         if ( (backgroundSong != null) && (musicOn) ) {
             backgroundSong.stop(); // Stops any songs currently playing in the background.
+            playbackStatus(false); // Updates SSPlayerFragment on the song playback status.
             currentSong = "STOPPED";
             Log.d(LOG_TAG, "MUSIC: Song playback has been stopped.");
         }
