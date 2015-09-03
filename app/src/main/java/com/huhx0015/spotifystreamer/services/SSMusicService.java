@@ -148,7 +148,7 @@ public class SSMusicService extends Service {
         }
 
         playbackStatus(false); // Updates the SSPlayerFragment on the current playback status.
-        seekHandler.removeCallbacks(seekbarThread); // Stops the seekbar update thread.
+        startStopThreads(false); // Stops the seekbar update thread.
     }
 
     // playTrack(): Accesses the SSMusicEngine instance to play the streaming song track.
@@ -164,7 +164,7 @@ public class SSMusicService extends Service {
             initializeMediaSession(songUrl, albumImage, albumArtist, albumTrack);
         }
 
-        seekHandler.postDelayed(seekbarThread, 1000); // Begins the seekbar update thread.
+        startStopThreads(true); // Begins the seekbar update thread.
     }
 
     // releaseMedia(): Accesses the SSMusicEngine instance to release all resources used by the
@@ -308,6 +308,17 @@ public class SSMusicService extends Service {
     }
 
     /** THREAD METHODS _________________________________________________________________________ **/
+
+    public void startStopThreads(Boolean isStart) {
+
+        if (isStart) {
+            seekHandler.postDelayed(seekbarThread, 1000); // Begins the seekbar update thread.
+        }
+
+        else {
+            seekHandler.removeCallbacks(seekbarThread); // Stops the seekbar update thread.
+        }
+    }
 
     // seekbarThread(): A threaded function which updates the player seekbar in the
     // SSPlayerFragment.

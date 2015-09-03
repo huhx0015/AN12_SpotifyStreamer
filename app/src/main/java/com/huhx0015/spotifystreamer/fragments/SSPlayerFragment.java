@@ -84,6 +84,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
     // SHARED PREFERENCE VARIABLES
     private static final String SS_OPTIONS = "ss_options"; // Used to reference the name of the preference XML file.
+    private Boolean autoPlayOn = true; // Used to determine if auto play is enabled or not.
     private Boolean notificationsOn = true; // Used to determine if notification display is enabled or not.
 
     // VIEW INJECTION VARIABLES
@@ -445,9 +446,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     // Updates the minimum duration TextView object.
                     if (progress < 10) {
                         minDurationText.setText("0:0" + progress);
-                    }
-
-                    else {
+                    } else {
                         minDurationText.setText("0:" + progress);
                     }
 
@@ -457,11 +456,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // onStartTrackingTouch(): Called when a touch event on the Seekbar object has started.
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             // onStopTrackingTouch: Called when a touch event on the Seekbar object has ended.
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
     }
 
@@ -589,10 +590,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         // Initializes the SharedPreferences object.
         SharedPreferences SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
 
+        // Retrieves the current auto play setting.
+        autoPlayOn = SSPreferences.getAutoPlay(SS_prefs);
+
         // Retrieves the current notification player setting.
         notificationsOn = SSPreferences.getNotifications(SS_prefs);
-
-        Log.d(LOG_TAG, "loadPreferences(): Current notification settings: " + notificationsOn);
     }
 
     /** INTERFACE METHODS ______________________________________________________________________ **/
@@ -698,16 +700,28 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             // Updates the player control button states to reflect that the song is no longer playing.
             else {
 
+                isPlaying = false; // Indicates that the song is no longer being played.
+                updateControlButtons(isPlaying); // Updates the player control buttons.
+
                 // If the song has stopped and is not paused, the seek bar and the current position
                 // text is reset.
                 if (!isPaused) {
                     pauseTrack(true); // Indicates that the song has stopped playback.
                     playerBar.setProgress(0); // Resets the player seek bar.
                     minDurationText.setText("0:00"); // Resets the minimum duration TextView object.
-                }
+                    SSNotificationPlayer.removeNotifications(currentActivity); // Removes any active notifications.
 
-                isPlaying = false; // Indicates that the song is no longer being played.
-                updateControlButtons(isPlaying); // Updates the player control buttons.
+                    // If the auto play feature has been enabled, the next song in the tracklist will
+                    // automatically be played.
+                    if (autoPlayOn && !isPreparing) {
+
+                        // Checks to see if the end of the tracklist has been reached first.
+                        if ( (selectedPosition + 1) < trackList.size()) {
+                            playNextSong(true, false); // Sets the next song.
+                            playCurrentSong(); // Plays the current song.
+                        }
+                    }
+                }
             }
         }
     }
@@ -728,7 +742,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // the case of a time out error.
     @Override
     public void stopSongPrepare() {
-        progressLayer.setVisibility(View.INVISIBLE); // Hides the progress indicator container.
+
+        if (!isDestroyed) {
+            progressLayer.setVisibility(View.INVISIBLE); // Hides the progress indicator container.
+        }
+
         isPlaying = false; // Indicates that the song is not being played.
         isPreparing = false; // Indicates that the song is no longer being prepared.
     }

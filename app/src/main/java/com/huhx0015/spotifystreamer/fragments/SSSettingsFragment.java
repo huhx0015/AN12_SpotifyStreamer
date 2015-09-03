@@ -79,14 +79,28 @@ public class SSSettingsFragment extends PreferenceFragment implements SharedPref
 
         // Assigns the references to the preference objects.
         ListPreference countryListPref = (ListPreference) findPreference("ss_country_code");
+        CheckBoxPreference autoPlayPref = (CheckBoxPreference) findPreference("ss_auto_play");
         CheckBoxPreference notificationsPref = (CheckBoxPreference) findPreference("ss_notifications");
 
-        // Updates the country code setting title.
+        // Updates the country code settings.
         String currentCode = countryListPref.getValue();
         countryListPref.setTitle("Current Country Code: " + currentCode);
         SSPreferences.setCountryCode(currentCode, SS_prefs); // Sets the new value in SharedPreferences.
 
-        // Updates the notification setting title.
+        // Updates the auto play settings.
+        // ON:
+        if (autoPlayPref.isChecked()) {
+            autoPlayPref.setTitle("Auto Play Tracklist: ON");
+            SSPreferences.setAutoPlay(true, SS_prefs); // Sets the new value in SharedPreferences.
+        }
+
+        // OFF:
+        else {
+            autoPlayPref.setTitle("Auto Play Tracklist: OFF");
+            SSPreferences.setAutoPlay(false, SS_prefs); // Sets the new value in SharedPreferences.
+        }
+
+        // Updates the notification settings.
         // ON:
         if (notificationsPref.isChecked()) {
             notificationsPref.setTitle("Display Notification Player: ON");

@@ -46,6 +46,11 @@ public class SSPreferences {
 
     /** GET PREFERENCES FUNCTIONALITY __________________________________________________________ **/
 
+    // getAutoPlay(): Retrieves the "ss_auto_play" value from preferences.
+    public static Boolean getAutoPlay(SharedPreferences preferences) {
+        return preferences.getBoolean("ss_auto_play", false); // Retrieves the ss_auto_play value.
+    }
+
     // getCountryCode(): Retrieves the current country code value from preferences.
     public static String getCountryCode(SharedPreferences preferences) {
         return preferences.getString("ss_country_code", "US"); // Retrieves the country code setting.
@@ -53,10 +58,20 @@ public class SSPreferences {
 
     // getNotifications(): Retrieves the "ss_notifications" value from preferences.
     public static Boolean getNotifications(SharedPreferences preferences) {
-        return preferences.getBoolean("ss_notifications", true); // Retrieves the ss_notifications launch value.
+        return preferences.getBoolean("ss_notifications", true); // Retrieves the ss_notifications value.
     }
 
     /** SET PREFERENCES FUNCTIONALITY __________________________________________________________ **/
+
+    // setAutoPlay(): Sets the "ss_auto_play" value to preferences.
+    public static void setAutoPlay(Boolean isAutoPlay, SharedPreferences preferences) {
+
+        // Prepares the SharedPreferences object for editing.
+        SharedPreferences.Editor prefEdit = preferences.edit();
+
+        prefEdit.putBoolean("ss_auto_play", isAutoPlay); // Sets the auto play setting.
+        prefEdit.apply(); // Applies the changes to SharedPreferences.
+    }
 
     // setCountryCode(): Sets the "ss_country_code" value to preferences.
     public static void setCountryCode(String code, SharedPreferences preferences) {

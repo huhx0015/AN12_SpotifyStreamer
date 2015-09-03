@@ -64,8 +64,9 @@ public class SSNotificationPlayer {
                         // Attaches the current MediaSession token.
                         .setMediaSession(streamerMediaSession.getSessionToken()))
 
+                .setTicker(artist + " - " + track) // Displays a ticker with the current artist and track name.
                 .setLargeIcon(albumImage) // Sets the album bitmap image.
-                .setSmallIcon(R.drawable.ic_launcher) // Sets the application icon image.
+                .setSmallIcon(R.drawable.ss_notification_icon) // Sets the notification image.
                 .setShowWhen(false) // Disables timestamp display.
                 .setContentIntent(contentPendingIntent) // Launches the SSMainActivity activity when the notification is pressed.
                 .setDeleteIntent(dismissPendingIntent) // Stops music playback when notification is dismissed.

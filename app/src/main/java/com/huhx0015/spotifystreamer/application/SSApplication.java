@@ -125,9 +125,9 @@ public class SSApplication extends Application implements OnMusicServiceListener
             setUpAudioService(); // Sets up the SSMusicService.
         }
 
-        // Signals the SSMusicService to pause the song stream.
         else {
-            musicService.pauseTrack(isStop);
+            musicService.startStopThreads(false); // Signals the SSMusicService to stop the seekbar thread.
+            musicService.pauseTrack(isStop); // Signals the SSMusicService to pause the song stream.
         }
     }
 
