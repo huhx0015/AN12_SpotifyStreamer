@@ -6,8 +6,6 @@ import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
-
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.preferences.SSPreferences;

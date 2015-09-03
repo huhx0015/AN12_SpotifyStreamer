@@ -7,11 +7,11 @@ android {
 
     defaultConfig {
         applicationId "com.huhx0015.spotifystreamer"
-        minSdkVersion 14
+        minSdkVersion 11
         targetSdkVersion 23
         versionCode 2
         versionName "2.0"
-        renderscriptTargetApi 14
+        renderscriptTargetApi 11
         renderscriptSupportModeEnabled true
     }
 

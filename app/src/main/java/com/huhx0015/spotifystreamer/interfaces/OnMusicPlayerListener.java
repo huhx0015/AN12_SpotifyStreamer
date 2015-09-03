@@ -22,7 +22,7 @@ public interface OnMusicPlayerListener {
 
     // playNextSong(): Interface method that is used to signal the SSPlayerFragment to play the
     // next or previous song in the tracklist.
-    void playNextSong(Boolean isNext);
+    void playNextSong(Boolean isNext, Boolean fromNotification);
 
     // seekbarStatus(): Interface method that is used to update the seekbar in the SSPlayerFragment
     // based on the current playback status of the Spotify streaming song.

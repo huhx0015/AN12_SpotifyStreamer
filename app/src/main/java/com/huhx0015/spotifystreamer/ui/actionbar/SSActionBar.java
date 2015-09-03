@@ -15,7 +15,7 @@ public class SSActionBar {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
-    // FRAGMENT TAG VARIABLES
+    // TAG VARIABLES
     private static final String PLAYER_TAG = "PLAYER"; // Tag for SSPlayerFragment.
     private static final String SETTINGS_TAG = "SETTINGS"; // Tag for SSSettingsFragment.
     private static final String TRACKS_TAG = "TRACKS"; // Tag for SSTracksFragment.

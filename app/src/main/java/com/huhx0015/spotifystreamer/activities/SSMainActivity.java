@@ -53,6 +53,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private static WeakReference<AppCompatActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
 
     // DATA VARIABLES
+    private static final String ARTIST_IMAGE_URL = "artistImageUrl"; // Used for restoring the artist image URL value for rotation change events.
     private static final String ARTIST_INPUT = "artistInput"; // Used for restoring the artist input value for rotation change events.
     private static final String ARTIST_LIST = "artistListResult"; // Parcelable key value for the artist list.
     private static final String ARTIST_NAME = "artistName"; // Used for restoring the artist name value for rotation change events.
@@ -69,6 +70,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private SSPlayerFragment playFragment; // Keeps a reference to the SSPlayerFragment.
     private String currentFragment = ""; // Used to determine which fragment is currently active.
     private String currentArtist = ""; // Used to determine the current artist name.
+    private String currentArtistUrl = null; // Used to determine the current artist image URL.
     private String currentInput = ""; // Used to determine the current artist input.
     private String currentTrack = ""; // Used to determine the current track name.
 
@@ -87,7 +89,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // SHARE VARIABLES
     private String spotifyUrl = ""; // Used to reference the Spotify track URL of the current track.
 
-    // FRAGMENT TAG VARIABLES
+    // TAG VARIABLES
     private static final String ARTISTS_TAG = "ARTISTS"; // Tag for SSArtistsFragment.
     private static final String PLAYER_TAG = "PLAYER"; // Tag for SSPlayerFragment.
     private static final String SETTINGS_TAG = "SETTINGS"; // Tag for SSSettingsFragment.
@@ -128,6 +130,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             // Restores the saved instance values.
             artistListResult = savedInstanceState.getParcelableArrayList(ARTIST_LIST);
             currentArtist = savedInstanceState.getString(ARTIST_NAME);
+            currentArtistUrl = savedInstanceState.getString(ARTIST_IMAGE_URL);
             currentInput = savedInstanceState.getString(ARTIST_INPUT);
             currentFragment = savedInstanceState.getString(CURRENT_FRAGMENT);
             currentTrack = savedInstanceState.getString(CURRENT_TRACK);
@@ -266,6 +269,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         savedInstanceState.putBoolean(ROTATION_CHANGE, true);
         savedInstanceState.putBoolean(SETTINGS_FRAGMENT, isSettings);
         savedInstanceState.putInt(CURRENT_TRACK_POS, listPosition);
+        savedInstanceState.putString(ARTIST_IMAGE_URL, currentArtistUrl);
         savedInstanceState.putString(ARTIST_INPUT, currentInput);
         savedInstanceState.putString(ARTIST_NAME, currentArtist);
         savedInstanceState.putString(CURRENT_FRAGMENT, currentFragment);

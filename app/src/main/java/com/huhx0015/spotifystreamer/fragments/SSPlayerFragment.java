@@ -239,7 +239,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
                 // Sets the song to the next track in the list.
                 if (!isPreparing) {
-                    playNextSong(true);
+                    playNextSong(true, false);
                 }
             }
         });
@@ -280,7 +280,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
                 // Sets the song to the previous track in the list.
                 if (!isPreparing) {
-                    playNextSong(false);
+                    playNextSong(false, false);
                 }
             }
         });
@@ -637,7 +637,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // playNextSong(): An interface method invoked by the SSMusicEngine to play the next or previous
     // song in the tracklist.
     @Override
-    public void playNextSong(Boolean isNext) {
+    public void playNextSong(Boolean isNext, Boolean fromNotification) {
 
         int newPosition = selectedPosition;
 
@@ -660,8 +660,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             initializeSongPlay();
         }
 
-        // The notification player is updated with the updated track.
-        else if (isUpdate && !isPlaying) {
+        // If the song is changed from the notification player while the song is not playing, the
+        // notification player is updated with the updated track.
+        else if (isUpdate && fromNotification && !isPlaying) {
             updateNotification(streamURL, notificationsOn, albumBitmap, artistName, songName);
         }
     }

@@ -1,6 +1,6 @@
 package com.huhx0015.spotifystreamer.fragments;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -88,12 +88,12 @@ public class SSTracksFragment extends Fragment {
 
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
 
-    // onAttach(): The initial function that is called when the Fragment is run. The activity is
+    // onAttach(): The initial function that is called when the Fragment is run. The context is
     // attached to the fragment.
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        this.currentActivity = (SSMainActivity) activity; // Sets the currentActivity to attached activity object.
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.currentActivity = (SSMainActivity) getActivity(); // Sets the currentActivity to attached activity object.
     }
 
     // onCreate(): Runs when the fragment is first started.

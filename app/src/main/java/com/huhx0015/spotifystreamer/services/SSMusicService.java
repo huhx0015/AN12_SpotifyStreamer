@@ -376,7 +376,7 @@ public class SSMusicService extends Service {
     private void playNextSong(Boolean isNext) {
 
         if (playerFragment != null) {
-            try { ((OnMusicPlayerListener) playerFragment).playNextSong(isNext); }
+            try { ((OnMusicPlayerListener) playerFragment).playNextSong(isNext, true); }
             catch (ClassCastException cce) {} // Catch for class cast exception errors.
         }
 
