@@ -1,6 +1,7 @@
 package com.huhx0015.spotifystreamer.ui.adapters;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -101,6 +102,11 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
         holder.songName.setText(listResult.get(position).getSong());
         holder.albumName.setText(listResult.get(position).getAlbum());
         holder.artistName.setText(listResult.get(position).getArtist());
+
+        // Sets the shadow layer effect for the TextView objects.
+        holder.songName.setShadowLayer(4, 2, 2, Color.BLACK);
+        holder.artistName.setShadowLayer(4, 2, 2, Color.DKGRAY);
+        holder.albumName.setShadowLayer(2, 2, 2, Color.GRAY);
 
         // Retrieves the image URL at the referenced position.
         String albumImage = listResult.get(position).getAlbumImage();
