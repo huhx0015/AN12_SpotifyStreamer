@@ -40,7 +40,8 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:id="@+id/ss_main_activity_main_content"
-                    android:layout_weight="3">
+                    android:layout_weight="3"
+                    android:background="@color/faint_teal_color">
 
                     <FrameLayout
                         android:layout_width="match_parent"
@@ -91,7 +92,7 @@
     <!-- The navigation drawer -->
     <LinearLayout
         android:id="@+id/ss_main_activity_left_drawer_container"
-        android:layout_width="240dp"
+        android:layout_width="360dp"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_gravity="start"
@@ -107,7 +108,7 @@
 
             <ImageView
                 android:layout_width="fill_parent"
-                android:layout_height="192dp"
+                android:layout_height="320dp"
                 android:id="@+id/ss_main_left_drawer_artist_image"
                 android:scaleType="centerCrop"
                 android:background="@drawable/ss_dark_transparent_tile" />

@@ -4,8 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/ss_tracks_fragment_layout"
-    android:background="@android:color/white">
+    android:id="@+id/ss_tracks_fragment_layout">
 
     <FrameLayout
         android:layout_width="fill_parent"
@@ -28,8 +27,7 @@
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/ss_tracks_recycler_view"
-            android:background="@android:color/white" />
+            android:id="@+id/ss_tracks_recycler_view" />
 
         <ProgressBar
             style="?android:attr/progressBarStyleLarge"
