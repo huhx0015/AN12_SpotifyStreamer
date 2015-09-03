@@ -128,7 +128,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -139,39 +139,36 @@
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/player_min_duration"
+                    android:id="@+id/ss_player_seekbar_min_duration_text"
+                    android:textColor="@android:color/white"
+                    android:typeface="sans"
+                    android:textSize="12sp"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:gravity="center" />
+
                 <SeekBar
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/ss_player_seekbar"
+                    android:layout_weight="1"
                     android:layout_marginBottom="2dp" />
 
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:id="@+id/ss_player_seekbar_duration_container"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/player_min_duration"
-                        android:id="@+id/ss_player_seekbar_min_duration_text"
-                        android:layout_gravity="start"
-                        android:textColor="@android:color/white"
-                        android:typeface="sans"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/player_max_duration"
-                        android:id="@+id/ss_player_seekbar_max_duration_text"
-                        android:layout_gravity="end"
-                        android:textColor="@android:color/white"
-                        android:textSize="12sp"
-                        android:typeface="sans" />
-                </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/player_max_duration"
+                    android:id="@+id/ss_player_seekbar_max_duration_text"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:typeface="sans"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:gravity="center" />
 
             </LinearLayout>
         </LinearLayout>
