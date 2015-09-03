@@ -30,6 +30,10 @@
         <item name="android:textColorPrimary">@android:color/white</item>
     </style>
 
+    <style name="ToolbarTitleAppearance" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">20sp</item>
+    </style>
+
     <!-- Dialog Theme -->
     <style name="DialogTheme" parent="@android:style/Theme.Holo.Dialog.NoActionBar">
     </style>

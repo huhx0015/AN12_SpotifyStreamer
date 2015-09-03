@@ -2,8 +2,6 @@ package com.huhx0015.spotifystreamer.ui.actionbar;
 
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-
 import com.huhx0015.spotifystreamer.R;
 
 /** -----------------------------------------------------------------------------------------------
@@ -28,8 +26,6 @@ public class SSActionBar {
     public static void setupActionBar(Toolbar actionBar, ActionBarDrawerToggle drawerToggle,
                                       String actionType, String currentArtist, String subtitle,
                                       Boolean isBack) {
-
-        Log.d("ACTIONBAR", "actionbar recreated: " + actionType);
 
         if (actionBar != null) {
 
