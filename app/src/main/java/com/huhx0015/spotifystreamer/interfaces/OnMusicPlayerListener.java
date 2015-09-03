@@ -34,6 +34,6 @@ public interface OnMusicPlayerListener {
 
     // stopSongPrepare(): Interface method that is used to signal SSPlayerFragment to stop preparing
     // the song.
-    void stopSongPrepare();
+    void stopSongPrepare(Boolean isStop);
 }
 

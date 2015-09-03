@@ -1,6 +1,7 @@
 package com.huhx0015.spotifystreamer.activities;
 
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,7 +15,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import com.huhx0015.spotifystreamer.R;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.fragments.SSArtistsFragment;
@@ -31,6 +35,7 @@ import com.huhx0015.spotifystreamer.ui.layouts.SSUnbind;
 import com.huhx0015.spotifystreamer.ui.notifications.SSNotificationPlayer;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.huhx0015.spotifystreamer.ui.views.SSFragmentView;
+import com.squareup.picasso.Picasso;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import butterknife.Bind;
@@ -69,7 +74,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     private Boolean isSettings = false; // Used to determine if the SSSettingsFragment is in focus.
     private SSPlayerFragment playFragment; // Keeps a reference to the SSPlayerFragment.
     private String currentFragment = ""; // Used to determine which fragment is currently active.
-    private String currentArtist = ""; // Used to determine the current artist name.
+    private String currentArtist = "Spotify Streamer M"; // Used to determine the current artist name.
     private String currentArtistUrl = null; // Used to determine the current artist image URL.
     private String currentInput = ""; // Used to determine the current artist input.
     private String currentTrack = ""; // Used to determine the current track name.
@@ -77,6 +82,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // LAYOUT VARIABLES
     private ActionBarDrawerToggle drawerToggle; // References the ActionBar drawer toggle object.
     private Boolean isTablet = false; // Used to determine if the current device is a mobile or tablet device.
+    private float curDensity; // References the density value of the current device.
 
     // LIST VARIABLES
     private ArrayList<SSSpotifyModel> artistListResult = new ArrayList<>(); // Stores the artist list result.
@@ -100,7 +106,13 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Bind(R.id.ss_main_activity_fragment_container) FrameLayout fragmentContainer;
     @Bind(R.id.ss_main_activity_secondary_fragment_container) FrameLayout fragmentSecondaryContainer;
     @Bind(R.id.ss_main_activity_settings_fragment_container) FrameLayout settingsFragmentContainer;
-    @Bind(R.id.ss_main_activity_left_drawer_container) LinearLayout leftDrawerContainer;
+    @Bind(R.id.ss_drawer_next_button) ImageButton drawerNextButton;
+    @Bind(R.id.ss_drawer_play_button) ImageButton drawerPlayButton;
+    @Bind(R.id.ss_drawer_pause_button) ImageButton drawerPauseButton;
+    @Bind(R.id.ss_drawer_previous_button) ImageButton drawerPreviousButton;
+    @Bind(R.id.ss_main_left_drawer_artist_image) ImageView drawerArtistImage;
+    @Bind(R.id.ss_drawer_player_controls_container) LinearLayout drawerPlayerContainer;
+    @Bind(R.id.ss_main_left_drawer_artist_name) TextView drawerArtistNameText;
     @Bind(R.id.ss_main_activity_toolbar) Toolbar activityToolbar;
 
     /** ACTIVITY LIFECYCLE METHODS _____________________________________________________________ **/
@@ -302,7 +314,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // If the SSTracksFragment is currently being displayed, the fragment is removed and
         // switched with the SSArtistsFragment view.
         else if ( (currentFragment.equals(TRACKS_TAG)) && !(isTablet) ) {
-            displayTracksFragment(false, currentInput);
+            displayTracksFragment(false, currentInput, currentArtistUrl);
         }
 
         // The activity is finished if the SSArtistsFragment is in focus.
@@ -340,6 +352,9 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // setupLayout(): Sets up the layout for the activity.
     private void setupLayout() {
 
+        // Retrieves the device's density attributes.
+        curDensity = getResources().getDisplayMetrics().density;
+
         // Updates the isTablet value to determine if the device is a mobile or tablet device.
         isTablet = getResources().getBoolean(R.bool.isTablet);
         Log.d(LOG_TAG, "setupLayout(): isTablet: " + isTablet);
@@ -349,11 +364,65 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         setupDrawer(); // Initializes the drawer view for the layout.
         setupFragment(); // Initializes the fragment view for the layout.
+        setupImages(false); // Sets up the images for the ImageView and ImageButton objects in this activity layout.
+        setupButtons(); // Sets up the button listeners for the Button objects in this activity layout.
+        setupText(); // Sets up the TextView objects for the layout.
 
         // If a rotation event occurred, the isRotationEvent value is reset.
         if (isRotationEvent) {
             isRotationEvent = false;
         }
+    }
+
+    // setupButtons(): Sets up the button listeners for the activity layout.
+    private void setupButtons() {
+
+        // PLAYER BUTTONS:
+        // -----------------------------------------------------------------------------------------
+
+        // NEXT: Sets up the listener and the actions for the NEXT button.
+        drawerNextButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                // Sets the song to the next track in the list.
+                SSNotificationPlayer.triggerPlaybackAction(2, SSMainActivity.this);
+            }
+        });
+
+        // PLAY: Sets up the listener and the actions for the PLAY button.
+        drawerPlayButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                // Begins playback of the current song track.
+                SSNotificationPlayer.triggerPlaybackAction(0, SSMainActivity.this);
+            }
+        });
+
+        // PAUSE: Sets up the listener and the actions for the PAUSE button.
+        drawerPauseButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                // Pauses playback of the current song track.
+                SSNotificationPlayer.triggerPlaybackAction(1, SSMainActivity.this);
+            }
+        });
+
+        // PREVIOUS: Sets up the listener and the actions for the PREVIOUS button.
+        drawerPreviousButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                // Sets the song to the previous track in the list.
+                SSNotificationPlayer.triggerPlaybackAction(3, SSMainActivity.this);
+            }
+        });
     }
 
     // setupDrawer(): Sets up the drawer and the Toolbar for the activity layout.
@@ -502,6 +571,64 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         }
     }
 
+    // setupImages(): Sets up the images for the ImageView and ImageButton objects in this activity
+    // layout.
+    private void setupImages(Boolean onlyArtist) {
+
+        // CURRENT ARTIST IMAGE:
+        // If the currentArtistUrl value is null, the standard application image is loaded instead.
+        if (currentArtistUrl == null) {
+
+            Picasso.with(this)
+                    .load(R.drawable.ic_launcher)
+                    .into(drawerArtistImage);
+        }
+
+        // Loads the current artist image into the drawer ImageView object.
+        else {
+
+            Picasso.with(this)
+                    .load(currentArtistUrl)
+                    .into(drawerArtistImage);
+        }
+
+        // Loads the image resources for the rest of the ImageButton objects.
+        if (!onlyArtist) {
+
+            // NEXT BUTTON:
+            Picasso.with(this)
+                    .load(android.R.drawable.ic_media_next)
+                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                    .into(drawerNextButton);
+
+            // PLAY BUTTON:
+            Picasso.with(this)
+                    .load(android.R.drawable.ic_media_play)
+                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                    .into(drawerPlayButton);
+
+            // PAUSE BUTTON:
+            Picasso.with(this)
+                    .load(android.R.drawable.ic_media_pause)
+                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                    .into(drawerPauseButton);
+
+            // PREVIOUS BUTTON:
+            Picasso.with(this)
+                    .load(android.R.drawable.ic_media_previous)
+                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                    .into(drawerPreviousButton);
+        }
+    }
+
+    // setupText(): Sets up the TextView objects for this layout.
+    private void setupText() {
+
+        // Sets the current selected artist's name.
+        drawerArtistNameText.setText(currentArtist.toUpperCase());
+        drawerArtistNameText.setShadowLayer(8, 2, 2, Color.BLACK); // Sets the shadow layer effect.
+    }
+
     /** FRAGMENT METHODS _______________________________________________________________________ **/
 
     // changeFragment(): Changes the fragment views.
@@ -610,10 +737,13 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
     // displayTracksFragment(): Displays or removes the SSTracksFragment from the view layout.
     @Override
-    public void displayTracksFragment(Boolean isShow, String name) {
+    public void displayTracksFragment(Boolean isShow, String name, String artistImageUrl) {
 
         // Displays the SSTracksFragment in the view layout.
         if (isShow) {
+
+            currentArtistUrl = artistImageUrl; // Sets the selected artist image URL.
+            setupImages(true); // Loads the selected artist image resource into the drawer.
 
             // Adds a new SSTracksFragment onto the fragment stack and is made visible in the view
             // layout.
@@ -649,6 +779,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
             }
 
             currentArtist = name; // Sets the name of the current artist.
+            setupText(); // Updates the selected artist name on the drawer.
             Log.d(LOG_TAG, "displayTracksFragment(): SSTracksFragment now being displayed.");
         }
 

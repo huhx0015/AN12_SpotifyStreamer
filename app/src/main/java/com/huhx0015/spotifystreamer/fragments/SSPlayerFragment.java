@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -57,9 +58,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // BITMAP VARIABLES
     private Bitmap albumBitmap; // Stores the Bitmap for the album image.
 
-    // DATA VARIABLES
-    private static final String PLAYER_STATE = "playerState"; // Parcelable key value for the SSMusicEngine state.
-
     // FRAGMENT VARIABLES
     private String artistName = ""; // Stores the name of the artist.
     private String songId = ""; // Stores the song ID value.
@@ -84,7 +82,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
     // SHARED PREFERENCE VARIABLES
     private static final String SS_OPTIONS = "ss_options"; // Used to reference the name of the preference XML file.
-    private Boolean autoPlayOn = true; // Used to determine if auto play is enabled or not.
+    private Boolean autoPlayOn = false; // Used to determine if auto play is enabled or not.
     private Boolean notificationsOn = true; // Used to determine if notification display is enabled or not.
 
     // VIEW INJECTION VARIABLES
@@ -176,18 +174,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         isDestroyed = true; // Indicates that the fragment is in the process of being destroyed.
         ButterKnife.unbind(this); // Sets all injected views to null.
-    }
-
-    /** FRAGMENT EXTENSION METHOD ______________________________________________________________ **/
-
-    // onSaveInstanceState(): Called to retrieve per-instance state from an fragment before being
-    // killed so that the state can be restored in onCreate() or onRestoreInstanceState().
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-
-        Log.d(LOG_TAG, "onSaveInstanceState(): The Parcelable data has been saved.");
-
-        super.onSaveInstanceState(savedInstanceState);
     }
 
     /** LAYOUT METHODS _________________________________________________________________________ **/
@@ -409,12 +395,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     .resize((int) (48 * curDensity), (int) (48 * curDensity))
                     .into(previousButton);
 
-            // NEXT BUTTON:
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_next)
-                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
-                    .into(nextButton);
-
             // REPEAT BUTTON:
             Picasso.with(currentActivity)
                     .load(android.R.drawable.stat_notify_sync)
@@ -446,7 +426,9 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     // Updates the minimum duration TextView object.
                     if (progress < 10) {
                         minDurationText.setText("0:0" + progress);
-                    } else {
+                    }
+
+                    else {
                         minDurationText.setText("0:" + progress);
                     }
 
@@ -456,13 +438,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
             // onStartTrackingTouch(): Called when a touch event on the Seekbar object has started.
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             // onStopTrackingTouch: Called when a touch event on the Seekbar object has ended.
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
     }
 
@@ -471,11 +451,11 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // Sets the artist and album name for the TextView object.
         artistAlbumNameText.setText(artistName + " - " + albumName);
-        artistAlbumNameText.setShadowLayer(8, 2, 2, 2); // Sets the shadow layer font.
+        artistAlbumNameText.setShadowLayer(8, 2, 2, Color.BLACK); // Sets the shadow layer effect.
 
         // Sets the song name for the TextView object.
         songNameText.setText(songName);
-        songNameText.setShadowLayer(8, 2, 2, 2); // Sets the shadow layer font.
+        songNameText.setShadowLayer(8, 2, 2, Color.BLACK); // Sets the shadow layer effect.
     }
 
     /** MUSIC PLAYER METHODS ___________________________________________________________________ **/
@@ -741,14 +721,27 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     // stopSongPrepare(): An interface method invoked by SSApplication to stop song preparation in
     // the case of a time out error.
     @Override
-    public void stopSongPrepare() {
+    public void stopSongPrepare(Boolean isStop) {
 
-        if (!isDestroyed) {
-            progressLayer.setVisibility(View.INVISIBLE); // Hides the progress indicator container.
+        // Stops preparation of the song track.
+        if (isStop) {
+
+            if (!isDestroyed) {
+                progressLayer.setVisibility(View.INVISIBLE); // Hides the progress indicator container.
+                SSNotificationPlayer.removeNotifications(currentActivity); // Removes all active notifications.
+            }
+
+            isPlaying = false; // Indicates that the song is not being played.
+            isPreparing = false; // Indicates that the song is no longer being prepared.
         }
 
-        isPlaying = false; // Indicates that the song is not being played.
-        isPreparing = false; // Indicates that the song is no longer being prepared.
+        // Displays the progress indicator container.
+        else {
+
+            if (!isDestroyed) {
+                progressLayer.setVisibility(View.VISIBLE); // Displays the progress indicator container.
+            }
+        }
     }
 
     // attachPlayerFragment(): Signals the attached class to attach this fragment to the

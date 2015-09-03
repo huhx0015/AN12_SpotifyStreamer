@@ -89,7 +89,7 @@ public class SSApplication extends Application implements OnMusicServiceListener
             else {
                 SSToast.toastyPopUp("The track could not be played due to a time-out error.", getApplicationContext());
                 pauseTrack(true); // Stops attempted playback of track.
-                stopSongPrepare(); // Signals the SSPlayerFragment to stop song preparation conditions.
+                stopSongPrepare(true); // Signals the SSPlayerFragment to stop song preparation conditions.
                 currentTimer = 0; // Resets the current timer value.
                 readySongTimerHandler.removeCallbacks(this);
             }
@@ -132,10 +132,10 @@ public class SSApplication extends Application implements OnMusicServiceListener
     }
 
     // stopSongPrepare(): Signals the SSPlayerFragment to hide the song preparation progress bar.
-    private void stopSongPrepare() {
+    private void stopSongPrepare(Boolean isStop) {
 
         if (playerFragment != null) {
-            try { ((OnMusicPlayerListener) playerFragment).stopSongPrepare(); }
+            try { ((OnMusicPlayerListener) playerFragment).stopSongPrepare(isStop); }
             catch (ClassCastException cce) {} // Catch for class cast exception errors.
         }
     }
@@ -243,9 +243,17 @@ public class SSApplication extends Application implements OnMusicServiceListener
             setUpAudioService(); // Sets up the SSMusicService.
         }
 
-        // The SSPlayerFragment is updated of the current song status and max song duration via
-        // SSMusicService & SSMusicEngine.
         else {
+
+            // If the currentTimer is between 0 - TIMEOUT_VALUE, it indicates that a song is
+            // currently being prepared for playback. Signals the SSPlayerFragment to display the
+            // progress indicator if currently active.
+            if ((currentTimer > 0) && (currentTimer <= TIMEOUT_VALUE)) {
+                stopSongPrepare(false);
+            }
+
+            // The SSPlayerFragment is updated of the current song status and max song duration via
+            // SSMusicService & SSMusicEngine.
             musicService.updatePlayer();
         }
     }

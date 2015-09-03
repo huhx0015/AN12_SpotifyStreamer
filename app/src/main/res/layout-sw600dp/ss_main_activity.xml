@@ -98,7 +98,93 @@
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
-        android:background="#111">
+        android:background="@android:color/darker_gray">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ss_main_left_drawer_artist_image_container">
+
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="192dp"
+                android:id="@+id/ss_main_left_drawer_artist_image"
+                android:scaleType="centerCrop"
+                android:background="@drawable/ss_dark_transparent_tile" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ARTIST"
+                android:id="@+id/ss_main_left_drawer_artist_name"
+                android:layout_gravity="left|bottom"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:typeface="sans"
+                android:textStyle="bold"
+                android:padding="16dp" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/ss_main_left_drawer_content_container">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/ss_toolbar_light_color"
+                android:id="@+id/ss_main_left_drawer_content_subcontainer">
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ss_drawer_player_controls_container"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:background="@drawable/ss_light_transparent_tile">
+
+                    <ImageButton
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:id="@+id/ss_drawer_previous_button"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent" />
+
+                    <ImageButton
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:id="@+id/ss_drawer_play_button"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent" />
+
+                    <ImageButton
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:id="@+id/ss_drawer_pause_button"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent" />
+
+                    <ImageButton
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:id="@+id/ss_drawer_next_button"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="@drawable/ss_toolbar_drop_shadow"
+                android:id="@+id/ss_drawer_drop_shadow" />
+        </FrameLayout>
+
     </LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>

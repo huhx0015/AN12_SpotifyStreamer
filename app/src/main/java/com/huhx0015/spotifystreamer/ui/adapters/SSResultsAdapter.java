@@ -78,9 +78,10 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
                     }
 
                     // SSArtistsFragment: Signals the attached activity to switch the fragment to
-                    // SSTracksFragment.
+                    // SSTracksFragment, as well as passing the artist image URL back to the parent
+                    // activity.
                     else {
-                        displayTopTracks(listResult.get(position).getArtist());
+                        displayTopTracks(listResult.get(position).getArtist(), listResult.get(position).getAlbumImage());
                     }
                 }
             });
@@ -142,8 +143,8 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
     }
 
     // displayTopTracks(): Signals attached activity to display the SSTracksFragment view.
-    private void displayTopTracks(String name) {
-        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(true, name); }
+    private void displayTopTracks(String name, String artistImageUrl) {
+        try { ((OnSpotifySelectedListener) currentActivity).displayTracksFragment(true, name, artistImageUrl); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
 

@@ -113,7 +113,7 @@ public class SSNotificationPlayer {
 
     // triggerPlaybackAction(): This method is invoked whenever the controls in the media player
     // notification are pressed.
-    private static PendingIntent triggerPlaybackAction(int actionId, Context context) {
+    public static PendingIntent triggerPlaybackAction(int actionId, Context context) {
 
         // Sets up the intent objects for invoking SSMusicService for media player playback control.
         Intent actionIntent;

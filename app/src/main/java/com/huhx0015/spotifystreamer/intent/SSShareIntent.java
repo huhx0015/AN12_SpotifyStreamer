@@ -43,14 +43,14 @@ public class SSShareIntent {
             if ( (trackName != null) && !(trackName.equals("")) && (spotifyUrl != null) && !(spotifyUrl.equals("")) ) {
 
                 // Sets the intent subject and message URL.
-                shareSubject = "I'm currently listening to " + trackName + " by " + artistName + " on SPOTIFY STREAMER";
+                shareSubject = "I'm currently listening to " + trackName + " by " + artistName + " on SPOTIFY STREAMER M";
                 shareMessage = spotifyUrl;
 
                 // Adds the data to the intent.
                 sendIntent.putExtra(Intent.EXTRA_SUBJECT, shareSubject);
                 sendIntent.putExtra(Intent.EXTRA_TEXT, shareSubject + ":\n" + shareMessage);
                 sendIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                context.startActivity(Intent.createChooser(sendIntent, "Share my Spotify Streamer experience with: "));
+                context.startActivity(Intent.createChooser(sendIntent, "Share my Spotify Streamer M experience with: "));
 
                 return;
             }
@@ -61,7 +61,7 @@ public class SSShareIntent {
             }
         }
 
-        shareMessage = shareMessage + "SPOTIFY STREAMER.";
+        shareMessage = shareMessage + "SPOTIFY STREAMER M.";
 
         // Adds the data to the intent.
         sendIntent.putExtra(Intent.EXTRA_SUBJECT, shareMessage);
