@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -23,11 +25,11 @@ import com.huhx0015.spotifystreamer.activities.SSMainActivity;
 import com.huhx0015.spotifystreamer.data.SSSpotifyModel;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
+import com.huhx0015.spotifystreamer.interfaces.OnSnackbarDisplayListener;
 import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
 import com.huhx0015.spotifystreamer.preferences.SSPreferences;
 import com.huhx0015.spotifystreamer.ui.graphics.SSBlurBuilder;
 import com.huhx0015.spotifystreamer.ui.notifications.SSNotificationPlayer;
-import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 import java.util.ArrayList;
@@ -68,6 +70,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
     // LAYOUT VARIABLES
     private Boolean isDestroyed = false; // Used to determine if the fragment is being destroyed or not.
+    private Boolean isTablet = false; // Used to determine if the current device is a mobile or tablet device.
     private float curDensity; // References the density value of the current device.
 
     // LIST VARIABLES
@@ -145,7 +148,26 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         Log.d(LOG_TAG, "FRAGMENT LIFECYCLE (onCreate): onCreate() invoked.");
 
+        // Updates the isTablet value to determine if the device is a mobile or tablet device.
+        isTablet = getResources().getBoolean(R.bool.isTablet);
+
         setRetainInstance(true); // Retains this fragment during runtime changes.
+    }
+
+    // onStart(): This method runs immediately after the onCreate() method.
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // TABLET: Disables the dark transparent overlay if this fragment is displayed as a
+        // DialogFragment.
+        if (isTablet) {
+            Window window = getDialog().getWindow();
+            WindowManager.LayoutParams windowParams = window.getAttributes();
+            windowParams.dimAmount = 0;
+            windowParams.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+            window.setAttributes(windowParams);
+        }
     }
 
     // onCreateView(): Creates and returns the view hierarchy associated with the fragment.
@@ -283,13 +305,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     // REPEAT OFF: Turns off song looping.
                     if (isLoop) {
                         isLoop = false;
-                        SSToast.toastyPopUp("LOOPING disabled.", currentActivity);
+                        displaySnackbarMessage("LOOPING disabled");
                     }
 
                     // REPEAT ON: Turns on infinite looping of the song.
                     else {
                         isLoop = true;
-                        SSToast.toastyPopUp("LOOPING enabled.", currentActivity);
+                        displaySnackbarMessage("LOOPING enabled");
                     }
                 }
             }
@@ -474,11 +496,14 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         if (!isDestroyed) {
 
-            updateActionBar(songName); // Updates the ActionBar title.
-
             // Displays the progress indicator container. This will be shown until music
             // playback is fully ready.
             progressLayer.setVisibility(View.VISIBLE);
+
+            updateActionBar(songName); // Updates the ActionBar title.
+
+            // Displays a Snackbar message of the song that is currently playing.
+            displaySnackbarMessage("NOW PLAYING: " + artistName + " - " + songName);
 
             // Starts the song timer thread. This will display a time out error Toast message if the
             // song is not ready in a given amount of time.
@@ -545,13 +570,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // Displays a Toast informing the user that the beginning of the tracklist has been reached.
         else if (position < 0){
-            SSToast.toastyPopUp("Reached the beginning of the tracklist.", currentActivity);
+            displaySnackbarMessage("Reached the beginning of the tracklist.");
             return false; // Indicates that the track has not changed.
         }
 
         // Displays a Toast informing the user that the end of the tracklist has been reached.
         else if (position >= trackList.size()) {
-            SSToast.toastyPopUp("Reached the end of the tracklist.", currentActivity);
+            displaySnackbarMessage("Reached the end of the tracklist.");
             return false; // Indicates that the track has not changed.
         }
 
@@ -612,7 +637,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // Displays a Toast informing the user that a song is already playing in the background.
         else {
-            SSToast.toastyPopUp(songName + " by " + artistName + " is already playing.", currentActivity);
+            displaySnackbarMessage(songName + " by " + artistName + " is already playing.");
         }
     }
 
@@ -752,6 +777,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         try { ((OnMusicServiceListener) currentActivity.getApplication()).attachFragment(this); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
+    }
+
+    // displaySnackbarMessage(): An interface method that signals the attached activity to display a
+    // Snackbar message.
+    private void displaySnackbarMessage(String message) {
+        try { ((OnSnackbarDisplayListener) currentActivity).displaySnackbar(message); }
+        catch (ClassCastException cce) { } // Catch for class cast exception errors.
     }
 
     // pauseTrack(): Signals the attached class to invoke the SSMusicService to pause playback

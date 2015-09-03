@@ -309,6 +309,7 @@ public class SSMusicService extends Service {
 
     /** THREAD METHODS _________________________________________________________________________ **/
 
+    // startStopThreads(): Starts/stops the seekbar thread.
     public void startStopThreads(Boolean isStart) {
 
         if (isStart) {

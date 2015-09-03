@@ -2,6 +2,7 @@ package com.huhx0015.spotifystreamer.activities;
 
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -28,6 +29,7 @@ import com.huhx0015.spotifystreamer.fragments.SSTracksFragment;
 import com.huhx0015.spotifystreamer.intent.SSShareIntent;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
+import com.huhx0015.spotifystreamer.interfaces.OnSnackbarDisplayListener;
 import com.huhx0015.spotifystreamer.interfaces.OnSpotifySelectedListener;
 import com.huhx0015.spotifystreamer.interfaces.OnTrackInfoUpdateListener;
 import com.huhx0015.spotifystreamer.ui.actionbar.SSActionBar;
@@ -50,12 +52,14 @@ import butterknife.ButterKnife;
  */
 
 public class SSMainActivity extends AppCompatActivity implements OnSpotifySelectedListener,
-        OnTrackInfoUpdateListener {
+        OnSnackbarDisplayListener, OnTrackInfoUpdateListener {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
 
     // ACTIVITY VARIABLES
     private static WeakReference<AppCompatActivity> weakRefActivity = null; // Used to maintain a weak reference to the activity.
+    private Boolean isActivityPaused = false; // Used to determine if the activity is currently in an onPause() state.
+    private Boolean isFinishing = false; // Used to determine if the activity is currently finishing.
 
     // DATA VARIABLES
     private static final String ARTIST_IMAGE_URL = "artistImageUrl"; // Used for restoring the artist image URL value for rotation change events.
@@ -112,6 +116,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Bind(R.id.ss_drawer_previous_button) ImageButton drawerPreviousButton;
     @Bind(R.id.ss_main_left_drawer_artist_image) ImageView drawerArtistImage;
     @Bind(R.id.ss_drawer_player_controls_container) LinearLayout drawerPlayerContainer;
+    @Bind(R.id.ss_main_activity_layout) LinearLayout mainLayout;
     @Bind(R.id.ss_main_left_drawer_artist_name) TextView drawerArtistNameText;
     @Bind(R.id.ss_main_activity_toolbar) Toolbar activityToolbar;
 
@@ -161,10 +166,23 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         setupLayout(); // Sets up the layout for the activity.
     }
 
+    // onResume(): This function is called immediately after onStart() runs and also runs after
+    // focus has returned to this activity.
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        isActivityPaused = false; // Indicates that this activity is no longer in an onPause state.
+
+        Log.d(LOG_TAG, "ACTIVITY LIFECYCLE (onResume): onResume invoked.");
+    }
+
     // onPause(): This function is called whenever the fragment is suspended.
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
+
+        isActivityPaused = true; // Indicates that this activity has entered an onPause state.
 
         Log.d(LOG_TAG, "ACTIVITY LIFECYCLE (onPause): onPause invoked.");
     }
@@ -222,9 +240,9 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
                     playCurrentSong(); // Plays the current track song.
                 }
 
-                // Displays a Toast message, indicating that no track has been selected.
+                // Displays a Snackbar/Toast message, indicating that no track has been selected.
                 else {
-                    SSToast.toastyPopUp("No previous track has been selected.", this);
+                    displaySnackbar("No previous track has been selected.");
                 }
 
                 return true;
@@ -385,9 +403,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             @Override
             public void onClick(View v) {
-
-                // Sets the song to the next track in the list.
-                SSNotificationPlayer.triggerPlaybackAction(2, SSMainActivity.this);
+                playNextSong(true); // Signals SSPlayerFragment to play the next song in the tracklist.
             }
         });
 
@@ -396,9 +412,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             @Override
             public void onClick(View v) {
-
-                // Begins playback of the current song track.
-                SSNotificationPlayer.triggerPlaybackAction(0, SSMainActivity.this);
+                playCurrentSong(); // Begins playback of the current song track.
             }
         });
 
@@ -407,9 +421,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             @Override
             public void onClick(View v) {
-
-                // Pauses playback of the current song track.
-                SSNotificationPlayer.triggerPlaybackAction(1, SSMainActivity.this);
+                pauseTrack(false); // Pauses the currently playing song track.
             }
         });
 
@@ -418,9 +430,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
             @Override
             public void onClick(View v) {
-
-                // Sets the song to the previous track in the list.
-                SSNotificationPlayer.triggerPlaybackAction(3, SSMainActivity.this);
+                playNextSong(false); // Signals SSPlayerFragment to play the previous song in the tracklist.
             }
         });
     }
@@ -854,6 +864,25 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         }
     }
 
+    // displaySnackbar(): An interface method that is invoked via the OnSnackbarDisplayListener
+    // interface class, which displays a Snackbar message.
+    @Override
+    public void displaySnackbar(String message) {
+
+        // Displays a snackbar message display at the bottom of the screen, as long as this activity
+        // is not currently paused.
+        if (!isActivityPaused) {
+            Snackbar
+                    .make(mainLayout, message, Snackbar.LENGTH_LONG)
+                    .show();
+        }
+
+        // Displays a Toast message instead if the activity is currently in an onPause state.
+        else {
+            SSToast.toastyPopUp(message, this);
+        }
+    }
+
     // setCurrentTrack(): Invoked by SSPlayerFragment to update the activity on the track name, the
     // Spotify URL of the selected music track, and the current list position.
     @Override
@@ -884,6 +913,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     // pauseTrack(): Signals the attached class to invoke the SSMusicService to pause playback
     // of the streamed Spotify track.
     private void pauseTrack(Boolean isStop) {
+
+        // Displays a Snackbar/Toast message, indicating that no track has been selected.
+        if (playFragment == null && !isFinishing) {
+            displaySnackbar("No previous track has been selected.");
+        }
+
         try { ((OnMusicServiceListener) getApplication()).pauseTrack(isStop); }
         catch (ClassCastException cce) {} // Catch for class cast exception errors.
     }
@@ -894,6 +929,26 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         if (playFragment != null) {
             try { ((OnMusicPlayerListener) playFragment).playCurrentSong(); }
             catch (ClassCastException cce) {} // Catch for class cast exception errors.
+        }
+
+        // Displays a Snackbar/Toast message, indicating that no track has been selected.
+        else {
+            displaySnackbar("No previous track has been selected.");
+        }
+    }
+
+    // playNextSong(): Signals the SSPlayerFragment to play the previous or next song in the
+    // tracklist.
+    private void playNextSong(Boolean isNext) {
+
+        if (playFragment != null) {
+            try { ((OnMusicPlayerListener) playFragment).playNextSong(isNext, true); }
+            catch (ClassCastException cce) {} // Catch for class cast exception errors.
+        }
+
+        // Displays a Snackbar/Toast message, indicating that no track has been selected.
+        else {
+            displaySnackbar("No previous track has been selected.");
         }
     }
 
