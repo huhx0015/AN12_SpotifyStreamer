@@ -31,5 +31,9 @@ public interface OnMusicPlayerListener {
     // setDuration(): Interface method that is used to determine the max song duration of the
     // Spotify streaming song.
     void setDuration(int duration);
+
+    // stopSongPrepare(): Interface method that is used to signal SSPlayerFragment to stop preparing
+    // the song.
+    void stopSongPrepare();
 }
 

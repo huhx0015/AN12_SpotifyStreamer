@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import com.huhx0015.spotifystreamer.interfaces.OnMusicPlayerListener;
 import com.huhx0015.spotifystreamer.interfaces.OnMusicServiceListener;
 import com.huhx0015.spotifystreamer.services.SSMusicService;
 import com.huhx0015.spotifystreamer.ui.toast.SSToast;
@@ -25,6 +26,9 @@ import com.huhx0015.spotifystreamer.ui.toast.SSToast;
 public class SSApplication extends Application implements OnMusicServiceListener {
 
     /** CLASS VARIABLES ________________________________________________________________________ **/
+
+    // FRAGMENT VARIABLES
+    private Fragment playerFragment; // References the player fragment attached to this service.
 
     // LOGGING VARIABLES
     private static final String LOG_TAG = SSApplication.class.getSimpleName();
@@ -84,6 +88,7 @@ public class SSApplication extends Application implements OnMusicServiceListener
             // Displays an timeout error message and stops the ready song timer thread.
             else {
                 SSToast.toastyPopUp("The track could not be played due to a time-out error.", getApplicationContext());
+                stopSongPrepare(); // Signals the SSPlayerFragment to stop song preparation conditions.
                 currentTimer = 0; // Resets the current timer value.
                 readySongTimerHandler.removeCallbacks(this);
             }
@@ -96,12 +101,16 @@ public class SSApplication extends Application implements OnMusicServiceListener
     @Override
     public void attachFragment(Fragment fragment) {
 
-        if (musicService != null) {
-            musicService.attachPlayerFragment(fragment); // Attaches the SSPlayerFragment.
+        this.playerFragment = fragment; // Attaches the playerFragment to this class.
+
+        // If the service has disconnected, the SSMusicService is restarted.
+        if (!serviceBound) {
+            setUpAudioService(); // Sets up the SSMusicService.
         }
 
+        // Attaches the SSPlayerFragment.
         else {
-            Log.e(LOG_TAG, "attachFragment(): SSPlayerFragment failed to attach.");
+            musicService.attachPlayerFragment(fragment);
         }
     }
 
@@ -109,7 +118,25 @@ public class SSApplication extends Application implements OnMusicServiceListener
     // stream.
     @Override
     public void pauseTrack(Boolean isStop) {
-        musicService.pauseTrack(isStop); // Signals the SSMusicService to pause the song stream.
+
+        // If the service has disconnected, the SSMusicService is restarted.
+        if (!serviceBound) {
+            setUpAudioService(); // Sets up the SSMusicService.
+        }
+
+        // Signals the SSMusicService to pause the song stream.
+        else {
+            musicService.pauseTrack(isStop);
+        }
+    }
+
+    // stopSongPrepare(): Signals the SSPlayerFragment to hide the song preparation progress bar.
+    private void stopSongPrepare() {
+
+        if (playerFragment != null) {
+            try { ((OnMusicPlayerListener) playerFragment).stopSongPrepare(); }
+            catch (ClassCastException cce) {} // Catch for class cast exception errors.
+        }
     }
 
     // playTrack(): Invoked by SSPlayerFragment to signal the SSMusicService to play the selected
@@ -117,8 +144,15 @@ public class SSApplication extends Application implements OnMusicServiceListener
     @Override
     public void playTrack(String url, Boolean loop, Bitmap albumImage, Boolean notiOn, String artist, String track) {
 
+        // If the service has disconnected, the SSMusicService is restarted.
+        if (!serviceBound) {
+            setUpAudioService(); // Sets up the SSMusicService.
+        }
+
         // Signals the SSMusicService to begin music playback of the selected track.
-        musicService.playTrack(url, loop, albumImage, notiOn, artist, track);
+        else {
+            musicService.playTrack(url, loop, albumImage, notiOn, artist, track);
+        }
     }
 
     // removeAudioService(): Invoked by the SSMainActivity to stops the SSMusicService running in
@@ -126,7 +160,7 @@ public class SSApplication extends Application implements OnMusicServiceListener
     @Override
     public void removeAudioService() {
 
-        if (audioIntent != null) {
+        if (serviceBound && audioIntent != null) {
 
             // Notifies SSMusicService to signal SSMusicEngine to release all resources used by the
             // internal MediaPlayer object.
@@ -142,7 +176,16 @@ public class SSApplication extends Application implements OnMusicServiceListener
     // selected position in the song.
     @Override
     public void setPosition(int position) {
-        musicService.setPosition(position); // Signals the SSMusicService to set the song position.
+
+        // If the service has disconnected, the SSMusicService is restarted.
+        if (!serviceBound) {
+            setUpAudioService(); // Sets up the SSMusicService.
+        }
+
+        // Signals the SSMusicService to set the song position.
+        else {
+            musicService.setPosition(position);
+        }
     }
 
     // setUpAudioService(): Sets up the SSMusicService service for playing audio from the
@@ -150,9 +193,7 @@ public class SSApplication extends Application implements OnMusicServiceListener
     @Override
     public void setUpAudioService() {
 
-        // TODO: Test this. May be more stable?
-        if (serviceBound == false) {
-        //if (audioIntent == null) {
+        if (!serviceBound) {
 
             Log.d(LOG_TAG, "setUpAudioService(): Setting up SSMusicService...");
 
@@ -174,9 +215,6 @@ public class SSApplication extends Application implements OnMusicServiceListener
 
         // Stops the song timer thread.
         else {
-
-            // TODO: Needs testing.
-            //updatePlayer(); // Updates the SSPlayerFragment of the current song playback status.
             currentTimer = 0; // Resets the current timer value.
             readySongTimerHandler.removeCallbacks(readySongTimerThread);
         }
@@ -189,7 +227,7 @@ public class SSApplication extends Application implements OnMusicServiceListener
 
         // A new notification player is only displayed if the device is running on Android API level
         // 21 (LOLLIPOP) or higher.
-        if (notiOn && (api_level >= 21)) {
+        if (serviceBound && notiOn && (api_level >= 21)) {
             musicService.initializeMediaSession(songUrl, albumImage, artist, track);
         }
     }
@@ -198,6 +236,16 @@ public class SSApplication extends Application implements OnMusicServiceListener
     // to update the attached player fragment of the current song status and max song duration.
     @Override
     public void updatePlayer() {
-        musicService.updatePlayer();
+
+        // If the service has disconnected, the SSMusicService is restarted.
+        if (!serviceBound) {
+            setUpAudioService(); // Sets up the SSMusicService.
+        }
+
+        // The SSPlayerFragment is updated of the current song status and max song duration via
+        // SSMusicService & SSMusicEngine.
+        else {
+            musicService.updatePlayer();
+        }
     }
 }

@@ -723,6 +723,15 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         }
     }
 
+    // stopSongPrepare(): An interface method invoked by SSApplication to stop song preparation in
+    // the case of a time out error.
+    @Override
+    public void stopSongPrepare() {
+        progressLayer.setVisibility(View.INVISIBLE); // Hides the progress indicator container.
+        isPlaying = false; // Indicates that the song is not being played.
+        isPreparing = false; // Indicates that the song is no longer being prepared.
+    }
+
     // attachPlayerFragment(): Signals the attached class to attach this fragment to the
     // SSMusicService.
     private void attachPlayerFragment() {
