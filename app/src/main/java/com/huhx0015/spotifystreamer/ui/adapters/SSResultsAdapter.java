@@ -101,10 +101,24 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
         holder.albumName.setText(listResult.get(position).getAlbum());
         holder.artistName.setText(listResult.get(position).getArtist());
 
-        // Loads the image into the ImageView object.
-        Picasso.with(currentActivity)
-                .load(listResult.get(position).getAlbumImage())
-                .into(holder.albumImage);
+        // Retrieves the image URL at the referenced position.
+        String albumImage = listResult.get(position).getAlbumImage();
+
+        // Loads the referenced image into the ImageView object.
+        if (albumImage != null) {
+
+            Picasso.with(currentActivity)
+                    .load(listResult.get(position).getAlbumImage())
+                    .into(holder.albumImage);
+        }
+
+        // If no referenced image exists, the application icon is set instead.
+        else {
+
+            Picasso.with(currentActivity)
+                    .load(R.drawable.ic_launcher)
+                    .into(holder.albumImage);
+        }
     }
 
     // getItemCount(): Returns the number of items present in the data.

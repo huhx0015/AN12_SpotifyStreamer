@@ -88,6 +88,7 @@ public class SSApplication extends Application implements OnMusicServiceListener
             // Displays an timeout error message and stops the ready song timer thread.
             else {
                 SSToast.toastyPopUp("The track could not be played due to a time-out error.", getApplicationContext());
+                pauseTrack(true); // Stops attempted playback of track.
                 stopSongPrepare(); // Signals the SSPlayerFragment to stop song preparation conditions.
                 currentTimer = 0; // Resets the current timer value.
                 readySongTimerHandler.removeCallbacks(this);

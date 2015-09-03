@@ -53,9 +53,9 @@ public class SSSpotifyAccessors {
                     albumURL = currentTrack.album.images.get(0).url;
                 }
 
-                // If no image exists for the artist, a placeholder image URL is set instead.
+                // If no image exists for the album, the image is set to null.
                 else {
-                    albumURL = "http://www.yoonhuh.com/Misc/Spotify-Streamer/ss_no_image.png";
+                    albumURL = null;
                 }
 
                 //Log.d(LOG_TAG, "Track " + i + " Song Name: " + songName);
@@ -132,9 +132,9 @@ public class SSSpotifyAccessors {
                     currentArtistImage = currentArtist.images.get(0).url;
                 }
 
-                // If no image exists for the artist, a placeholder image URL is set instead.
+                // If no image exists for the artist, the image is set to null.
                 else {
-                    currentArtistImage = "http://www.yoonhuh.com/Misc/Spotify-Streamer/ss_no_image.png";
+                    currentArtistImage = null;
                 }
 
                 //Log.d(LOG_TAG, "Artist " + i + " Artist Name: " + currentArtistName);
