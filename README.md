@@ -3,9 +3,11 @@ AN12_SpotifyStreamerM
 
 DEVELOPER: Michael Yoon Huh (huhx0015)
 
-Android Nanodegree - Project 1-2: Spotify Streamer M: An application that utilizes the Spotify API to allow users to search and listen to popular music artists' top 10 tracks. Spotify Streamer M makes full use of the Android Design Support Library to employ a rich, Material Design-compliant appearance.
+Android Nanodegree - Project 1-2: Spotify Streamer M: An application that utilizes the Spotify API to allow users to search and listen to popular music artists' top 10 tracks. 
 
 Spotify Streamer M utilizes a single activity class and manages multiple fragments to display different parts of the app. It uses a Service for handling audio playback of the music engine (which is derived from https://github.com/huhx0015/HuhX_Game_Sound_Engine). In addition, it extends the Application class to manage the interactions between the Activity & Fragments and the music Service.
+
+To access the Spotify API, Spotify Streamer M relies on the Spotify Web API for Android library (https://github.com/kaaes/spotify-web-api-android). In addition, Spotify Streamer M makes full use of the Android Design Support Library to employ a rich, Material Design-compliant appearance. Spotify Streamer M also utilizes popular third-party Android libraries such as Square's Picasso, RetroFit, and OkHttp libraries, along with ButterKnife for view dependency injection support.
 
 
 RUBRIC:
