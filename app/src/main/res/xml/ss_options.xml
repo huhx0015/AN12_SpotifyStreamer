@@ -13,16 +13,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="PLAYBACK SETTINGS"
-        android:key="ss_playback_category">
-        <CheckBoxPreference
-            android:key="ss_auto_play"
-            android:title="Auto Play Tracklist: OFF"
-            android:summary="Enables the auto playback of the tracklist when in Now Playing view."
-            android:defaultValue="false" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="NOTIFICATION PLAYER"
         android:key="ss_notifications_category">
         <CheckBoxPreference

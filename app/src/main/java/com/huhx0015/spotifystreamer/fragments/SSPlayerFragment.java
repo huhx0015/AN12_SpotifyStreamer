@@ -53,7 +53,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     private SSMainActivity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
     // AUDIO VARIABLES
-    private Boolean isLoop = false; // Indicates the song will be looped infinitely.
     private Boolean isPaused = false; // Indicates that a song is currently paused.
     private Boolean isPlaying = false; // Indicates that a song is currently playing in the background.
     private Boolean isPreparing = false; // Used to determine if a song is currently being prepared for playback.
@@ -85,14 +84,17 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     private final int api_level = android.os.Build.VERSION.SDK_INT; // Used to determine the device's Android API version.
 
     // SHARED PREFERENCE VARIABLES
+    private SharedPreferences SS_prefs; // SharedPreferences object for the application.
     private static final String SS_OPTIONS = "ss_options"; // Used to reference the name of the preference XML file.
     private Boolean autoPlayOn = false; // Used to determine if auto play is enabled or not.
+    private Boolean isLoop = false; // Used to determine if the song will be looped infinitely.
     private Boolean notificationsOn = true; // Used to determine if notification display is enabled or not.
 
     // VIEW INJECTION VARIABLES
     @Bind(R.id.ss_player_fragment_progress_layer) FrameLayout progressLayer;
     @Bind(R.id.ss_player_fragment_parent_container) LinearLayout playerContainer;
     @Bind(R.id.ss_player_album_image) ImageView albumImage;
+    @Bind(R.id.ss_autoplay_button) ImageButton autoPlayButton;
     @Bind(R.id.ss_forward_button) ImageButton forwardButton;
     @Bind(R.id.ss_next_button) ImageButton nextButton;
     @Bind(R.id.ss_play_pause_button) ImageButton playPauseButton;
@@ -209,7 +211,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         setUpButtons(); // Sets up the button listeners for the fragment.
         setUpSeekbar(); // Sets up the seekbar listener for the player bar.
-        setUpImage(false); // Sets up the images for the ImageView objects for the fragment.
+        setUpImage(); // Sets up the images for the ImageView objects for the fragment.
         setUpText(); // Sets up the text for the TextView objects for the fragment.
 
         // Retrieves the current song status and max duration of the song from
@@ -225,6 +227,26 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
         // PLAYER BUTTONS:
         // -----------------------------------------------------------------------------------------
+
+        // AUTO PLAY: Sets up the listener and the actions for the AUTO PLAY button.
+        autoPlayButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                if (!isPreparing) {
+
+                    // Toggles on/off the auto play feature.
+                    if (autoPlayOn) {
+                        autoPlayToggle(false, true); // Enables the auto play feature.
+                    }
+
+                    else {
+                        autoPlayToggle(true, true); // Disables the auto play feature.
+                    }
+                }
+            }
+        });
 
         // FORWARD: Sets up the listener and the actions for the FORWARD button.
         forwardButton.setOnClickListener(new View.OnClickListener() {
@@ -303,16 +325,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
 
                 if (!isPreparing) {
 
-                    // REPEAT OFF: Turns off song looping.
+                    // Toggles on/off the repeat playback feature.
                     if (isLoop) {
-                        isLoop = false;
-                        displaySnackbarMessage("LOOPING disabled");
+                        repeatToggle(false, true); // Enables the repeat playback feature.
                     }
 
-                    // REPEAT ON: Turns on infinite looping of the song.
                     else {
-                        isLoop = true;
-                        displaySnackbarMessage("LOOPING enabled");
+                        repeatToggle(true, true); // Disables the repeat playback feature.
                     }
                 }
             }
@@ -342,106 +361,36 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     }
 
     // setUpImage(): Sets up the images for the ImageView objects in the fragment.
-    private void setUpImage(Boolean onlyAlbum) {
+    private void setUpImage() {
 
-        // ALBUM COVER: Loads the image from the image URL into the albumImage ImageView object and
-        // stores a reference to the loaded bitmap.
-        Target target = new Target() {
-
-            // onBitmapLoaded(): Runs when the bitmap is loaded.
-            @SuppressLint("NewApi")
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-
-                albumBitmap = bitmap; // Stores the reference to the album bitmap.
-
-                // Sets the album image and the blurred background image as long as this fragment
-                // view is not destroyed.
-                if (!isDestroyed) {
-
-                    albumImage.setImageBitmap(bitmap); // Sets the album image bitmap.
-
-                    // Android API Level 16+: Sets a highly blurred version of the album image as
-                    // the background for the fragment layout.
-                    if (api_level >= 16) {
-                        playerContainer.setBackground(SSBlurBuilder.createBlurDrawable(currentActivity, bitmap));
-                    }
-
-                    // Android API Level 1-15: Sets a highly blurred version of the album image as
-                    // the background for the fragment layout.
-                    else {
-                        playerContainer.setBackgroundDrawable(SSBlurBuilder.createBlurDrawable(currentActivity, bitmap));
-                    }
-                }
-            }
-
-            // onBitmapFailed(): Runs when the bitmap failed to load.
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-                Log.e(LOG_TAG, "setUpImage(): ERROR: Bitmap failed to load.");
-            }
-
-            // onPrepareLoad(): Runs prior to loading the bitmap.
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                albumImage.setImageDrawable(null); // Sets the ImageView Drawable to be null.
-
-                // Sets the ImageView Drawable to be null.
-                if (api_level >= 16) {
-                    albumImage.setBackground(null); // API 16+: New method.
-                }
-
-                else {
-                    albumImage.setBackgroundDrawable(null); // API 9-15: Depreciated method.
-                }
-            }
-        };
-
-        // Loads the album image from the URL into the target.
+        // FORWARD BUTTON:
         Picasso.with(currentActivity)
-                .load(albumImageURL)
-                .into(target);
+                .load(android.R.drawable.ic_media_ff)
+                .resize((int) (56 * curDensity), (int) (56 * curDensity))
+                .into(forwardButton);
 
-        // Loads the image resources into the player control ImageView objects.
-        if (!onlyAlbum) {
+        // NEXT BUTTON:
+        Picasso.with(currentActivity)
+                .load(android.R.drawable.ic_media_next)
+                .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                .into(nextButton);
 
-            // FORWARD BUTTON:
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_ff)
-                    .resize((int) (56 * curDensity), (int) (56 * curDensity))
-                    .into(forwardButton);
+        // PREVIOUS BUTTON:
+        Picasso.with(currentActivity)
+                .load(android.R.drawable.ic_media_previous)
+                .resize((int) (48 * curDensity), (int) (48 * curDensity))
+                .into(previousButton);
 
-            // NEXT BUTTON:
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_next)
-                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
-                    .into(nextButton);
+        // REWIND BUTTON:
+        Picasso.with(currentActivity)
+                .load(android.R.drawable.ic_media_rew)
+                .resize((int) (56 * curDensity), (int) (56 * curDensity))
+                .into(rewindButton);
 
-            // PLAY/PAUSE BUTTON:
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_play)
-                    .resize((int) (64 * curDensity), (int) (64 * curDensity))
-                    .into(playPauseButton);
-
-            // PREVIOUS BUTTON:
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_previous)
-                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
-                    .into(previousButton);
-
-            // REPEAT BUTTON:
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.stat_notify_sync)
-                    .resize((int) (48 * curDensity), (int) (48 * curDensity))
-                    .into(repeatButton);
-
-            // REWIND BUTTON:
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_rew)
-                    .resize((int) (56 * curDensity), (int) (56 * curDensity))
-                    .into(rewindButton);
-        }
+        updateAlbumImage(albumImageURL); // ALBUM IMAGE
+        updateAutoPlayButton(autoPlayOn); // AUTOPLAY BUTTON
+        updatePlayPauseButton(isPlaying); // PLAY/PAUSE BUTTON
+        updateRepeatButton(isLoop); // REPEAT BUTTON
     }
 
     // setUpSeekbar(): Sets up a listener for the Seekbar object.
@@ -493,7 +442,205 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         songNameText.setShadowLayer(8, 2, 2, Color.BLACK); // Sets the shadow layer effect.
     }
 
+    // updateAlbumImage(): Updates the album ImageView object with the specified image URL.
+    private void updateAlbumImage(String albumUrl) {
+
+        // ALBUM COVER: Loads the image from the image URL into the albumImage ImageView object and
+        // stores a reference to the loaded bitmap.
+        Target target = new Target() {
+
+            // onBitmapLoaded(): Runs when the bitmap is loaded.
+            @SuppressLint("NewApi")
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+
+                albumBitmap = bitmap; // Stores the reference to the album bitmap.
+
+                // Sets the album image and the blurred background image as long as this fragment
+                // view is not destroyed.
+                if (!isDestroyed) {
+
+                    albumImage.setImageBitmap(bitmap); // Sets the album image bitmap.
+
+                    // Android API Level 16+: Sets a highly blurred version of the album image as
+                    // the background for the fragment layout.
+                    if (api_level >= 16) {
+                        playerContainer.setBackground(SSBlurBuilder.createBlurDrawable(currentActivity, bitmap));
+                    }
+
+                    // Android API Level 1-15: Sets a highly blurred version of the album image as
+                    // the background for the fragment layout.
+                    else {
+                        playerContainer.setBackgroundDrawable(SSBlurBuilder.createBlurDrawable(currentActivity, bitmap));
+                    }
+                }
+            }
+
+            // onBitmapFailed(): Runs when the bitmap failed to load.
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+                Log.e(LOG_TAG, "onBitmapFailed(): ERROR: Bitmap failed to load.");
+            }
+
+            // onPrepareLoad(): Runs prior to loading the bitmap.
+            @SuppressLint("NewApi")
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                // Clears ImageView resource to free up memory if the device is running on
+                // GINGERBREAD.
+                if (api_level < 12) {
+                    albumImage.setImageDrawable(null); // Sets the ImageView Drawable to be null.
+                    albumImage.setBackgroundDrawable(null); // Sets the ImageView background to be null.
+                }
+            }
+        };
+
+        // Loads the album image from the URL into the target.
+        Picasso.with(currentActivity)
+                .load(albumUrl)
+                .into(target);
+    }
+
+    // updateAutoPlayButton(): Updates the graphics of the auto play button.
+    private void updateAutoPlayButton(Boolean isAutoPlay) {
+
+        // Checks to see if the fragment has been destroyed or not.
+        if (!isDestroyed) {
+
+            // AUTO PLAY ENABLED:
+            if (isAutoPlay) {
+
+                Picasso.with(currentActivity)
+                        .load(R.drawable.ss_forward_on)
+                        .resize((int) (36 * curDensity), (int) (36 * curDensity))
+                        .into(autoPlayButton);
+            }
+
+            // AUTO PLAY DISABLED:
+            else {
+
+                Picasso.with(currentActivity)
+                        .load(R.drawable.ss_forward_off)
+                        .resize((int) (36 * curDensity), (int) (36 * curDensity))
+                        .into(autoPlayButton);
+            }
+        }
+    }
+
+    // updateRepeatButton(): Updates the graphics of the repeat button.
+    private void updateRepeatButton(Boolean isRepeat) {
+
+        // Checks to see if the fragment has been destroyed or not.
+        if (!isDestroyed) {
+
+            // REPEAT ENABLED:
+            if (isRepeat) {
+
+                Picasso.with(currentActivity)
+                        .load(R.drawable.ss_repeat_on)
+                        .resize((int) (36 * curDensity), (int) (36 * curDensity))
+                        .into(repeatButton);
+            }
+
+            // REPEAT DISABLED:
+            else {
+
+                Picasso.with(currentActivity)
+                        .load(R.drawable.ss_repeat_off)
+                        .resize((int) (36 * curDensity), (int) (36 * curDensity))
+                        .into(repeatButton);
+            }
+        }
+    }
+
+    // updatePlayPauseButton(): Updates the graphics of the playback control buttons.
+    private void updatePlayPauseButton(Boolean isPlay) {
+
+        // Checks to see if the fragment has been destroyed or not.
+        if (!isDestroyed) {
+
+            // PLAYING:
+            if (isPlay) {
+
+                Picasso.with(currentActivity)
+                        .load(android.R.drawable.ic_media_pause)
+                        .resize((int) (64 * curDensity), (int) (64 * curDensity))
+                        .into(playPauseButton);
+            }
+
+            // STOP / PAUSED:
+            else {
+
+                Picasso.with(currentActivity)
+                        .load(android.R.drawable.ic_media_play)
+                        .resize((int) (64 * curDensity), (int) (64 * curDensity))
+                        .into(playPauseButton);
+            }
+        }
+    }
+
     /** MUSIC PLAYER METHODS ___________________________________________________________________ **/
+
+    // autoPlayToggle(): This method toggles on/off the auto play property.
+    private void autoPlayToggle(Boolean isAutoPlay, Boolean showMessage) {
+
+        // AUTO PLAY OFF: Turns off the auto play feature.
+        if (!isAutoPlay) {
+            autoPlayOn = false;
+            updateAutoPlayButton(false); // Updates the auto play button ImageView.
+            SSPreferences.setAutoPlay(false, SS_prefs); // Updates the SharedPreferences.
+
+            // Displays a Toast of the updated settings.
+            if (showMessage) {
+                displaySnackbarMessage("TRACKLIST AUTO PLAY has been disabled.");
+            }
+        }
+
+        // AUTO PLAY ON: Turns on the auto play feature.
+        else {
+            autoPlayOn = true;
+            updateAutoPlayButton(true); // Updates the auto play button ImageView.
+            SSPreferences.setAutoPlay(true, SS_prefs); // Updates the SharedPreferences.
+
+            repeatToggle(false, false); // Disables repeat playback settings.
+
+            // Displays a Toast of the updated settings.
+            if (showMessage) {
+                displaySnackbarMessage("TRACKLIST AUTO PLAY has been enabled.");
+            }
+        }
+    }
+
+    // repeatToggle(): This method toggles on/off the repeat playback property.
+    private void repeatToggle(Boolean looping, Boolean showMessage) {
+
+        // REPEAT OFF: Turns off song repeat.
+        if (!looping) {
+            isLoop = false;
+            updateRepeatButton(false); // Updates the repeat button ImageView.
+            SSPreferences.setRepeat(false, SS_prefs); // Updates the SharedPreferences.
+
+            // Displays a Toast of the updated settings.
+            if (showMessage) {
+                displaySnackbarMessage("TRACK PLAYBACK REPEAT disabled.");
+            }
+        }
+
+        // REPEAT ON: Turns on infinite playback of the song.
+        else {
+            isLoop = true;
+            updateRepeatButton(true); // Updates the repeat button ImageView.
+            SSPreferences.setRepeat(true, SS_prefs); // Updates the SharedPreferences.
+
+            autoPlayToggle(false, false); // Disables auto playback settings.
+
+            // Displays a Toast of the updated settings.
+            if (showMessage) {
+                displaySnackbarMessage("TRACK PLAYBACK REPEAT enabled.");
+            }
+        }
+    }
 
     // initializeSongPlay(): Prepares the selected track for music playback.
     private void initializeSongPlay() {
@@ -537,28 +684,6 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
         isPreparing = true; // Indicates that the song is currently being prepared for playback.
     }
 
-    // updateControlButtons(): Updates the graphics of the playback control buttons.
-    private void updateControlButtons(Boolean isPlay) {
-
-        // PLAYING:
-        if (isPlay) {
-
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_pause)
-                    .resize((int) (64 * curDensity), (int) (64 * curDensity))
-                    .into(playPauseButton);
-        }
-
-        // STOP / PAUSED:
-        else {
-
-            Picasso.with(currentActivity)
-                    .load(android.R.drawable.ic_media_play)
-                    .resize((int) (64 * curDensity), (int) (64 * curDensity))
-                    .into(playPauseButton);
-        }
-    }
-
     // updateTrack(): Updates the song track details based on the set position.
     private Boolean updateTrack(int position) {
 
@@ -575,7 +700,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             albumImageURL = trackList.get(position).getAlbumImage();
             streamURL = trackList.get(position).getSongURL();
 
-            setUpImage(true); // Updates the album image.
+            updateAlbumImage(albumImageURL); // Updates the album image.
 
             if (!isDestroyed) {
                 setUpText(); // Updates the artist and song name TextView objects.
@@ -616,10 +741,13 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     private void loadPreferences() {
 
         // Initializes the SharedPreferences object.
-        SharedPreferences SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
+        SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
 
         // Retrieves the current auto play setting.
         autoPlayOn = SSPreferences.getAutoPlay(SS_prefs);
+
+        // Retrieves the repeat setting.
+        isLoop = SSPreferences.getRepeat(SS_prefs);
 
         // Retrieves the current notification player setting.
         notificationsOn = SSPreferences.getNotifications(SS_prefs);
@@ -632,19 +760,21 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
     @Override
     public void playbackStatus(Boolean isPlay) {
 
-        if (!isDestroyed) {
+        Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
 
-            isPlaying = isPlay; // Updates the current playback status of the streaming song.
-            updateControlButtons(isPlaying); // Updates the player control buttons.
+        isPlaying = isPlay; // Updates the current playback status of the streaming song.
+        updatePlayPauseButton(isPlaying); // Updates the player control buttons.
 
-            // PLAYING:
-            if (isPlay) {
-                progressLayer.setVisibility(View.INVISIBLE); // Hides the progress indicator container.
-                startStopSongTimer(false); // Turns off the song timer.
-                isPreparing = false; // Indicates that the song is no longer being prepared.
+        // PLAYING:
+        if (isPlay) {
+
+            startStopSongTimer(false); // Turns off the song timer.
+            isPreparing = false; // Indicates that the song is no longer being prepared.
+
+            // Hides the progress indicator container as long as the fragment is not destroyed.
+            if (!isDestroyed) {
+                progressLayer.setVisibility(View.INVISIBLE);
             }
-
-            Log.d(LOG_TAG, "playbackStatus(): Current playback status: " + isPlaying);
         }
     }
 
@@ -729,7 +859,7 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
             else {
 
                 isPlaying = false; // Indicates that the song is no longer being played.
-                updateControlButtons(isPlaying); // Updates the player control buttons.
+                updatePlayPauseButton(isPlaying); // Updates the player control buttons.
 
                 // If the song has stopped and is not paused, the seek bar and the current position
                 // text is reset.
@@ -739,14 +869,23 @@ public class SSPlayerFragment extends DialogFragment implements OnMusicPlayerLis
                     minDurationText.setText("0:00"); // Resets the minimum duration TextView object.
                     SSNotificationPlayer.removeNotifications(currentActivity); // Removes any active notifications.
 
-                    // If the auto play feature has been enabled, the next song in the tracklist will
-                    // automatically be played.
-                    if (autoPlayOn && !isPreparing) {
+                    if (!isPreparing) {
 
-                        // Checks to see if the end of the tracklist has been reached first.
-                        if ( (selectedPosition + 1) < trackList.size()) {
-                            playNextSong(true, false); // Sets the next song.
-                            playCurrentSong(); // Plays the current song.
+                        // REPEAT ENABLED: If the repeat playback feature has been enabled, the
+                        // current song will be repeated.
+                        if (isLoop) {
+                            initializeSongPlay(); // Plays the current song.
+                        }
+
+                        // AUTO PLAY ENABLED: If the auto play feature has been enabled, the next
+                        // song in the tracklist will automatically be played.
+                        else if (autoPlayOn) {
+
+                            // Checks to see if the end of the tracklist has been reached first.
+                            if ( (selectedPosition + 1) < trackList.size()) {
+                                playNextSong(true, false); // Sets the next song.
+                                playCurrentSong(); // Plays the current song.
+                            }
                         }
                     }
                 }

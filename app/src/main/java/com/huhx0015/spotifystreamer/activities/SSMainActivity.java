@@ -681,12 +681,12 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         // Displays the SSSettingsFragment view.
         if (isShow) {
 
+            Boolean isAnimate = true;
             isSettings = true; // Indicates that the SSSettingsFragment is active.
             settingsFragmentContainer.setVisibility(View.VISIBLE);
 
             // If the SSSettingsFragment is being re-added after a screen orientation change,
             // fragment animations are disabled.
-            Boolean isAnimate = true;
             if (isRotation) {
                 isAnimate = false;
             }

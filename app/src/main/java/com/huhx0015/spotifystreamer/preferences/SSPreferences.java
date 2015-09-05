@@ -61,6 +61,11 @@ public class SSPreferences {
         return preferences.getBoolean("ss_notifications", true); // Retrieves the ss_notifications value.
     }
 
+    // getRepeat(): Retrieves the "ss_repeat" value from preferences.
+    public static Boolean getRepeat(SharedPreferences preferences) {
+        return preferences.getBoolean("ss_repeat", false); // Retrieves the ss_repeat value.
+    }
+
     /** SET PREFERENCES FUNCTIONALITY __________________________________________________________ **/
 
     // setAutoPlay(): Sets the "ss_auto_play" value to preferences.
@@ -90,6 +95,16 @@ public class SSPreferences {
         SharedPreferences.Editor prefEdit = preferences.edit();
 
         prefEdit.putBoolean("ss_notifications", isNotificationsOn); // Sets the notification setting.
+        prefEdit.apply(); // Applies the changes to SharedPreferences.
+    }
+
+    // setRepeat(): Sets the "ss_repeat" value to preferences.
+    public static void setRepeat(Boolean isRepeat, SharedPreferences preferences) {
+
+        // Prepares the SharedPreferences object for editing.
+        SharedPreferences.Editor prefEdit = preferences.edit();
+
+        prefEdit.putBoolean("ss_repeat", isRepeat); // Sets the repeat setting.
         prefEdit.apply(); // Applies the changes to SharedPreferences.
     }
 }

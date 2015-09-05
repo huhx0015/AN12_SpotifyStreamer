@@ -26,6 +26,7 @@ public class SSSettingsFragment extends PreferenceFragment implements SharedPref
     private SSMainActivity currentActivity; // Used to determine the activity class this fragment is currently attached to.
 
     // SHARED PREFERENCE VARIABLES
+    private SharedPreferences SS_prefs; // References the application's SharedPreferences object.
     private static final String SS_OPTIONS = "ss_options"; // Used to reference the name of the preference XML file.
 
     /** FRAGMENT LIFECYCLE METHODS _____________________________________________________________ **/
@@ -45,6 +46,10 @@ public class SSSettingsFragment extends PreferenceFragment implements SharedPref
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.ss_options); // Loads the preferences from the "ss_options.xml" file.
+
+        // Initializes the SharedPreferences object.
+        SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
+
         onSharedPreferenceChanged(null, ""); // Initializes the call to on onSharedPreferenceChanged function.
     }
 
@@ -74,33 +79,18 @@ public class SSSettingsFragment extends PreferenceFragment implements SharedPref
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-        // Initializes the SharedPreferences object.
-        SharedPreferences SS_prefs = SSPreferences.initializePreferences(SS_OPTIONS, currentActivity);
-
         // Assigns the references to the preference objects.
         ListPreference countryListPref = (ListPreference) findPreference("ss_country_code");
         CheckBoxPreference autoPlayPref = (CheckBoxPreference) findPreference("ss_auto_play");
+        CheckBoxPreference repeatPref = (CheckBoxPreference) findPreference("ss_repeat");
         CheckBoxPreference notificationsPref = (CheckBoxPreference) findPreference("ss_notifications");
 
-        // Updates the country code settings.
+        // COUNTRY CODE: Updates the country code settings.
         String currentCode = countryListPref.getValue();
         countryListPref.setTitle("Current Country Code: " + currentCode);
         SSPreferences.setCountryCode(currentCode, SS_prefs); // Sets the new value in SharedPreferences.
 
-        // Updates the auto play settings.
-        // ON:
-        if (autoPlayPref.isChecked()) {
-            autoPlayPref.setTitle("Auto Play Tracklist: ON");
-            SSPreferences.setAutoPlay(true, SS_prefs); // Sets the new value in SharedPreferences.
-        }
-
-        // OFF:
-        else {
-            autoPlayPref.setTitle("Auto Play Tracklist: OFF");
-            SSPreferences.setAutoPlay(false, SS_prefs); // Sets the new value in SharedPreferences.
-        }
-
-        // Updates the notification settings.
+        // NOTIFICATION PLAYER: Updates the notification settings.
         // ON:
         if (notificationsPref.isChecked()) {
             notificationsPref.setTitle("Display Notification Player: ON");

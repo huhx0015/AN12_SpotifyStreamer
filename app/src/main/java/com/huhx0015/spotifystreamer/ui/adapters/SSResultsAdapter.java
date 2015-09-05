@@ -115,7 +115,7 @@ public class SSResultsAdapter extends RecyclerView.Adapter<SSResultsAdapter.SSRe
         if (albumImage != null) {
 
             Picasso.with(currentActivity)
-                    .load(listResult.get(position).getAlbumImage())
+                    .load(albumImage)
                     .into(holder.albumImage);
         }
 
