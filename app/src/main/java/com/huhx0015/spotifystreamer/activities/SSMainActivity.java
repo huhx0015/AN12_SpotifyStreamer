@@ -2,6 +2,7 @@ package com.huhx0015.spotifystreamer.activities;
 
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -116,7 +117,6 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
     @Bind(R.id.ss_drawer_pause_button) ImageButton drawerPauseButton;
     @Bind(R.id.ss_drawer_previous_button) ImageButton drawerPreviousButton;
     @Bind(R.id.ss_main_left_drawer_artist_image) ImageView drawerArtistImage;
-    @Bind(R.id.ss_drawer_player_controls_container) LinearLayout drawerPlayerContainer;
     @Bind(R.id.ss_main_activity_layout) LinearLayout mainLayout;
     @Bind(R.id.ss_main_left_drawer_artist_name) TextView drawerArtistNameText;
     @Bind(R.id.ss_main_activity_toolbar) Toolbar activityToolbar;
@@ -389,6 +389,18 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // If a rotation event occurred, the isRotationEvent value is reset.
         if (isRotationEvent) {
+
+            // SPECIAL FIX: This addresses a bug where the Toolbar title is unable to be updated
+            // immediately after a screen orientation change.
+            // SSSettingsFragment:
+            if (isSettings) {
+                SSActionBar.updateToolbarTitle(SETTINGS_TAG, activityToolbar);
+            }
+            // SSArtistFragment | SSTracksFragment | SSPlayerFragment:
+            else {
+                SSActionBar.updateToolbarTitle(currentFragment, activityToolbar);
+            }
+
             isRotationEvent = false;
         }
     }

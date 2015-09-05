@@ -1,5 +1,6 @@
 package com.huhx0015.spotifystreamer.ui.actionbar;
 
+import android.os.Handler;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import com.huhx0015.spotifystreamer.R;
@@ -72,5 +73,38 @@ public class SSActionBar {
         else {
             drawerToggle.setDrawerIndicatorEnabled(true); // Displays the drawer indicator.
         }
+    }
+
+    // updateTitle(): This method updates the Toolbar title.
+    public static void updateToolbarTitle(final String fragType, final Toolbar actionBar) {
+
+        // Handles a bug where the Toolbar title is unable to be updated immediately after a screen
+        // orientation change by adding a subtle delay.
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+
+                // Used for setting the title of the Toolbar object.
+                String title = "Spotify Streamer M";
+
+                // PLAYER:
+                if (fragType.equals(PLAYER_TAG)) {
+                    title = "Now Playing";
+                }
+
+                // TRACKS:
+                else if (fragType.equals(TRACKS_TAG)) {
+                    title = "Top 10 Tracks";
+                }
+
+                // SETTING:
+                else if (fragType.equals(SETTINGS_TAG)) {
+                    title = "Settings";
+                }
+
+                actionBar.setTitle(title); // Sets the title of the Toolbar.
+            }
+        }, 100);
     }
 }
