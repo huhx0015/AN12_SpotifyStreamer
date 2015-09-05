@@ -81,8 +81,6 @@ public class SSSettingsFragment extends PreferenceFragment implements SharedPref
 
         // Assigns the references to the preference objects.
         ListPreference countryListPref = (ListPreference) findPreference("ss_country_code");
-        CheckBoxPreference autoPlayPref = (CheckBoxPreference) findPreference("ss_auto_play");
-        CheckBoxPreference repeatPref = (CheckBoxPreference) findPreference("ss_repeat");
         CheckBoxPreference notificationsPref = (CheckBoxPreference) findPreference("ss_notifications");
 
         // COUNTRY CODE: Updates the country code settings.

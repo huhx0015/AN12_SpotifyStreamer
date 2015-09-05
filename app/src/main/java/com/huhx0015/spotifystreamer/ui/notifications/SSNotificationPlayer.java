@@ -65,6 +65,7 @@ public class SSNotificationPlayer {
                         .setMediaSession(streamerMediaSession.getSessionToken()))
 
                 .setTicker(artist + " - " + track) // Displays a ticker with the current artist and track name.
+                .setColor(context.getResources().getColor(R.color.ss_toolbar_dark_color))
                 .setLargeIcon(albumImage) // Sets the album bitmap image.
                 .setSmallIcon(R.drawable.ss_notification_icon) // Sets the notification image.
                 .setShowWhen(false) // Disables timestamp display.
