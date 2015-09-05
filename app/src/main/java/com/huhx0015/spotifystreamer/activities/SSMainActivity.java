@@ -2,8 +2,6 @@ package com.huhx0015.spotifystreamer.activities;
 
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.os.Handler;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -338,6 +336,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
 
         // The activity is finished if the SSArtistsFragment is in focus.
         else {
+            isFinishing = true; // This is set so that the Snackbar isn't displayed.
             pauseTrack(true); // Stops any track playing in the background.
             SSNotificationPlayer.removeNotifications(this); // Removes all active notifications.
             finish(); // Finishes the activity.

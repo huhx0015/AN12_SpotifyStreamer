@@ -51,7 +51,6 @@ public class SSMusicService extends Service {
 
     // MEDIA SESSION VARIABLES:
     private MediaController streamerMediaController;
-    private MediaSession streamerMediaSession;
     private MediaSessionManager streamerMediaSessionManager;
 
     // SERVICE VARIABLES
@@ -193,7 +192,7 @@ public class SSMusicService extends Service {
                                        final String albumArtist, final String albumTrack) {
 
         // Creates a new MediaSession.
-        streamerMediaSession = new MediaSession(getApplicationContext(), "SPOTIFY STREAMER");
+        MediaSession streamerMediaSession = new MediaSession(getApplicationContext(), "SPOTIFY STREAMER");
         streamerMediaSessionManager = (MediaSessionManager) getSystemService(Context.MEDIA_SESSION_SERVICE);
         streamerMediaController = new MediaController(getApplicationContext(), streamerMediaSession.getSessionToken());
 
