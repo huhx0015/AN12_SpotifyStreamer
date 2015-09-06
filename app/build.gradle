@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
 
     compileSdkVersion 23
-    buildToolsVersion "23"
+    buildToolsVersion '23.0.0'
 
     defaultConfig {
         applicationId "com.huhx0015.spotifystreamer"
@@ -35,16 +35,13 @@ configurations.all {
 }
 
 dependencies {
-
     // INTEGRATED LIBRARIES:
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile(name:'spotify-web-api-android-0.1.0', ext:'aar')
-
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile(name: 'spotify-web-api-android-0.1.0', ext: 'aar')
     // ANDROID SUPPORT LIBRARIES:
-    compile 'com.android.support:design:23.0.0'
-    compile 'com.android.support:recyclerview-v7:23.0.0'
-    compile 'com.android.support:cardview-v7:23.0.0'
-
+    compile 'com.android.support:design:23.0.1'
+    compile 'com.android.support:recyclerview-v7:23.0.1'
+    compile 'com.android.support:cardview-v7:23.0.1'
     // THIRD-PARTY LIBRARIES:
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
