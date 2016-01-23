@@ -176,7 +176,7 @@ public class SSMainActivity extends AppCompatActivity implements OnSpotifySelect
         Log.d(LOG_TAG, "ACTIVITY LIFECYCLE (onResume): onResume invoked.");
     }
 
-    // onPause(): This function is called whenever the fragment is suspended.
+    // onPause(): This function is called whenever the activity is suspended.
     @Override
     public void onPause() {
         super.onPause();

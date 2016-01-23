@@ -41,9 +41,9 @@ dependencies {
     compile(name:'spotify-web-api-android-0.1.0', ext:'aar')
 
     // ANDROID SUPPORT LIBRARIES:
-    compile 'com.android.support:design:23.0.0'
-    compile 'com.android.support:recyclerview-v7:23.0.0'
-    compile 'com.android.support:cardview-v7:23.0.0'
+    compile 'com.android.support:design:23.+'
+    compile 'com.android.support:recyclerview-v7:23.+'
+    compile 'com.android.support:cardview-v7:23.+'
 
     // THIRD-PARTY LIBRARIES:
     compile 'com.squareup.picasso:picasso:2.5.2'
