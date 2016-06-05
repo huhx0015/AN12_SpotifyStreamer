@@ -1,7 +1,7 @@
 AN12_SpotifyStreamer
 ====================
 
-DEVELOPER: Michael Yoon Huh
+DEVELOPER: huhx0015
 
 ### SPOTIFY STREAMER M
 ![spotifystreamerm_preview](https://cloud.githubusercontent.com/assets/1645482/12526533/2622477c-c123-11e5-9172-0f016ed3ca9d.gif)
