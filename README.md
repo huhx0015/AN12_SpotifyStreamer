@@ -6,7 +6,7 @@ DEVELOPER: huhx0015
 ### SPOTIFY STREAMER M
 ![spotifystreamerm_preview](https://cloud.githubusercontent.com/assets/1645482/12526533/2622477c-c123-11e5-9172-0f016ed3ca9d.gif)
 
-## Description:
+## Description
 
 Android Nanodegree - Project 1-2: Spotify Streamer M: An application that utilizes the Spotify API to allow users to search for and listen to preview clips of popular music artists' top 10 tracks.
 
