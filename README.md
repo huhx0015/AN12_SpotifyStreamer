@@ -18,6 +18,7 @@ To access the Spotify API, Spotify Streamer M relies on the Spotify Web API for 
 
 Link: https://docs.google.com/document/d/18GcAc70wUlllHUDoAAVF36fX9YSkuMyX07OWVQ2tDWI/pub?embedded=true
 
+
 ### Spotify Streamer, Stage 1 Rubric
 
 #### Required Components
@@ -56,6 +57,7 @@ To “meet specifications”, your app must fulfill all the criteria listed in t
 #### Optional Components
 
 There are no optional components for stage 1.
+
 
 ### Spotify Streamer, Stage 2 Rubric
 
